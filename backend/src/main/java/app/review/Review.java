@@ -1,7 +1,7 @@
 package app.review;
 
 import app.product.Product;
-import app.user.User;
+import app.user.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

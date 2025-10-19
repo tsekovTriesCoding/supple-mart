@@ -1,6 +1,6 @@
 package app.order;
 
-import app.user.User;
+import app.user.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

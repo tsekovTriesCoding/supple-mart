@@ -1,4 +1,4 @@
-package app.user;
+package app.user.model;
 
 public enum Role {
     ADMIN, CUSTOMER
