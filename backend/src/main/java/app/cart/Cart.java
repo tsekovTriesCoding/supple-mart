@@ -1,6 +1,6 @@
-package com.supplemart.cart;
+package app.cart;
 
-import com.supplemart.user.User;
+import app.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

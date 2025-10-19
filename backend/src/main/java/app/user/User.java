@@ -1,4 +1,4 @@
-package com.supplemart.user;
+package app.user;
 
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,4 +1,4 @@
-package com.supplemart.product;
+package app.product;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
