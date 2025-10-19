@@ -1,6 +1,7 @@
 package app.security;
 
 import app.security.jwt.JwtAuthenticationFilter;
+import app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,11 +25,13 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final UserService userService;
     private final JwtAuthenticationFilter jwtAuthFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
+                .userDetailsService(userService)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
