@@ -21,7 +21,7 @@ public class CustomUserDetails implements UserDetails {
     private final String username;
     private final String password;
     private final Role role;
-    private final boolean isActive;
+    private final boolean isEnabled;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -39,22 +39,7 @@ public class CustomUserDetails implements UserDetails {
     }
 
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
     public boolean isEnabled() {
-        return isActive;
+        return isEnabled;
     }
 }
