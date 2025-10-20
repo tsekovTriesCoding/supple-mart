@@ -1,4 +1,4 @@
-package app.product;
+package app.product.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

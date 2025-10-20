@@ -1,5 +1,6 @@
-package app.cart;
+package app.review.model;
 
+import app.product.model.Product;
 import app.user.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,27 +9,33 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "carts")
+@Table(name = "reviews")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Cart {
+public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<CartItem> items;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
+
+    @Column(nullable = false)
+    private Integer rating; // 1-5 stars
+
+    @Column(columnDefinition = "TEXT")
+    private String comment;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

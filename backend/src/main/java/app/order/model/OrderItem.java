@@ -1,6 +1,6 @@
-package app.order;
+package app.order.model;
 
-import app.product.Product;
+import app.product.model.Product;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,4 +1,4 @@
-package app.product;
+package app.product.model;
 
 public enum Category {
     PROTEIN,

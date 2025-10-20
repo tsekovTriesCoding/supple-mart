@@ -1,6 +1,6 @@
-package app.cart;
+package app.cart.model;
 
-import app.product.Product;
+import app.product.model.Product;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
