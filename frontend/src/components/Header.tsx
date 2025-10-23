@@ -54,9 +54,14 @@ const Header = () => {
                                 3
                             </span>
                         </button>
-                        <button className="p-2 transition-colors" style={{ color: '#d1d5db' }}>
+                        <Link 
+                            to="/login" 
+                            className="p-2 transition-colors hover:text-blue-400 inline-flex items-center space-x-1" 
+                            style={{ color: '#d1d5db' }}
+                        >
                             <User className="w-6 h-6" />
-                        </button>
+                            <span className="hidden lg:block text-sm">Login</span>
+                        </Link>
                         <button
                             className="md:hidden p-2 transition-colors"
                             style={{ color: '#d1d5db' }}
@@ -80,6 +85,15 @@ const Header = () => {
                                     {link.label}
                                 </Link>
                             ))}
+                            <Link
+                                to="/login"
+                                className={`${isActive('/login') ? 'nav-link-active' : 'nav-link'
+                                    } font-medium py-2 inline-flex items-center space-x-2`}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                <User className="w-5 h-5" />
+                                <span>Login</span>
+                            </Link>
                             <div className="pt-2">
                                 <div className="relative">
                                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{ color: '#9ca3af' }} />
