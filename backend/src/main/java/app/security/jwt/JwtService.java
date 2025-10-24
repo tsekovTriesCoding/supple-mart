@@ -10,6 +10,7 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 @Service
@@ -18,6 +19,9 @@ public class JwtService {
 
     private final JwtConfig jwtConfig;
     private final SecretKey jwtSecretKey;
+
+    // For production use Redis or persistent store. This is fine for practice/dev.
+    private final Map<String, Date> revokedTokens = new ConcurrentHashMap<>();
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -72,7 +76,28 @@ public class JwtService {
                 .compact();
     }
 
+    public void revokeToken(String token) {
+        try {
+            Date exp = extractExpiration(token);
+            revokedTokens.put(token, exp);
+            cleanupExpiredRevocations();
+        } catch (RuntimeException e) {
+            revokedTokens.put(token, new Date());
+        }
+    }
+
+    private void cleanupExpiredRevocations() {
+        Date now = new Date();
+        revokedTokens.entrySet().removeIf(entry -> entry.getValue().before(now));
+    }
+
+    public boolean isTokenRevoked(String token) {
+        cleanupExpiredRevocations();
+        return revokedTokens.containsKey(token);
+    }
+
     public boolean isTokenValid(String token, UserDetails userDetails) {
+        if (isTokenRevoked(token)) return false;
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
