@@ -6,7 +6,7 @@ import { Eye, EyeOff, Mail, Lock } from 'lucide-react'
 interface LoginForm {
   email: string
   password: string
-}
+};
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,14 +17,14 @@ const Login = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginForm>()
+  } = useForm<LoginForm>();
 
   const onSubmit = async (data: LoginForm) => {
-    setIsLoading(true)
-    
+    setIsLoading(true);
+
     try {
       await new Promise(resolve => setTimeout(resolve, 1000))
-      
+
       const mockUser = {
         id: 1,
         email: data.email,
@@ -32,12 +32,12 @@ const Login = () => {
         lastName: 'Doe',
         role: data.email.includes('admin') ? 'ADMIN' as const : 'CUSTOMER' as const
       }
-      
+
       const mockToken = 'mock-jwt-token'
-      
+
       localStorage.setItem('user', JSON.stringify(mockUser))
       localStorage.setItem('token', mockToken)
-      
+
       navigate('/')
     } catch (error) {
       console.error('Login failed:', error)
