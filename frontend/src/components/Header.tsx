@@ -39,11 +39,14 @@ const Header = () => {
           </nav>
           <div className="hidden md:flex items-center space-x-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{ color: '#9ca3af' }} />
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <Search className="w-4 h-4" style={{ color: '#9ca3af' }} />
+              </div>
               <input
                 type="text"
                 placeholder="Search products..."
-                className="input pl-10 pr-4 w-64"
+                className="input w-64"
+                style={{ paddingLeft: '2.75rem', paddingRight: '1rem' }}
               />
             </div>
           </div>
@@ -111,11 +114,14 @@ const Header = () => {
               </Link>
               <div className="pt-2">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{ color: '#9ca3af' }} />
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <Search className="w-4 h-4" style={{ color: '#9ca3af' }} />
+                  </div>
                   <input
                     type="text"
                     placeholder="Search products..."
-                    className="input w-full pl-10 pr-4"
+                    className="input w-full"
+                    style={{ paddingLeft: '2.75rem', paddingRight: '1rem' }}
                   />
                 </div>
               </div>
