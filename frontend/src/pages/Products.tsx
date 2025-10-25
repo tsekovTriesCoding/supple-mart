@@ -104,13 +104,14 @@ const Products = () => {
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
             <form onSubmit={handleSearch} className="flex-1 w-full lg:max-w-md">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                 <input
                   type="text"
                   placeholder="Search products..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="input pl-12 pr-4 w-full"
+                  className="input w-full"
+                  style={{ paddingLeft: '3rem', paddingRight: '1rem' }}
                 />
               </div>
             </form>
