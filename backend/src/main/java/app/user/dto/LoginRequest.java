@@ -1,4 +1,4 @@
-package app.web.dto;
+package app.user.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
