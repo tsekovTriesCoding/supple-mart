@@ -1,7 +1,9 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react'
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+
+import { authAPI } from '../lib/api';
 
 interface LoginForm {
   email: string
@@ -11,6 +13,7 @@ interface LoginForm {
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string>('');
   const navigate = useNavigate();
 
   const {
@@ -21,28 +24,31 @@ const Login = () => {
 
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true);
+    setError('');
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await authAPI.login(data.email, data.password);
+      console.log('Login response:', response);
+      
+      localStorage.setItem('user', JSON.stringify(response.user));
+      localStorage.setItem('token', response.accessToken);
 
-      const mockUser = {
-        id: 1,
-        email: data.email,
-        firstName: 'John',
-        lastName: 'Doe',
-        role: data.email.includes('admin') ? 'ADMIN' as const : 'CUSTOMER' as const
+      navigate('/');
+    } catch (err: unknown) {
+      console.error('Login failed:', err);
+
+      const axiosError = err as { response?: { status?: number; data?: { message?: string } } };
+      if (axiosError.response?.status === 401) {
+        setError('Invalid email or password');
+      } else if (axiosError.response?.status === 422) {
+        setError('Please check your input and try again');
+      } else if (axiosError.response?.data?.message) {
+        setError(axiosError.response.data.message);
+      } else {
+        setError('Login failed. Please try again.');
       }
-
-      const mockToken = 'mock-jwt-token'
-
-      localStorage.setItem('user', JSON.stringify(mockUser))
-      localStorage.setItem('token', mockToken)
-
-      navigate('/')
-    } catch (error) {
-      console.error('Login failed:', error)
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   };
 
@@ -71,6 +77,12 @@ const Login = () => {
           </div>
 
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+            {error && (
+              <div className="p-4 bg-red-900/20 border border-red-700 rounded-lg animate-fade-in">
+                <p className="text-red-400 text-sm">{error}</p>
+              </div>
+            )}
+
             <div className="space-y-4">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
