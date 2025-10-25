@@ -1,7 +1,9 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
-import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react'
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+
+import { authAPI } from '../lib/api';
 
 interface RegisterForm {
   firstName: string
@@ -15,6 +17,7 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string>('');
   const navigate = useNavigate();
 
   const {
@@ -27,31 +30,52 @@ const Register = () => {
   const password = watch('password');
 
   const onSubmit = async (data: RegisterForm) => {
-    setIsLoading(true)
+    setIsLoading(true);
+    setError('');
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      const mockUser = {
-        id: Date.now(),
-        email: data.email,
+      const response = await authAPI.register({
         firstName: data.firstName,
         lastName: data.lastName,
-        role: 'CUSTOMER' as const
+        email: data.email,
+        password: data.password
+      });
+      
+      console.log('Registration response:', response);
+
+      localStorage.setItem('user', JSON.stringify(response.user));
+      
+      if (response.accessToken) {
+        localStorage.setItem('token', response.accessToken);
+        navigate('/');
+      } else {
+        alert('Registration successful! Please login.');
+        navigate('/login');
       }
+    } catch (err: unknown) {
+      console.error('Registration failed:', err);
 
-      const mockToken = 'mock-jwt-token'
+      const axiosError = err as {
+        response?: { status?: number; data?: { message?: string } };
+        code?: string;
+        message?: string;
+      };
 
-      localStorage.setItem('user', JSON.stringify(mockUser))
-      localStorage.setItem('token', mockToken)
-
-      navigate('/')
-    } catch (error) {
-      console.error('Registration failed:', error)
+      if (axiosError.code === 'ECONNABORTED' || axiosError.message?.includes('timeout')) {
+        setError('Registration is taking longer than expected. Your account may have been created. Please try logging in or contact support.');
+      } else if (axiosError.response?.status === 409) {
+        setError('Email already exists. Please use a different email or try logging in.');
+      } else if (axiosError.response?.status === 422) {
+        setError('Please check your input and try again');
+      } else if (axiosError.response?.data?.message) {
+        setError(axiosError.response.data.message);
+      } else {
+        setError('Registration failed. Please try again.');
+      }
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 animate-fade-in" style={{ backgroundColor: '#0a0a0a' }}>
@@ -78,6 +102,12 @@ const Register = () => {
           </div>
 
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+            {error && (
+              <div className="p-4 bg-red-900/20 border border-red-700 rounded-lg animate-fade-in">
+                <p className="text-red-400 text-sm">{error}</p>
+              </div>
+            )}
+
             <div className="space-y-4">
               <div>
                 <label htmlFor="firstName" className="block text-sm font-medium text-white mb-2">
@@ -264,7 +294,17 @@ const Register = () => {
                 disabled={isLoading}
                 className="btn-primary w-full inline-flex items-center justify-center"
               >
-                {isLoading ? 'Creating account...' : 'Create account'}
+                {isLoading ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Creating account (this may take a moment)...
+                  </>
+                ) : (
+                  'Create account'
+                )}
               </button>
             </div>
             <div className="mt-6 p-4 bg-gray-800 border border-gray-700 rounded-lg">
