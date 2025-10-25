@@ -1,9 +1,9 @@
 package app.user.service;
 
 import app.security.CustomUserDetails;
+import app.user.dto.RegisterRequest;
 import app.user.model.User;
 import app.user.repository.UserRepository;
-import app.web.dto.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;

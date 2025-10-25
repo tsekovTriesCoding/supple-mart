@@ -2,11 +2,11 @@ package app.web;
 
 import app.security.CustomUserDetails;
 import app.security.jwt.JwtService;
+import app.user.dto.AuthResponse;
+import app.user.dto.LoginRequest;
+import app.user.dto.RegisterRequest;
 import app.user.model.User;
 import app.user.service.UserService;
-import app.web.dto.AuthResponse;
-import app.web.dto.LoginRequest;
-import app.web.dto.RegisterRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
