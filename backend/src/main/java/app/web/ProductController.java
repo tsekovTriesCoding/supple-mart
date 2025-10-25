@@ -1,17 +1,16 @@
 package app.web;
 
+import app.product.dto.ProductDTO;
 import app.product.dto.ProductPageResponse;
 import app.product.model.Category;
 import app.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/products")
@@ -43,5 +42,11 @@ public class ProductController {
     public ResponseEntity<List<Category>> getAllCategories() {
         List<Category> categories = productService.getAllCategories();
         return ResponseEntity.ok(categories);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductDTO> getProductById(@PathVariable UUID id) {
+        ProductDTO product = productService.getProductById(id);
+        return ResponseEntity.ok(product);
     }
 }

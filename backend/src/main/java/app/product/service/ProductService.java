@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -64,5 +65,11 @@ public class ProductService {
 
     public List<Category> getAllCategories() {
         return Arrays.asList(Category.values());
+    }
+
+    public ProductDTO getProductById(UUID id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+        return productMapper.toDTO(product);
     }
 }
