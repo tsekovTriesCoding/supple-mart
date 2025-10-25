@@ -72,13 +72,87 @@ const ProductDetail = ({ productId, isOpen, onClose }: ProductDetailProps) => {
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="bg-gray-900 rounded-2xl p-8 max-w-md w-full">
-          <div className="animate-pulse">
-            <div className="h-6 bg-gray-700 rounded mb-4"></div>
-            <div className="h-64 bg-gray-700 rounded mb-4"></div>
-            <div className="h-4 bg-gray-700 rounded mb-2"></div>
-            <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+      <div className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity duration-200 ${isClosing ? 'animate-fade-out' : 'animate-fade-in'
+        }`}>
+        <div className={`bg-gray-900 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto transition-transform duration-200 ${isClosing ? 'animate-scale-out' : 'animate-scale-in'
+          }`}>
+          {/* Header Skeleton */}
+          <div className="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-gray-700 p-6 flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="animate-pulse">
+                <div className="h-8 bg-gray-700 rounded w-48"></div>
+              </div>
+              <div className="flex items-center space-x-2 text-blue-400">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-400"></div>
+                <span className="text-sm font-medium">Loading...</span>
+              </div>
+            </div>
+            <button
+              onClick={handleClose}
+              className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+            >
+              <X className="w-6 h-6 text-gray-400" />
+            </button>
+          </div>
+
+          <div className="p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <div className="aspect-square bg-gray-800 rounded-2xl animate-pulse flex items-center justify-center">
+                  <div className="text-gray-600 text-lg">Loading image...</div>
+                </div>
+              </div>
+              <div className="space-y-6">
+                <div className="animate-pulse space-y-4">
+                  <div className="h-8 bg-gray-700 rounded w-3/4"></div>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <div key={i} className="w-5 h-5 bg-gray-700 rounded"></div>
+                      ))}
+                    </div>
+                    <div className="h-4 bg-gray-700 rounded w-20"></div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-8 bg-gray-700 rounded w-32"></div>
+                    <div className="h-4 bg-gray-700 rounded w-24"></div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-700 rounded w-full"></div>
+                    <div className="h-4 bg-gray-700 rounded w-5/6"></div>
+                    <div className="h-4 bg-gray-700 rounded w-4/6"></div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="h-12 bg-gray-700 rounded w-32"></div>
+                    <div className="flex space-x-3">
+                      <div className="h-12 bg-gray-700 rounded flex-1"></div>
+                      <div className="h-12 bg-gray-700 rounded w-12"></div>
+                      <div className="h-12 bg-gray-700 rounded w-12"></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-center py-8">
+                  <div className="inline-flex items-center space-x-3 text-gray-400">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                    <span>Loading product details...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="mt-8">
+              <div className="border-b border-gray-700 mb-6">
+                <div className="flex space-x-8">
+                  {['Description', 'Reviews', 'Shipping'].map((_, index) => (
+                    <div key={index} className="h-10 bg-gray-700 rounded w-24 animate-pulse"></div>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="h-4 bg-gray-700 rounded w-full animate-pulse"></div>
+                <div className="h-4 bg-gray-700 rounded w-4/5 animate-pulse"></div>
+                <div className="h-4 bg-gray-700 rounded w-3/5 animate-pulse"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

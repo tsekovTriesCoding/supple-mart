@@ -15,6 +15,7 @@ const Products = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loadingProductId, setLoadingProductId] = useState<number | null>(null);
 
   const { data, isLoading, isError } = useProducts({
     page: currentPage,
@@ -66,13 +67,19 @@ const Products = () => {
   };
 
   const handleProductClick = (productId: number) => {
+    setLoadingProductId(productId);
     setSelectedProductId(productId);
     setIsModalOpen(true);
+
+    setTimeout(() => {
+      setLoadingProductId(null);
+    }, 500);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedProductId(null);
+    setLoadingProductId(null);
   };
 
   const addToCart = (product: Product) => {
@@ -252,11 +259,20 @@ const Products = () => {
                 {(data || productsData)?.products.map((product: Product, index: number) => (
                   <div
                     key={product.id}
-                    className="card-hover p-4 animate-slide-in cursor-pointer"
+                    className={`card-hover p-4 animate-slide-in cursor-pointer transition-all duration-200 ${loadingProductId === product.id ? 'opacity-75 scale-95' : 'hover:scale-[1.02]'
+                      }`}
                     style={{ animationDelay: `${index * 0.05}s` }}
                     onClick={() => handleProductClick(product.id)}
                   >
                     <div className="relative">
+                      {loadingProductId === product.id && (
+                        <div className="absolute inset-0 bg-blue-500/20 rounded-lg flex items-center justify-center z-10">
+                          <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            <span>Opening...</span>
+                          </div>
+                        </div>
+                      )}
                       <div className="aspect-square bg-gray-800 rounded-lg mb-4 overflow-hidden relative">
                         <img
                           src={product.imageUrl}
@@ -314,11 +330,20 @@ const Products = () => {
                 {(data || productsData)?.products.map((product: Product, index: number) => (
                   <div
                     key={product.id}
-                    className="card-hover p-6 animate-slide-in cursor-pointer"
+                    className={`card-hover p-6 animate-slide-in cursor-pointer transition-all duration-200 ${loadingProductId === product.id ? 'opacity-75 scale-98' : 'hover:scale-[1.01]'
+                      }`}
                     style={{ animationDelay: `${index * 0.05}s` }}
                     onClick={() => handleProductClick(product.id)}
                   >
-                    <div className="flex flex-col md:flex-row gap-6">
+                    {loadingProductId === product.id && (
+                      <div className="absolute inset-0 bg-blue-500/20 rounded-lg flex items-center justify-center z-10">
+                        <div className="bg-blue-500 text-white px-4 py-2 rounded-full font-medium flex items-center space-x-2">
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                          <span>Opening product details...</span>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex flex-col md:flex-row gap-6 relative">
                       <div className="w-full md:w-48 h-48 bg-gray-800 rounded-lg overflow-hidden relative shrink-0">
                         <img
                           src={product.imageUrl}
