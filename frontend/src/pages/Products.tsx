@@ -1,6 +1,8 @@
+import { Filter, Grid, Heart, List, Minus, Plus, Search, ShoppingBag, Star } from 'lucide-react';
 import { useState } from 'react';
-import { useProducts, useProductCategories, type Product } from '../hooks/useProducts';
-import { Star, Filter, Grid, List, Search, ShoppingBag, Heart, Plus, Minus } from 'lucide-react';
+
+import ProductDetail from '../components/ProductDetail';
+import { useProductCategories, useProducts, type Product } from '../hooks/useProducts';
 
 const Products = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -11,6 +13,8 @@ const Products = () => {
   const [priceRange, setPriceRange] = useState({ min: '', max: '' });
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'createdAt'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data, isLoading, isError } = useProducts({
     page: currentPage,
@@ -59,6 +63,16 @@ const Products = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentPage(1);
+  };
+
+  const handleProductClick = (productId: number) => {
+    setSelectedProductId(productId);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedProductId(null);
   };
 
   const addToCart = (product: Product) => {
@@ -230,13 +244,18 @@ const Products = () => {
           <>
             <div className="flex justify-between items-center mb-6">
               <p className="text-gray-400">
-                Showing {data?.products.length || 0} of {data?.total || 0} products
+                Showing {data?.products.length || 0} of {data?.totalElements || 0} products
               </p>
             </div>
             {viewMode === 'grid' ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
                 {(data || productsData)?.products.map((product: Product, index: number) => (
-                  <div key={product.id} className="card-hover p-4 animate-slide-in" style={{ animationDelay: `${index * 0.05}s` }}>
+                  <div
+                    key={product.id}
+                    className="card-hover p-4 animate-slide-in cursor-pointer"
+                    style={{ animationDelay: `${index * 0.05}s` }}
+                    onClick={() => handleProductClick(product.id)}
+                  >
                     <div className="relative">
                       <div className="aspect-square bg-gray-800 rounded-lg mb-4 overflow-hidden relative">
                         <img
@@ -293,7 +312,12 @@ const Products = () => {
             ) : (
               <div className="space-y-4 mb-8">
                 {(data || productsData)?.products.map((product: Product, index: number) => (
-                  <div key={product.id} className="card-hover p-6 animate-slide-in" style={{ animationDelay: `${index * 0.05}s` }}>
+                  <div
+                    key={product.id}
+                    className="card-hover p-6 animate-slide-in cursor-pointer"
+                    style={{ animationDelay: `${index * 0.05}s` }}
+                    onClick={() => handleProductClick(product.id)}
+                  >
                     <div className="flex flex-col md:flex-row gap-6">
                       <div className="w-full md:w-48 h-48 bg-gray-800 rounded-lg overflow-hidden relative shrink-0">
                         <img
@@ -391,6 +415,15 @@ const Products = () => {
           </>
         )}
       </section>
+
+      {/* Product Detail Modal */}
+      {selectedProductId && (
+        <ProductDetail
+          productId={selectedProductId}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+        />
+      )}
     </div>
   );
 };

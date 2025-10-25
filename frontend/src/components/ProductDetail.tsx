@@ -1,0 +1,349 @@
+import { Heart, Minus, Plus, Share, Shield, ShoppingCart, Star, Truck, X } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+
+import { calculateDiscountPercentage, formatPrice, isProductOnSale, useProduct } from '../hooks/useProducts';
+
+interface ProductDetailProps {
+  productId: number | string;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const ProductDetail = ({ productId, isOpen, onClose }: ProductDetailProps) => {
+  const [quantity, setQuantity] = useState(1);
+  const [selectedTab, setSelectedTab] = useState<'description' | 'reviews' | 'shipping'>('description');
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+
+  const { data: product, isLoading, isError } = useProduct(productId);
+
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 200);
+  }, [onClose]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        handleClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, handleClose]);
+
+  const handleQuantityChange = (change: number) => {
+    setQuantity(prev => Math.max(1, prev + change));
+  };
+
+  const handleAddToCart = () => {
+    // TODO: Implement add to cart functionality
+    console.log('Added to cart:', { product, quantity });
+  };
+
+  const handleWishlistToggle = () => {
+    setIsWishlisted(!isWishlisted);
+    // TODO: Implement wishlist functionality
+  };
+
+  const handleShare = () => {
+    // TODO: Implement share functionality
+    if (navigator.share && product) {
+      navigator.share({
+        title: product.name,
+        text: product.description,
+        url: window.location.href,
+      });
+    }
+  };
+
+  if (!isOpen) return null;
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="bg-gray-900 rounded-2xl p-8 max-w-md w-full">
+          <div className="animate-pulse">
+            <div className="h-6 bg-gray-700 rounded mb-4"></div>
+            <div className="h-64 bg-gray-700 rounded mb-4"></div>
+            <div className="h-4 bg-gray-700 rounded mb-2"></div>
+            <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError || !product) {
+    return (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="bg-gray-900 rounded-2xl p-8 max-w-md w-full text-center">
+          <h3 className="text-xl font-semibold text-white mb-4">Product Not Found</h3>
+          <p className="text-gray-400 mb-6">Sorry, we couldn't load the product details.</p>
+          <button onClick={onClose} className="btn-primary">
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const discount = isProductOnSale(product) ? calculateDiscountPercentage(product.originalPrice!, product.price) : 0;
+
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      handleClose();
+    }
+  };
+
+  return (
+    <div
+      className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity duration-200 ${isClosing ? 'animate-fade-out' : 'animate-fade-in'
+        }`}
+      onClick={handleBackdropClick}
+    >
+      <div className={`bg-gray-900 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto transition-transform duration-200 ${isClosing ? 'animate-scale-out' : 'animate-scale-in'
+        }`}>
+        <div className="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-gray-700 p-6 flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-white">Product Details</h2>
+          <button
+            onClick={handleClose}
+            className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+          >
+            <X className="w-6 h-6 text-gray-400" />
+          </button>
+        </div>
+
+        <div className="p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <div className="aspect-square bg-gray-800 rounded-2xl overflow-hidden relative">
+                <img
+                  src={product.imageUrl}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                />
+                {discount > 0 && (
+                  <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                    -{discount}%
+                  </div>
+                )}
+                {!product.inStock && (
+                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                    <span className="bg-red-500 text-white px-4 py-2 rounded-lg font-medium">
+                      Out of Stock
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-blue-400 font-medium text-sm">{product.category}</span>
+                  <button
+                    onClick={handleShare}
+                    className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+                  >
+                    <Share className="w-5 h-5 text-gray-400" />
+                  </button>
+                </div>
+                <h1 className="text-3xl font-bold text-white mb-2">{product.name}</h1>
+                {product.brand && (
+                  <p className="text-gray-400 mb-4">by {product.brand}</p>
+                )}
+                <div className="flex items-center space-x-2 mb-4">
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-5 h-5 ${i < Math.floor(product.rating)
+                          ? 'text-yellow-400 fill-current'
+                          : 'text-gray-600'
+                          }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-white font-medium">{product.rating}</span>
+                  <span className="text-gray-400">({product.reviewCount} reviews)</span>
+                </div>
+
+                <div className="flex items-center space-x-3 mb-6">
+                  <span className="text-3xl font-bold text-blue-400">
+                    {formatPrice(product.price)}
+                  </span>
+                  {product.originalPrice && (
+                    <span className="text-xl text-gray-500 line-through">
+                      {formatPrice(product.originalPrice)}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center space-x-4">
+                  <span className="text-white font-medium">Quantity:</span>
+                  <div className="flex items-center border border-gray-600 rounded-lg">
+                    <button
+                      onClick={() => handleQuantityChange(-1)}
+                      className="p-2 hover:bg-gray-700 transition-colors"
+                      disabled={quantity <= 1}
+                    >
+                      <Minus className="w-4 h-4 text-gray-400" />
+                    </button>
+                    <span className="px-4 py-2 text-white font-medium min-w-12 text-center">
+                      {quantity}
+                    </span>
+                    <button
+                      onClick={() => handleQuantityChange(1)}
+                      className="p-2 hover:bg-gray-700 transition-colors"
+                      disabled={!product.inStock}
+                    >
+                      <Plus className="w-4 h-4 text-gray-400" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex space-x-3">
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={!product.inStock}
+                    className="btn-primary flex-1 inline-flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ShoppingCart className="w-5 h-5" />
+                    <span>{product.inStock ? 'Add to Cart' : 'Out of Stock'}</span>
+                  </button>
+                  <button
+                    onClick={handleWishlistToggle}
+                    className={`p-3 rounded-lg border transition-colors ${isWishlisted
+                      ? 'bg-red-500 border-red-500 text-white'
+                      : 'border-gray-600 text-gray-400 hover:border-red-500 hover:text-red-500'
+                      }`}
+                  >
+                    <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
+                  </button>
+                </div>
+
+                {product.stock && (
+                  <div className="text-sm">
+                    {product.stock > 10 ? (
+                      <span className="text-green-400">✓ In Stock ({product.stock} available)</span>
+                    ) : product.stock > 0 ? (
+                      <span className="text-yellow-400">⚠ Low Stock ({product.stock} remaining)</span>
+                    ) : (
+                      <span className="text-red-400">✗ Out of Stock</span>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="flex items-center space-x-2 text-sm text-gray-400">
+                  <Shield className="w-4 h-4" />
+                  <span>Quality Guaranteed</span>
+                </div>
+                <div className="flex items-center space-x-2 text-sm text-gray-400">
+                  <Truck className="w-4 h-4" />
+                  <span>Fast Shipping</span>
+                </div>
+                <div className="flex items-center space-x-2 text-sm text-gray-400">
+                  <Star className="w-4 h-4" />
+                  <span>Top Rated</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-12">
+            <div className="border-b border-gray-700">
+              <nav className="flex space-x-8">
+                {[
+                  { id: 'description', label: 'Description' },
+                  { id: 'reviews', label: 'Reviews' },
+                  { id: 'shipping', label: 'Shipping' },
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setSelectedTab(tab.id as 'description' | 'reviews' | 'shipping')}
+                    className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${selectedTab === tab.id
+                      ? 'border-blue-500 text-blue-400'
+                      : 'border-transparent text-gray-400 hover:text-white'
+                      }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </nav>
+            </div>
+
+            <div className="py-6">
+              {selectedTab === 'description' && (
+                <div className="prose prose-invert max-w-none">
+                  <p className="text-gray-300 leading-relaxed">{product.description}</p>
+                  {product.tags && product.tags.length > 0 && (
+                    <div className="mt-6">
+                      <h4 className="text-white font-medium mb-3">Tags:</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {product.tags.map((tag: string) => (
+                          <span
+                            key={tag}
+                            className="px-3 py-1 bg-gray-800 text-gray-300 rounded-full text-sm"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {selectedTab === 'reviews' && (
+                <div className="text-center py-12">
+                  <p className="text-gray-400">Reviews feature coming soon!</p>
+                </div>
+              )}
+
+              {selectedTab === 'shipping' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="text-white font-medium mb-2">Shipping Options</h4>
+                      <ul className="space-y-2 text-gray-300">
+                        <li>• Standard Shipping: 5-7 business days</li>
+                        <li>• Express Shipping: 2-3 business days</li>
+                        <li>• Overnight Shipping: 1 business day</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="text-white font-medium mb-2">Return Policy</h4>
+                      <ul className="space-y-2 text-gray-300">
+                        <li>• 30-day return window</li>
+                        <li>• Free returns on orders over $50</li>
+                        <li>• Original packaging required</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ProductDetail;
