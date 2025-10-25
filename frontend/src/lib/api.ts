@@ -13,6 +13,7 @@ export const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -42,7 +43,7 @@ export const authAPI = {
     const response = await api.post('/auth/login', { email, password });
     return response.data;
   },
-  
+
   register: async (userData: {
     firstName: string;
     lastName: string;
@@ -52,7 +53,7 @@ export const authAPI = {
     const response = await api.post('/auth/register', userData);
     return response.data;
   },
-  
+
   logout: async () => {
     try {
       await api.post('/auth/logout');
@@ -63,12 +64,12 @@ export const authAPI = {
       localStorage.removeItem('user');
     }
   },
-  
+
   refreshToken: async () => {
     const response = await api.post('/auth/refresh');
     return response.data;
   },
-  
+
   getCurrentUser: async () => {
     const response = await api.get('/auth/me');
     return response.data;
