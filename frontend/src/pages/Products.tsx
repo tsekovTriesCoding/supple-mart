@@ -1,182 +1,6 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import api from '../lib/api';
+import { useProducts, useProductCategories, type Product } from '../hooks/useProducts';
 import { Star, Filter, Grid, List, Search, ShoppingBag, Heart, Plus, Minus } from 'lucide-react';
-
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  rating: number;
-  reviewCount: number;
-  image: string;
-  category: string;
-  brand: string;
-  inStock: boolean;
-  description: string;
-  tags: string[];
-}
-
-interface ProductsResponse {
-  products: Product[];
-  total: number;
-  page: number;
-  totalPages: number;
-}
-
-const fetchProducts = async (page: number = 1, category?: string, search?: string): Promise<ProductsResponse> => {
-  try {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: '12',
-      ...(category && { category }),
-      ...(search && { search })
-    });
-
-    const response = await api.get(`/products?${params}`);
-    return response.data;
-  } catch (error) {
-    console.warn('API not available, using mock data:', error);
-    return mockProductsResponse(page, category, search);
-  }
-};
-
-const mockProductsResponse = (page: number, category?: string, search?: string): ProductsResponse => {
-  const allProducts: Product[] = [
-    {
-      id: 1,
-      name: "Premium Whey Protein Isolate",
-      price: 49.99,
-      originalPrice: 59.99,
-      rating: 4.8,
-      reviewCount: 256,
-      image: "https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=300&h=300&fit=crop&crop=center",
-      category: "Protein",
-      brand: "NutritionPro",
-      inStock: true,
-      description: "High-quality whey protein isolate for muscle building and recovery. 25g protein per serving.",
-      tags: ["muscle-building", "recovery", "low-carb"]
-    },
-    {
-      id: 2,
-      name: "Organic Multivitamin Complex",
-      price: 29.99,
-      rating: 4.6,
-      reviewCount: 189,
-      image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop&crop=center",
-      category: "Vitamins",
-      brand: "GreenLife",
-      inStock: true,
-      description: "Complete daily vitamin and mineral support from organic sources.",
-      tags: ["organic", "daily-health", "immune-support"]
-    },
-    {
-      id: 3,
-      name: "Pre-Workout Energy Booster",
-      price: 39.99,
-      originalPrice: 44.99,
-      rating: 4.7,
-      reviewCount: 342,
-      image: "https://images.unsplash.com/photo-1550572017-edd951b55104?w=300&h=300&fit=crop&crop=center",
-      category: "Pre-Workout",
-      brand: "PowerFuel",
-      inStock: true,
-      description: "Natural energy boost with caffeine, B-vitamins, and amino acids for enhanced performance.",
-      tags: ["energy", "performance", "focus"]
-    },
-    {
-      id: 4,
-      name: "Omega-3 Fish Oil Capsules",
-      price: 24.99,
-      rating: 4.5,
-      reviewCount: 167,
-      image: "https://images.unsplash.com/photo-1559181567-c3190ca9959b?w=300&h=300&fit=crop&crop=center",
-      category: "Supplements",
-      brand: "OceanPure",
-      inStock: true,
-      description: "High-potency omega-3 fatty acids for heart and brain health.",
-      tags: ["heart-health", "brain-health", "anti-inflammatory"]
-    },
-    {
-      id: 5,
-      name: "Creatine Monohydrate Powder",
-      price: 19.99,
-      rating: 4.9,
-      reviewCount: 423,
-      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=300&fit=crop&crop=center",
-      category: "Supplements",
-      brand: "StrengthMax",
-      inStock: true,
-      description: "Pure creatine monohydrate for increased strength and muscle mass.",
-      tags: ["strength", "muscle-building", "power"]
-    },
-    {
-      id: 6,
-      name: "Post-Workout Recovery Formula",
-      price: 34.99,
-      rating: 4.4,
-      reviewCount: 98,
-      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=300&fit=crop&crop=center",
-      category: "Recovery",
-      brand: "RecoverFast",
-      inStock: false,
-      description: "Advanced recovery blend with BCAAs, glutamine, and electrolytes.",
-      tags: ["recovery", "muscle-repair", "hydration"]
-    },
-    {
-      id: 7,
-      name: "Vitamin D3 + K2 Complex",
-      price: 22.99,
-      rating: 4.7,
-      reviewCount: 134,
-      image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop&crop=center",
-      category: "Vitamins",
-      brand: "VitalHealth",
-      inStock: true,
-      description: "Essential vitamin D3 and K2 for bone health and immune support.",
-      tags: ["bone-health", "immune-support", "vitamin-d"]
-    },
-    {
-      id: 8,
-      name: "Green Superfood Powder",
-      price: 42.99,
-      originalPrice: 49.99,
-      rating: 4.3,
-      reviewCount: 76,
-      image: "https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=300&h=300&fit=crop&crop=center",
-      category: "Supplements",
-      brand: "GreenVitality",
-      inStock: true,
-      description: "Blend of organic greens, fruits, and vegetables for daily nutrition.",
-      tags: ["organic", "antioxidants", "detox"]
-    }
-  ];
-
-  let filteredProducts = category
-    ? allProducts.filter(p => p.category.toLowerCase() === category.toLowerCase())
-    : allProducts;
-
-  if (search) {
-    filteredProducts = filteredProducts.filter(p =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.description.toLowerCase().includes(search.toLowerCase()) ||
-      p.brand.toLowerCase().includes(search.toLowerCase())
-    );
-  }
-
-  const limit = 12;
-  const startIndex = (page - 1) * limit;
-  const endIndex = startIndex + limit;
-  const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
-
-  return {
-    products: paginatedProducts,
-    total: filteredProducts.length,
-    page,
-    totalPages: Math.ceil(filteredProducts.length / limit)
-  };
-};
 
 const Products = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -185,15 +9,23 @@ const Products = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState({ min: '', max: '' });
-  const [sortBy, setSortBy] = useState('name');
+  const [sortBy, setSortBy] = useState<'name' | 'price' | 'createdAt'>('name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
-  const { data, isLoading, isError } = useQuery<ProductsResponse>({
-    queryKey: ['products', currentPage, selectedCategory, searchQuery],
-    queryFn: () => fetchProducts(currentPage, selectedCategory, searchQuery),
-    placeholderData: (previousData) => previousData,
+  const { data, isLoading, isError } = useProducts({
+    page: currentPage,
+    limit: 12,
+    category: selectedCategory || undefined,
+    search: searchQuery || undefined,
+    sortBy,
+    sortOrder
   });
 
-  const categories = [
+  const productsData = data;
+
+  const { data: categoriesData } = useProductCategories();
+
+  const categories = categoriesData || [
     'All',
     'Protein',
     'Creatine',
@@ -204,15 +36,23 @@ const Products = () => {
   ];
 
   const sortOptions = [
-    { value: 'name', label: 'Name A-Z' },
-    { value: 'price-low', label: 'Price: Low to High' },
-    { value: 'price-high', label: 'Price: High to Low' },
-    { value: 'rating', label: 'Highest Rated' },
-    { value: 'newest', label: 'Newest' }
+    { value: 'name-asc', label: 'Name A-Z' },
+    { value: 'name-desc', label: 'Name Z-A' },
+    { value: 'price-asc', label: 'Price: Low to High' },
+    { value: 'price-desc', label: 'Price: High to Low' },
+    { value: 'createdAt-desc', label: 'Newest' },
+    { value: 'createdAt-asc', label: 'Oldest' }
   ];
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category === 'All' ? '' : category);
+    setCurrentPage(1);
+  };
+
+  const handleSortChange = (sortValue: string) => {
+    const [field, direction] = sortValue.split('-');
+    setSortBy(field as 'name' | 'price' | 'createdAt');
+    setSortOrder(direction as 'asc' | 'desc');
     setCurrentPage(1);
   };
 
@@ -277,8 +117,8 @@ const Products = () => {
 
             <div className="flex items-center space-x-4">
               <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
+                value={`${sortBy}-${sortOrder}`}
+                onChange={(e) => handleSortChange(e.target.value)}
                 className="input"
               >
                 {sortOptions.map(option => (
@@ -317,7 +157,7 @@ const Products = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-3">Categories</h3>
                   <div className="space-y-2">
-                    {categories.map(category => (
+                    {categories.map((category: string) => (
                       <button
                         key={category}
                         onClick={() => handleCategoryChange(category)}
@@ -394,12 +234,12 @@ const Products = () => {
             </div>
             {viewMode === 'grid' ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-                {data?.products.map((product, index) => (
+                {(data || productsData)?.products.map((product: Product, index: number) => (
                   <div key={product.id} className="card-hover p-4 animate-slide-in" style={{ animationDelay: `${index * 0.05}s` }}>
                     <div className="relative">
                       <div className="aspect-square bg-gray-800 rounded-lg mb-4 overflow-hidden relative">
                         <img
-                          src={product.image}
+                          src={product.imageUrl}
                           alt={product.name}
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                         />
@@ -451,12 +291,12 @@ const Products = () => {
               </div>
             ) : (
               <div className="space-y-4 mb-8">
-                {data?.products.map((product, index) => (
+                {(data || productsData)?.products.map((product: Product, index: number) => (
                   <div key={product.id} className="card-hover p-6 animate-slide-in" style={{ animationDelay: `${index * 0.05}s` }}>
                     <div className="flex flex-col md:flex-row gap-6">
                       <div className="w-full md:w-48 h-48 bg-gray-800 rounded-lg overflow-hidden relative shrink-0">
                         <img
-                          src={product.image}
+                          src={product.imageUrl}
                           alt={product.name}
                           className="w-full h-full object-cover"
                         />
@@ -524,7 +364,7 @@ const Products = () => {
                 </button>
 
                 <div className="flex space-x-1">
-                  {Array.from({ length: data.totalPages }, (_, i) => i + 1).map(page => (
+                  {Array.from({ length: (data || productsData)?.totalPages || 1 }, (_, i) => i + 1).map(page => (
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
@@ -539,8 +379,8 @@ const Products = () => {
                 </div>
 
                 <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, data.totalPages))}
-                  disabled={currentPage === data.totalPages}
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, (data || productsData)?.totalPages || 1))}
+                  disabled={currentPage === ((data || productsData)?.totalPages || 1)}
                   className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Plus className="w-4 h-4" />
