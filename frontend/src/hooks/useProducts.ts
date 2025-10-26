@@ -3,13 +3,23 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { productsAPI } from '../lib/api';
 
 //can be moved to a separate types file later
+export interface Review {
+  id: string;
+  userId: string;
+  userName: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Product {
   id: number;
   name: string;
   price: number;
   originalPrice?: number;
-  rating: number;
-  reviewCount: number;
+  averageRating: number;
+  totalReviews: number;
   imageUrl: string;
   category: string;
   brand?: string;
@@ -19,6 +29,7 @@ export interface Product {
   stock?: number;
   createdAt?: string;
   updatedAt?: string;
+  reviews?: Review[];
 }
 
 export const useProducts = (params?: {

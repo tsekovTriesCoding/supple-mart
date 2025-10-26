@@ -2,6 +2,7 @@ import { Heart, Minus, Plus, Share, Shield, ShoppingCart, Star, Truck, X } from 
 import { useCallback, useEffect, useState } from 'react';
 
 import { calculateDiscountPercentage, formatPrice, isProductOnSale, useProduct } from '../hooks/useProducts';
+import ProductReviews from './ProductReviews';
 
 interface ProductDetailProps {
   productId: number | string;
@@ -76,7 +77,6 @@ const ProductDetail = ({ productId, isOpen, onClose }: ProductDetailProps) => {
         }`}>
         <div className={`bg-gray-900 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto transition-transform duration-200 ${isClosing ? 'animate-scale-out' : 'animate-scale-in'
           }`}>
-          {/* Header Skeleton */}
           <div className="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-gray-700 p-6 flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="animate-pulse">
@@ -243,15 +243,15 @@ const ProductDetail = ({ productId, isOpen, onClose }: ProductDetailProps) => {
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        className={`w-5 h-5 ${i < Math.floor(product.rating)
+                        className={`w-5 h-5 ${i < Math.floor(product.averageRating)
                           ? 'text-yellow-400 fill-current'
                           : 'text-gray-600'
                           }`}
                       />
                     ))}
                   </div>
-                  <span className="text-white font-medium">{product.rating}</span>
-                  <span className="text-gray-400">({product.reviewCount} reviews)</span>
+                  <span className="text-white font-medium">{product.averageRating}</span>
+                  <span className="text-gray-400">({product.totalReviews === 1 ? '1 review' : `${product.totalReviews} reviews`})</span>
                 </div>
 
                 <div className="flex items-center space-x-3 mb-6">
@@ -310,12 +310,12 @@ const ProductDetail = ({ productId, isOpen, onClose }: ProductDetailProps) => {
                   </button>
                 </div>
 
-                {product.stock && (
+                {product.inStock && (
                   <div className="text-sm">
-                    {product.stock > 10 ? (
-                      <span className="text-green-400">✓ In Stock ({product.stock} available)</span>
-                    ) : product.stock > 0 ? (
-                      <span className="text-yellow-400">⚠ Low Stock ({product.stock} remaining)</span>
+                    {product.stockQuantity > 10 ? (
+                      <span className="text-green-400">✓ In Stock ({product.stockQuantity} available)</span>
+                    ) : product.stockQuantity > 0 ? (
+                      <span className="text-yellow-400">⚠ Low Stock ({product.stockQuantity} remaining)</span>
                     ) : (
                       <span className="text-red-400">✗ Out of Stock</span>
                     )}
@@ -385,9 +385,11 @@ const ProductDetail = ({ productId, isOpen, onClose }: ProductDetailProps) => {
               )}
 
               {selectedTab === 'reviews' && (
-                <div className="text-center py-12">
-                  <p className="text-gray-400">Reviews feature coming soon!</p>
-                </div>
+                <ProductReviews
+                  reviews={product.reviews || []}
+                  averageRating={product.averageRating}
+                  totalReviews={product.totalReviews}
+                />
               )}
 
               {selectedTab === 'shipping' && (

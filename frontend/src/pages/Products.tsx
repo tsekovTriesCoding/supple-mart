@@ -297,8 +297,8 @@ const Products = () => {
                           <span className="text-sm text-blue-400 font-medium">{product.category}</span>
                           <div className="flex items-center space-x-1">
                             <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                            <span className="text-sm text-gray-300">{product.rating}</span>
-                            <span className="text-xs text-gray-500">({product.reviewCount})</span>
+                            <span className="text-sm text-gray-300">{product.averageRating}</span>
+                            <span className="text-xs text-gray-500">({product.totalReviews === 1 ? '1 review' : `${product.totalReviews} reviews`})</span>
                           </div>
                         </div>
 
@@ -374,8 +374,8 @@ const Products = () => {
 
                         <div className="flex items-center space-x-1 mb-3">
                           <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                          <span className="text-sm text-gray-300">{product.rating}</span>
-                          <span className="text-xs text-gray-500">({product.reviewCount} reviews)</span>
+                          <span className="text-sm text-gray-300">{product.averageRating}</span>
+                          <span className="text-xs text-gray-500">({product.totalReviews} reviews)</span>
                         </div>
 
                         <p className="text-gray-400 mb-4 line-clamp-2">{product.description}</p>
