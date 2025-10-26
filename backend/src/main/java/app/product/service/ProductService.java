@@ -1,6 +1,7 @@
 package app.product.service;
 
 import app.product.dto.ProductDTO;
+import app.product.dto.ProductDetailsDTO;
 import app.product.dto.ProductPageResponse;
 import app.product.mapper.ProductMapper;
 import app.product.model.Category;
@@ -67,9 +68,9 @@ public class ProductService {
         return Arrays.asList(Category.values());
     }
 
-    public ProductDTO getProductById(UUID id) {
-        Product product = productRepository.findById(id)
+    public ProductDetailsDTO getProductDetailsById(UUID id) {
+        Product product = productRepository.findByIdWithReviews(id)
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
-        return productMapper.toDTO(product);
+        return productMapper.toDetailsDTO(product);
     }
 }

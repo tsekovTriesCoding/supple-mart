@@ -1,6 +1,6 @@
 package app.web;
 
-import app.product.dto.ProductDTO;
+import app.product.dto.ProductDetailsDTO;
 import app.product.dto.ProductPageResponse;
 import app.product.model.Category;
 import app.product.service.ProductService;
@@ -45,8 +45,8 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDTO> getProductById(@PathVariable UUID id) {
-        ProductDTO product = productService.getProductById(id);
+    public ResponseEntity<ProductDetailsDTO> getProductById(@PathVariable UUID id) {
+        ProductDetailsDTO product = productService.getProductDetailsById(id);
         return ResponseEntity.ok(product);
     }
 }
