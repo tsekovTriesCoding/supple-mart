@@ -105,8 +105,8 @@ const Header = () => {
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <button className="relative p-2 transition-colors" style={{ color: '#d1d5db' }}>
-              <ShoppingCart className="w-6 h-6" />
+            <button className="relative p-2 transition-colors md:cursor-pointer hover:text-blue-400 group" style={{ color: '#d1d5db' }}>
+              <ShoppingCart className="w-6 h-6 group-hover:text-blue-400 transition-colors" />
               <span className="absolute -top-1 -right-1 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" style={{ backgroundColor: '#2563eb' }}>
                 3
               </span>
@@ -120,7 +120,7 @@ const Header = () => {
                 <button
                   onClick={handleLogout}
                   disabled={isLoggingOut}
-                  className={`p-2 transition-colors inline-flex items-center space-x-1 ${isLoggingOut ? 'opacity-50 cursor-not-allowed' : 'hover:text-red-400'
+                  className={`p-2 transition-colors inline-flex items-center space-x-1 group ${isLoggingOut ? 'opacity-50 cursor-not-allowed' : 'hover:text-red-400 md:cursor-pointer'
                     }`}
                   style={{ color: '#d1d5db' }}
                   title={isLoggingOut ? 'Logging out...' : 'Logout'}
@@ -131,9 +131,9 @@ const Header = () => {
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                   ) : (
-                    <LogOut className="w-6 h-6" />
+                    <LogOut className="w-6 h-6 group-hover:text-red-400 transition-colors" />
                   )}
-                  <span className="hidden lg:block text-sm">
+                  <span className="hidden lg:block text-sm group-hover:text-red-400 transition-colors">
                     {isLoggingOut ? 'Logging out...' : 'Logout'}
                   </span>
                 </button>
@@ -142,11 +142,11 @@ const Header = () => {
               <>
                 <Link
                   to="/login"
-                  className="p-2 transition-colors hover:text-blue-400 inline-flex items-center space-x-1"
+                  className="p-2 transition-colors hover:text-blue-400 md:cursor-pointer inline-flex items-center space-x-1 group"
                   style={{ color: '#d1d5db' }}
                 >
-                  <User className="w-6 h-6" />
-                  <span className="hidden lg:block text-sm">Login</span>
+                  <User className="w-6 h-6 group-hover:text-blue-400 transition-colors" />
+                  <span className="hidden lg:block text-sm group-hover:text-blue-400 transition-colors">Login</span>
                 </Link>
                 <Link
                   to="/register"
@@ -157,7 +157,7 @@ const Header = () => {
               </>
             )}
             <button
-              className="md:hidden p-2 transition-colors"
+              className="md:hidden p-2 transition-colors hover:text-blue-400"
               style={{ color: '#d1d5db' }}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
