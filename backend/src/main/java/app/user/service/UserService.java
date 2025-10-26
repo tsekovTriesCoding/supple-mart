@@ -1,7 +1,7 @@
 package app.user.service;
 
-import app.security.CustomUserDetails;
 import app.user.dto.RegisterRequest;
+import app.user.mapper.UserMapper;
 import app.user.model.User;
 import app.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,27 +12,20 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = this.userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User with email " + username + " not found."));
 
-        return CustomUserDetails.builder()
-                .id(user.getId())
-                .username(user.getEmail())
-                .password(user.getPassword())
-                .role(user.getRole())
-                .isEnabled(true)
-                .build();
+        return userMapper.toCustomUserDetails(user);
     }
 
     public User authenticateUser(String email, String password) {
@@ -51,15 +44,8 @@ public class UserService implements UserDetailsService {
             throw new IllegalArgumentException("User with email " + registerRequest.getEmail() + " already exists");
         }
 
-        User user = User.builder()
-                .email(registerRequest.getEmail())
-                .password(passwordEncoder.encode(registerRequest.getPassword()))
-                .firstName(registerRequest.getFirstName())
-                .lastName(registerRequest.getLastName())
-                .role(registerRequest.getRole())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
+        String encodedPassword = passwordEncoder.encode(registerRequest.getPassword());
+        User user = userMapper.toUser(registerRequest, encodedPassword);
 
         return userRepository.save(user);
     }

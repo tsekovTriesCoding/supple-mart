@@ -2,11 +2,13 @@ package app.product.mapper;
 
 import app.product.dto.ProductDTO;
 import app.product.dto.ProductDetailsDTO;
+import app.product.dto.ProductPageResponse;
 import app.product.model.Product;
 import app.review.dto.ReviewDTO;
 import app.review.mapper.ReviewMapper;
 import app.review.model.Review;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -88,5 +90,21 @@ public class ProductMapper {
 
     private boolean isInStock(Product product) {
         return product.getStockQuantity() > 0;
+    }
+
+    public ProductPageResponse toPageResponse(Page<Product> productPage) {
+        List<ProductDTO> productDTOs = toDTOList(productPage.getContent());
+
+        return ProductPageResponse.builder()
+                .products(productDTOs)
+                .currentPage(productPage.getNumber())
+                .totalPages(productPage.getTotalPages())
+                .totalElements(productPage.getTotalElements())
+                .size(productPage.getSize())
+                .first(productPage.isFirst())
+                .last(productPage.isLast())
+                .hasNext(productPage.hasNext())
+                .hasPrevious(productPage.hasPrevious())
+                .build();
     }
 }

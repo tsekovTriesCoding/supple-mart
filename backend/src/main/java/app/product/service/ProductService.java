@@ -1,6 +1,5 @@
 package app.product.service;
 
-import app.product.dto.ProductDTO;
 import app.product.dto.ProductDetailsDTO;
 import app.product.dto.ProductPageResponse;
 import app.product.mapper.ProductMapper;
@@ -49,19 +48,7 @@ public class ProductService {
                 search, category, minPrice, maxPrice, active, pageable
         );
 
-        List<ProductDTO> productDTOs = productMapper.toDTOList(productPage.getContent());
-
-        return ProductPageResponse.builder()
-                .products(productDTOs)
-                .currentPage(productPage.getNumber())
-                .totalPages(productPage.getTotalPages())
-                .totalElements(productPage.getTotalElements())
-                .size(productPage.getSize())
-                .first(productPage.isFirst())
-                .last(productPage.isLast())
-                .hasNext(productPage.hasNext())
-                .hasPrevious(productPage.hasPrevious())
-                .build();
+        return productMapper.toPageResponse(productPage);
     }
 
     public List<Category> getAllCategories() {
