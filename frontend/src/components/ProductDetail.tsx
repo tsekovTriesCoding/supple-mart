@@ -2,6 +2,7 @@ import { Heart, Minus, Plus, Share, Shield, ShoppingCart, Star, Truck, X } from 
 import { useCallback, useEffect, useState } from 'react';
 
 import { calculateDiscountPercentage, formatPrice, isProductOnSale, useProduct } from '../hooks/useProducts';
+import { useCart } from '../hooks';
 import ProductReviews from './ProductReviews';
 
 interface ProductDetailProps {
@@ -17,6 +18,7 @@ const ProductDetail = ({ productId, isOpen, onClose }: ProductDetailProps) => {
   const [isClosing, setIsClosing] = useState(false);
 
   const { data: product, isLoading, isError } = useProduct(productId);
+  const { addItem } = useCart();
 
   const handleClose = useCallback(() => {
     setIsClosing(true);
@@ -48,9 +50,18 @@ const ProductDetail = ({ productId, isOpen, onClose }: ProductDetailProps) => {
     setQuantity(prev => Math.max(1, prev + change));
   };
 
-  const handleAddToCart = () => {
-    // TODO: Implement add to cart functionality
-    console.log('Added to cart:', { product, quantity });
+  const handleAddToCart = async () => {
+    if (product) {
+      try {
+        await addItem(product.id, quantity);
+        setQuantity(1);
+        console.log(`Added ${quantity} x ${product.name} to cart`);
+        // TODO: Show success message
+      } catch (error) {
+        console.error('Failed to add item to cart:', error);
+        // TODO: Show error message
+      }
+    }
   };
 
   const handleWishlistToggle = () => {
