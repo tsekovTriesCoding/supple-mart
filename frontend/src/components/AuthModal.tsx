@@ -78,7 +78,8 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
     try {
       const response = await authAPI.login(data.email, data.password);
       
-      localStorage.setItem('token', response.token);
+      localStorage.setItem('token', response.accessToken);
+      localStorage.setItem('refreshToken', response.refreshToken);
       localStorage.setItem('user', JSON.stringify(response.user));
       
       onSuccess?.();
@@ -114,7 +115,8 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
         password: data.password,
       });
 
-      localStorage.setItem('token', response.token);
+      localStorage.setItem('token', response.accessToken);
+      localStorage.setItem('refreshToken', response.refreshToken);
       localStorage.setItem('user', JSON.stringify(response.user));
       
       onSuccess?.();

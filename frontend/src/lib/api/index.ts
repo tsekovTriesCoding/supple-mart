@@ -16,6 +16,9 @@ api.interceptors.request.use(
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log(`Making ${config.method?.toUpperCase()} request to ${config.url} with token:`, `${token.substring(0, 20)}...`);
+    } else {
+      console.log(`Making ${config.method?.toUpperCase()} request to ${config.url} without token`);
     }
     return config;
   },
@@ -29,10 +32,18 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response?.status === 401) {
+    console.log('API Error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      url: error.config?.url,
+      method: error.config?.method
+    });
+    
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      console.log('Authentication failed, clearing tokens');
       localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
-      window.location.href = '/login';
     }
     return Promise.reject(error);
   }

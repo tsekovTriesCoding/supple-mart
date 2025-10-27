@@ -12,7 +12,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      refreshCart();
+      // Don't let cart errors crash the app
+      refreshCart().catch((err) => {
+        console.error('Initial cart load failed:', err);
+        // Continue with empty cart rather than crashing
+      });
     }
   }, []);
 
@@ -29,8 +33,28 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       const cart = await cartAPI.getCart();
       setItems(cart.items || []);
     } catch (err) {
-      setError('Failed to load cart');
+      // Handle different types of errors more gracefully
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { status?: number } };
+        if (axiosError.response?.status === 401 || axiosError.response?.status === 403) {
+          // Token is invalid or access forbidden, clear it
+          localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+          setItems([]);
+          setError('Session expired. Please login again.');
+          console.log('Authentication failed, clearing tokens');
+          return;
+        } else if (axiosError.response?.status === 404) {
+          // Cart not found, create empty cart
+          setItems([]);
+          return;
+        }
+      }
+      
+      // For network errors or other issues, just log and continue
       console.error('Error loading cart:', err);
+      setError('Failed to load cart');
       setItems([]);
     } finally {
       setIsLoading(false);
