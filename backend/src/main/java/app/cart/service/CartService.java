@@ -78,6 +78,19 @@ public class CartService {
         return cartMapper.toCartDTO(savedCart);
     }
 
+    @Transactional
+    public CartDTO emptyCart(UUID userId) {
+        User user = userService.getUserById(userId);
+
+        Cart cart = cartRepository.findByUserWithItems(user)
+                .orElse(createEmptyCart(user));
+
+        cart.getItems().clear();
+
+        Cart savedCart = cartRepository.save(cart);
+        return cartMapper.toCartDTO(savedCart);
+    }
+
     private Cart createEmptyCart(User user) {
         return Cart.builder()
                 .user(user)

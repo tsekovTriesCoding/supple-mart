@@ -1,6 +1,6 @@
 package app.product.model;
 
-import app.cart.item.model.CartItem;
+import app.cartitem.model.CartItem;
 import app.order.model.OrderItem;
 import app.review.model.Review;
 import jakarta.persistence.*;

@@ -27,4 +27,12 @@ public class CartItemService {
         cartItem.setQuantity(request.getQuantity());
         return cartItemRepository.save(cartItem);
     }
+
+    @Transactional
+    public void deleteCartItem(UUID cartItemId, UUID userId) {
+        CartItem cartItem = cartItemRepository.findByIdAndUserId(cartItemId, userId)
+                .orElseThrow(() -> new RuntimeException("Cart item not found"));
+
+        cartItemRepository.delete(cartItem);
+    }
 }
