@@ -1,6 +1,6 @@
 package app.cart.dto;
 
-import app.cart.item.dto.CartItemDTO;
+import app.cartitem.dto.CartItemDTO;
 import lombok.Builder;
 import lombok.Data;
 

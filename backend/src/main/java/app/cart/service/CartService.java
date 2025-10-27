@@ -4,7 +4,7 @@ import app.cart.dto.AddCartItemRequest;
 import app.cart.dto.CartDTO;
 import app.cart.mapper.CartMapper;
 import app.cart.model.Cart;
-import app.cart.item.model.CartItem;
+import app.cartitem.model.CartItem;
 import app.cart.repository.CartRepository;
 import app.product.model.Product;
 import app.product.service.ProductService;

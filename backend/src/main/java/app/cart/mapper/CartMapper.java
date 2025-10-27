@@ -2,9 +2,9 @@ package app.cart.mapper;
 
 import app.cart.dto.CartDTO;
 import app.cart.model.Cart;
-import app.cart.item.dto.CartItemDTO;
-import app.cart.item.mapper.CartItemMapper;
-import app.cart.item.model.CartItem;
+import app.cartitem.dto.CartItemDTO;
+import app.cartitem.mapper.CartItemMapper;
+import app.cartitem.model.CartItem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
