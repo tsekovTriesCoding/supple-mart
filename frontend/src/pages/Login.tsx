@@ -4,11 +4,7 @@ import { useForm } from 'react-hook-form';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 
 import { authAPI } from '../lib/api';
-
-interface LoginForm {
-  email: string
-  password: string
-};
+import type { LoginForm } from '../types/auth';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);

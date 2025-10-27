@@ -1,36 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { productsAPI } from '../lib/api';
+import type { Product, StockStatus } from '../types/product';
 
-//can be moved to a separate types file later
-export interface Review {
-  id: string;
-  userId: string;
-  userName: string;
-  rating: number;
-  comment: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Product {
-  id: number;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  averageRating: number;
-  totalReviews: number;
-  imageUrl: string;
-  category: string;
-  brand?: string;
-  inStock: boolean;
-  description: string;
-  tags?: string[];
-  stock?: number;
-  createdAt?: string;
-  updatedAt?: string;
-  reviews?: Review[];
-}
+export type { 
+  Product, 
+  Review, 
+  ProductQueryParams, 
+  ProductSearchFilters,
+  ProductData,
+  ProductUpdateData,
+  StockStatus 
+} from '../types/product';
 
 export const useProducts = (params?: {
   page?: number;
@@ -163,7 +144,7 @@ export const isProductOnSale = (product: Product): boolean => {
   return !!(product.originalPrice && product.originalPrice > product.price);
 };
 
-export const getStockStatus = (stock: number): 'in-stock' | 'low-stock' | 'out-of-stock' => {
+export const getStockStatus = (stock: number): StockStatus => {
   if (stock === 0) return 'out-of-stock';
   if (stock < 10) return 'low-stock';
   return 'in-stock';

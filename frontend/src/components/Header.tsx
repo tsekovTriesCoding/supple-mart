@@ -3,16 +3,9 @@ import { ShoppingCart, User, Search, Menu, X, LogOut } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 
 import { authAPI } from '../lib/api';
-import { useCart } from '../hooks';
+import { useCart } from '../hooks/useCart';
 import CartDropdown from './CartDropdown';
-
-interface UserData {
-  id?: string;
-  name?: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-};
+import type { UserData } from '../types/auth';
 
 const Header = () => {
   const location = useLocation();

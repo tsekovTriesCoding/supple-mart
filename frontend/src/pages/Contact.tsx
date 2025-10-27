@@ -1,13 +1,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle } from 'lucide-react'
-
-interface ContactForm {
-  name: string
-  email: string
-  subject: string
-  message: string
-}
+import type { ContactForm } from '../types/common';
 
 const Contact = () => {
   const [isSubmitted, setIsSubmitted] = useState(false)
