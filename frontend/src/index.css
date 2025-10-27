@@ -226,3 +226,35 @@ html {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+.password-input::-ms-reveal,
+.password-input::-ms-clear {
+  display: none;
+}
+
+.password-input::-webkit-outer-spin-button,
+.password-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.auth-input,
+.auth-input:autofill,
+.auth-input:-webkit-autofill,
+.auth-input:-webkit-autofill:hover,
+.auth-input:-webkit-autofill:focus,
+.auth-input:-webkit-autofill:active {
+  background-color: #1f2937 !important;
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  -webkit-box-shadow: 0 0 0 1000px #1f2937 inset !important;
+  box-shadow: 0 0 0 1000px #1f2937 inset !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+}
+
+.auth-input:focus {
+  background-color: #1f2937 !important;
+  color: #f8fafc !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3) !important;
+}

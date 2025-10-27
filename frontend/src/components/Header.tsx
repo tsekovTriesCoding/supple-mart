@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { authAPI } from '../lib/api';
 import { useCart } from '../hooks/useCart';
 import CartDropdown from './CartDropdown';
+import AuthModal from './AuthModal';
 import type { UserData } from '../types/auth';
 
 const Header = () => {
@@ -15,6 +16,7 @@ const Header = () => {
   const [user, setUser] = useState<UserData | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isCartDropdownOpen, setIsCartDropdownOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const cartRef = useRef<HTMLDivElement>(null);
   const cartTimeoutRef = useRef<number | null>(null);
   const { totalItems } = useCart();
@@ -181,22 +183,14 @@ const Header = () => {
                 </button>
               </div>
             ) : (
-              <>
-                <Link
-                  to="/login"
-                  className="p-2 transition-colors hover:text-blue-400 md:cursor-pointer inline-flex items-center space-x-1 group"
-                  style={{ color: '#d1d5db' }}
-                >
-                  <User className="w-6 h-6 group-hover:text-blue-400 transition-colors" />
-                  <span className="hidden lg:block text-sm group-hover:text-blue-400 transition-colors">Login</span>
-                </Link>
-                <Link
-                  to="/register"
-                  className="btn-outline text-sm px-3 py-2 hidden md:inline-flex items-center"
-                >
-                  Register
-                </Link>
-              </>
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
+                className="p-2 transition-colors hover:text-blue-400 md:cursor-pointer inline-flex items-center space-x-1 group"
+                style={{ color: '#d1d5db' }}
+              >
+                <User className="w-6 h-6 group-hover:text-blue-400 transition-colors" />
+                <span className="hidden lg:block text-sm group-hover:text-blue-400 transition-colors">Sign In</span>
+              </button>
             )}
             <button
               className="md:hidden p-2 transition-colors hover:text-blue-400"
@@ -249,27 +243,16 @@ const Header = () => {
                   </button>
                 </div>
               ) : (
-
-                <>
-                  <Link
-                    to="/login"
-                    className={`${isActive('/login') ? 'nav-link-active' : 'nav-link'
-                      } font-medium py-2 inline-flex items-center space-x-2`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <User className="w-5 h-5" />
-                    <span>Login</span>
-                  </Link>
-                  <Link
-                    to="/register"
-                    className={`${isActive('/register') ? 'nav-link-active' : 'nav-link'
-                      } font-medium py-2 inline-flex items-center space-x-2`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <User className="w-5 h-5" />
-                    <span>Register</span>
-                  </Link>
-                </>
+                <button
+                  onClick={() => {
+                    setIsAuthModalOpen(true);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="nav-link font-medium py-2 inline-flex items-center space-x-2 w-full text-left hover:text-blue-400"
+                >
+                  <User className="w-5 h-5" />
+                  <span>Sign In</span>
+                </button>
               )}
               <div className="pt-2">
                 <div className="relative">
@@ -288,6 +271,16 @@ const Header = () => {
           </div>
         )}
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={() => {
+          setIsAuthModalOpen(false);
+          setIsMobileMenuOpen(false);
+        }}
+      />
     </header>
   )
 }
