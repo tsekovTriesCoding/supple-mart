@@ -4,7 +4,7 @@ import app.cart.dto.AddCartItemRequest;
 import app.cart.dto.CartDTO;
 import app.cart.mapper.CartMapper;
 import app.cart.model.Cart;
-import app.cart.model.CartItem;
+import app.cart.item.model.CartItem;
 import app.cart.repository.CartRepository;
 import app.product.model.Product;
 import app.product.service.ProductService;
@@ -88,7 +88,6 @@ public class CartService {
     private Cart createAndSaveCart(User user) {
         Cart cart = Cart.builder()
                 .user(user)
-                .items(new ArrayList<>())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();

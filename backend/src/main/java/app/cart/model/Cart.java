@@ -1,5 +1,6 @@
 package app.cart.model;
 
+import app.cart.item.model.CartItem;
 import app.user.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
