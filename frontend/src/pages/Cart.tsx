@@ -70,7 +70,6 @@ const Cart = () => {
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
                         className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
-                        disabled={item.quantity <= 1}
                       >
                         <Minus className="w-4 h-4 text-gray-400" />
                       </button>

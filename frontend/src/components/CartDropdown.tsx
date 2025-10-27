@@ -76,7 +76,6 @@ const CartDropdown = ({ isOpen, onClose, onMouseEnter, onMouseLeave }: CartDropd
                     <button
                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
                       className="p-1 hover:bg-gray-700 rounded-full transition-colors"
-                      disabled={item.quantity <= 1}
                     >
                       <Minus className="w-3 h-3 text-gray-400" />
                     </button>
