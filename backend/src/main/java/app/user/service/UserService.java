@@ -12,6 +12,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
@@ -48,5 +50,10 @@ public class UserService implements UserDetailsService {
         User user = userMapper.toUser(registerRequest, encodedPassword);
 
         return userRepository.save(user);
+    }
+
+    public User getUserById(UUID userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }

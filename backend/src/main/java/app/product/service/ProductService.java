@@ -60,4 +60,9 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
         return productMapper.toDetailsDTO(product);
     }
+
+    public Product getProductById(UUID id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+    }
 }
