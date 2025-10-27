@@ -1,10 +1,13 @@
 import { Filter, Grid, Heart, List, Minus, Plus, Search, ShoppingBag, Star } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import ProductDetail from '../components/ProductDetail';
 import { useProductCategories, useProducts, type Product } from '../hooks/useProducts';
 
 const Products = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -17,10 +20,36 @@ const Products = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loadingProductId, setLoadingProductId] = useState<number | null>(null);
 
+  useEffect(() => {
+    const categoryFromUrl = searchParams.get('category');
+    const searchFromUrl = searchParams.get('search');
+    
+    if (categoryFromUrl) {
+      setSelectedCategory(categoryFromUrl);
+    }
+    if (searchFromUrl) {
+      setSearchQuery(searchFromUrl);
+    }
+  }, [searchParams]);
+
+  const formatCategoryForDisplay = (category: string): string => {
+    if (category === 'all') return 'All';
+    
+    return category
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
+  const formatCategoryForBackend = (category: string): string => {
+    if (!category || category === 'all') return '';
+    return category.replace(/\s+/g, '_').toUpperCase();
+  };
+
   const { data, isLoading, isError } = useProducts({
     page: currentPage,
     limit: 12,
-    category: selectedCategory || undefined,
+    category: formatCategoryForBackend(selectedCategory),
     search: searchQuery || undefined,
     sortBy,
     sortOrder
@@ -30,15 +59,7 @@ const Products = () => {
 
   const { data: categoriesData } = useProductCategories();
 
-  const categories = categoriesData || [
-    'All',
-    'Protein',
-    'Creatine',
-    'Pre-Workout',
-    'Amino Acids',
-    'Vitamins',
-    'Weight Loss'
-  ];
+  const categories = ['all', ...(categoriesData || [])];
 
   const sortOptions = [
     { value: 'name-asc', label: 'Name A-Z' },
@@ -50,8 +71,17 @@ const Products = () => {
   ];
 
   const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category === 'All' ? '' : category);
+    const newCategory = category === 'all' ? '' : category;
+    setSelectedCategory(newCategory);
     setCurrentPage(1);
+    
+    const newSearchParams = new URLSearchParams(searchParams);
+    if (newCategory) {
+      newSearchParams.set('category', newCategory);
+    } else {
+      newSearchParams.delete('category');
+    }
+    setSearchParams(newSearchParams);
   };
 
   const handleSortChange = (sortValue: string) => {
@@ -64,6 +94,14 @@ const Products = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentPage(1);
+    
+    const newSearchParams = new URLSearchParams(searchParams);
+    if (searchQuery) {
+      newSearchParams.set('search', searchQuery);
+    } else {
+      newSearchParams.delete('search');
+    }
+    setSearchParams(newSearchParams);
   };
 
   const handleProductClick = (productId: number) => {
@@ -183,12 +221,12 @@ const Products = () => {
                       <button
                         key={category}
                         onClick={() => handleCategoryChange(category)}
-                        className={`block w-full text-left px-3 py-2 rounded-lg transition-colors ${(category === 'All' && !selectedCategory) || category === selectedCategory
+                        className={`block w-full text-left px-3 py-2 rounded-lg transition-colors ${(category === 'all' && !selectedCategory) || category === selectedCategory
                           ? 'bg-blue-600 text-white'
                           : 'text-gray-400 hover:text-white hover:bg-gray-700'
                           }`}
                       >
-                        {category}
+                        {formatCategoryForDisplay(category)}
                       </button>
                     ))}
                   </div>
@@ -441,7 +479,6 @@ const Products = () => {
         )}
       </section>
 
-      {/* Product Detail Modal */}
       {selectedProductId && (
         <ProductDetail
           productId={selectedProductId}

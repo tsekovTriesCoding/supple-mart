@@ -39,8 +39,11 @@ public class ProductController {
     }
 
     @GetMapping("/categories")
-    public ResponseEntity<List<Category>> getAllCategories() {
-        List<Category> categories = productService.getAllCategories();
+    public ResponseEntity<List<String>> getAllCategories() {
+        List<String> categories = productService.getAllCategories()
+                .stream()
+                .map(category -> category.name().toLowerCase())
+                .toList();
         return ResponseEntity.ok(categories);
     }
 

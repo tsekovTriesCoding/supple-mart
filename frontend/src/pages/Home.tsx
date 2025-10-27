@@ -6,17 +6,17 @@ import { useProducts, type Product } from '../hooks/useProducts';
 import ProductDetail from '../components/ProductDetail';
 
 const Home = () => {
-  const { data: productsData, isLoading, error } = useProducts({ 
-    limit: 8, 
-    sortBy: 'createdAt', 
-    sortOrder: 'desc' 
+  const { data: productsData, isLoading, error } = useProducts({
+    limit: 8,
+    sortBy: 'createdAt',
+    sortOrder: 'desc'
   });
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isAutoScrolling, setIsAutoScrolling] = useState(true);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
-  
+
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
 
@@ -34,14 +34,14 @@ const Home = () => {
     if (!isAutoScrolling || !scrollContainerRef.current || !productsData?.products) return;
 
     let animationId: number;
-    
+
     const smoothScroll = () => {
       const container = scrollContainerRef.current;
       if (!container) return;
 
       const scrollSpeed = 0.5;
       const maxScroll = container.scrollWidth - container.clientWidth;
-      
+
       if (container.scrollLeft >= maxScroll) {
         container.scrollLeft = 0;
       } else {
@@ -64,7 +64,7 @@ const Home = () => {
 
   const updateScrollButtons = () => {
     if (!scrollContainerRef.current) return;
-    
+
     const container = scrollContainerRef.current;
     setCanScrollLeft(container.scrollLeft > 0);
     setCanScrollRight(container.scrollLeft < container.scrollWidth - container.clientWidth);
@@ -88,7 +88,7 @@ const Home = () => {
       const timeout = setTimeout(() => {
         setIsAutoScrolling(true);
       }, 3000);
-      
+
       return () => clearTimeout(timeout);
     }
   }, [isAutoScrolling]);
@@ -98,25 +98,25 @@ const Home = () => {
       name: 'Protein Supplements',
       description: 'Build muscle and strength',
       image: 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=200&h=200&fit=crop&crop=center',
-      category: 'Protein'
+      category: 'protein'
     },
     {
       name: 'Vitamins & Minerals',
       description: 'Essential daily nutrition',
       image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200&h=200&fit=crop&crop=center',
-      category: 'Vitamins'
+      category: 'vitamins'
     },
     {
       name: 'Energy & Performance',
       description: 'Boost your workout',
       image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=200&fit=crop&crop=center',
-      category: 'Energy'
+      category: 'pre_workout'
     },
     {
       name: 'Weight Management',
       description: 'Achieve your goals',
       image: 'https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=200&h=200&fit=crop&crop=center',
-      category: 'Weight Loss'
+      category: 'weight_loss'
     }
   ];
 
@@ -181,18 +181,18 @@ const Home = () => {
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Shop by Category</h2>
           <p className="text-gray-400 text-lg">Find exactly what you need for your health journey</p>
         </div>
-        
+
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {popularCategories.map((category, index) => (
-            <Link 
+            <Link
               key={category.category}
-              to={`/products?category=${encodeURIComponent(category.category)}`}
+              to={`/products?category=${category.category}`}
               className="group"
             >
               <div className="card-hover p-4 text-center animate-slide-in" style={{ animationDelay: `${index * 0.1}s` }}>
                 <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden bg-gray-800">
-                  <img 
-                    src={category.image} 
+                  <img
+                    src={category.image}
                     alt={category.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
@@ -235,11 +235,10 @@ const Home = () => {
               <button
                 onClick={scrollLeft}
                 disabled={!canScrollLeft}
-                className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-gray-800 border border-gray-700 transition-all duration-200 ${
-                  canScrollLeft 
-                    ? 'hover:bg-gray-700 text-white' 
+                className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-gray-800 border border-gray-700 transition-all duration-200 ${canScrollLeft
+                    ? 'hover:bg-gray-700 text-white'
                     : 'opacity-50 cursor-not-allowed text-gray-500'
-                }`}
+                  }`}
                 aria-label="Previous products"
               >
                 <ChevronLeft className="w-6 h-6" />
@@ -248,17 +247,16 @@ const Home = () => {
               <button
                 onClick={scrollRight}
                 disabled={!canScrollRight}
-                className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-gray-800 border border-gray-700 transition-all duration-200 ${
-                  canScrollRight 
-                    ? 'hover:bg-gray-700 text-white' 
+                className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-gray-800 border border-gray-700 transition-all duration-200 ${canScrollRight
+                    ? 'hover:bg-gray-700 text-white'
                     : 'opacity-50 cursor-not-allowed text-gray-500'
-                }`}
+                  }`}
                 aria-label="Next products"
               >
                 <ChevronRight className="w-6 h-6" />
               </button>
 
-              <div 
+              <div
                 ref={scrollContainerRef}
                 className="overflow-x-auto scrollbar-hide mx-12"
                 onScroll={updateScrollButtons}
@@ -274,7 +272,7 @@ const Home = () => {
                     <div
                       key={product.id}
                       onClick={() => handleProductClick(product.id)}
-                      className="shrink-0 w-80 card-hover p-6 animate-slide-in group cursor-pointer" 
+                      className="shrink-0 w-80 card-hover p-6 animate-slide-in group cursor-pointer"
                       style={{ animationDelay: `${index * 0.1}s` }}
                     >
                       <div className="aspect-square bg-gray-800 rounded-lg mb-4 overflow-hidden">
@@ -305,7 +303,7 @@ const Home = () => {
                   ))}
                 </div>
               </div>
-              
+
               <div className="text-center mt-2 md:hidden">
                 <p className="text-gray-500 text-sm">← Swipe to see more products →</p>
               </div>
