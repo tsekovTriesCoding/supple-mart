@@ -4,9 +4,12 @@ import { useState, useEffect, useRef } from 'react';
 
 import { authAPI } from '../lib/api';
 import { useCart } from '../hooks/useCart';
+import { useProductCategories } from '../hooks/useProducts';
 import CartDropdown from './CartDropdown';
 import AuthModal from './AuthModal';
+import CategoryNavigation from './CategoryNavigation';
 import type { UserData } from '../types/auth';
+import { formatCategoryForDisplay, formatCategoryForUrl } from '../utils/categoryUtils';
 
 const Header = () => {
   const location = useLocation();
@@ -20,6 +23,7 @@ const Header = () => {
   const cartRef = useRef<HTMLDivElement>(null);
   const cartTimeoutRef = useRef<number | null>(null);
   const { totalItems } = useCart();
+  const { data: categoriesData } = useProductCategories();
 
   const handleCartMouseEnter = () => {
     if (cartTimeoutRef.current) {
@@ -114,6 +118,7 @@ const Header = () => {
                 {link.label}
               </Link>
             ))}
+            <CategoryNavigation />
           </nav>
           <div className="hidden md:flex items-center space-x-4">
             <div className="relative">
@@ -216,6 +221,29 @@ const Header = () => {
                 </Link>
               ))}
 
+              <div className="pt-2 border-t border-gray-700">
+                <div className="text-gray-400 text-sm font-medium mb-2">Categories</div>
+                <div className="pl-4 space-y-2">
+                  <Link
+                    to="/products"
+                    className="block text-gray-300 hover:text-white py-1"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    All Products
+                  </Link>
+                  {categoriesData?.map((category: string) => (
+                    <Link
+                      key={category}
+                      to={`/products?category=${formatCategoryForUrl(category)}`}
+                      className="block text-gray-300 hover:text-white py-1"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {formatCategoryForDisplay(category)}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
               {isLoggedIn ? (
                 <div className="pt-2 border-t border-gray-700">
                   <div className="flex items-center space-x-2 py-2">
@@ -272,7 +300,6 @@ const Header = () => {
         )}
       </div>
 
-      {/* Auth Modal */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}

@@ -4,6 +4,12 @@ import { useSearchParams } from 'react-router-dom';
 
 import ProductDetail from '../components/ProductDetail';
 import { useProductCategories, useProducts, type Product } from '../hooks/useProducts';
+import { 
+  formatCategoryForDisplay, 
+  formatCategoryFromUrl, 
+  formatCategoryForUrl, 
+  urlCategoryToBackend 
+} from '../utils/categoryUtils';
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -25,31 +31,17 @@ const Products = () => {
     const searchFromUrl = searchParams.get('search');
     
     if (categoryFromUrl) {
-      setSelectedCategory(categoryFromUrl);
+      setSelectedCategory(formatCategoryFromUrl(categoryFromUrl));
     }
     if (searchFromUrl) {
       setSearchQuery(searchFromUrl);
     }
   }, [searchParams]);
 
-  const formatCategoryForDisplay = (category: string): string => {
-    if (category === 'all') return 'All';
-    
-    return category
-      .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  };
-
-  const formatCategoryForBackend = (category: string): string => {
-    if (!category || category === 'all') return '';
-    return category.replace(/\s+/g, '_').toUpperCase();
-  };
-
   const { data, isLoading, isError } = useProducts({
     page: currentPage,
     limit: 12,
-    category: formatCategoryForBackend(selectedCategory),
+    category: urlCategoryToBackend(formatCategoryForUrl(selectedCategory)),
     search: searchQuery || undefined,
     sortBy,
     sortOrder
@@ -77,7 +69,7 @@ const Products = () => {
     
     const newSearchParams = new URLSearchParams(searchParams);
     if (newCategory) {
-      newSearchParams.set('category', newCategory);
+      newSearchParams.set('category', formatCategoryForUrl(newCategory));
     } else {
       newSearchParams.delete('category');
     }
@@ -332,7 +324,7 @@ const Products = () => {
 
                       <div className="space-y-2">
                         <div className="flex justify-between items-start">
-                          <span className="text-sm text-blue-400 font-medium">{product.category}</span>
+                          <span className="text-sm text-blue-400 font-medium">{formatCategoryForDisplay(product.category)}</span>
                           <div className="flex items-center space-x-1">
                             <Star className="w-4 h-4 text-yellow-400 fill-current" />
                             <span className="text-sm text-gray-300">{product.averageRating}</span>

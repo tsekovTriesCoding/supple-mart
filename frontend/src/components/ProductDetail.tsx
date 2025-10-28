@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { calculateDiscountPercentage, formatPrice, isProductOnSale, useProduct } from '../hooks/useProducts';
 import { useCart } from '../hooks';
 import ProductReviews from './ProductReviews';
+import { formatCategoryForDisplay } from '../utils/categoryUtils';
 
 interface ProductDetailProps {
   productId: number | string;
@@ -237,7 +238,7 @@ const ProductDetail = ({ productId, isOpen, onClose }: ProductDetailProps) => {
             <div className="space-y-6">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-blue-400 font-medium text-sm">{product.category}</span>
+                  <span className="text-blue-400 font-medium text-sm">{formatCategoryForDisplay(product.category)}</span>
                   <button
                     onClick={handleShare}
                     className="p-2 hover:bg-gray-800 rounded-lg transition-colors"

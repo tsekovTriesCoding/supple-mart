@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { ArrowRight, Star, ShoppingBag, Truck, Shield, Headphones, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useProducts, type Product } from '../hooks/useProducts';
 import ProductDetail from '../components/ProductDetail';
+import { formatCategoryForDisplay } from '../utils/categoryUtils';
 
 const Home = () => {
   const { data: productsData, isLoading, error } = useProducts({
@@ -93,33 +94,6 @@ const Home = () => {
     }
   }, [isAutoScrolling]);
 
-  const popularCategories = [
-    {
-      name: 'Protein Supplements',
-      description: 'Build muscle and strength',
-      image: 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=200&h=200&fit=crop&crop=center',
-      category: 'protein'
-    },
-    {
-      name: 'Vitamins & Minerals',
-      description: 'Essential daily nutrition',
-      image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200&h=200&fit=crop&crop=center',
-      category: 'vitamins'
-    },
-    {
-      name: 'Energy & Performance',
-      description: 'Boost your workout',
-      image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=200&fit=crop&crop=center',
-      category: 'pre_workout'
-    },
-    {
-      name: 'Weight Management',
-      description: 'Achieve your goals',
-      image: 'https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=200&h=200&fit=crop&crop=center',
-      category: 'weight_loss'
-    }
-  ];
-
   const features = [
     {
       icon: <Truck className="w-8 h-8 text-blue-400" />,
@@ -172,37 +146,6 @@ const Home = () => {
               <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
               <p className="text-gray-400">{feature.description}</p>
             </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="mb-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Shop by Category</h2>
-          <p className="text-gray-400 text-lg">Find exactly what you need for your health journey</p>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {popularCategories.map((category, index) => (
-            <Link
-              key={category.category}
-              to={`/products?category=${category.category}`}
-              className="group"
-            >
-              <div className="card-hover p-4 text-center animate-slide-in" style={{ animationDelay: `${index * 0.1}s` }}>
-                <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden bg-gray-800">
-                  <img
-                    src={category.image}
-                    alt={category.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                </div>
-                <h3 className="text-white font-semibold mb-1 group-hover:text-blue-400 transition-colors">
-                  {category.name}
-                </h3>
-                <p className="text-gray-400 text-sm">{category.description}</p>
-              </div>
-            </Link>
           ))}
         </div>
       </section>
@@ -283,7 +226,7 @@ const Home = () => {
                         />
                       </div>
                       <div className="flex justify-between items-start mb-2">
-                        <span className="text-sm text-blue-400 font-medium">{product.category}</span>
+                        <span className="text-sm text-blue-400 font-medium">{formatCategoryForDisplay(product.category)}</span>
                         <div className="flex items-center space-x-1">
                           <Star className="w-4 h-4 text-yellow-400 fill-current" />
                           <span className="text-sm text-gray-300">{product.averageRating.toFixed(1)}</span>
