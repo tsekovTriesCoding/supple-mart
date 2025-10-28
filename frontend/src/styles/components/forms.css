@@ -1,0 +1,41 @@
+.input {
+  background-color: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 0.5rem;
+  color: #f8fafc;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input::placeholder {
+  color: #9ca3af;
+}
+
+.input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+  outline: none;
+}
+
+.textarea {
+  background-color: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 0.5rem;
+  color: #f8fafc;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  resize: vertical;
+  min-height: 5rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.textarea::placeholder {
+  color: #9ca3af;
+}
+
+.textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+  outline: none;
+}

@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom'
-import { Star, Award, Users, Truck, Shield, Heart, Target, Zap, Globe } from 'lucide-react'
+import { Link } from 'react-router-dom';
+import { Star, Award, Users, Truck, Shield, Heart, Target, Zap, Globe } from 'lucide-react';
 
 const About = () => {
   const stats = [
@@ -7,7 +7,7 @@ const About = () => {
     { icon: <Award className="w-8 h-8 text-blue-400" />, number: '1,000+', label: 'Premium Products' },
     { icon: <Star className="w-8 h-8 text-blue-400" />, number: '4.9', label: 'Average Rating' },
     { icon: <Globe className="w-8 h-8 text-blue-400" />, number: '15', label: 'Countries Served' }
-  ]
+  ];
 
   const values = [
     {
@@ -30,7 +30,7 @@ const About = () => {
       title: 'Innovation',
       description: 'We stay at the forefront of nutritional science, continuously updating our product line with the latest breakthroughs.'
     }
-  ]
+  ];
 
   const teamMembers = [
     {
@@ -51,7 +51,7 @@ const About = () => {
       image: 'https://images.unsplash.com/photo-1494790108755-2616b332c371?w=300&h=300&fit=crop&crop=center',
       bio: 'Certified nutritionist helping customers achieve their health goals.'
     }
-  ]
+  ];
 
   const milestones = [
     { year: '2018', title: 'Company Founded', description: 'Started with a mission to make premium supplements accessible to everyone.' },
@@ -59,7 +59,7 @@ const About = () => {
     { year: '2021', title: 'International Expansion', description: 'Expanded to serve customers across 15 countries worldwide.' },
     { year: '2023', title: 'Premium Certification', description: 'Achieved the highest industry certifications for quality and safety.' },
     { year: '2024', title: '50,000+ Happy Customers', description: 'Celebrating a community of health-conscious individuals.' }
-  ]
+  ];
 
   return (
     <div className="animate-fade-in">
