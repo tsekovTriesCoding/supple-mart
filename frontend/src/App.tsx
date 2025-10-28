@@ -8,6 +8,9 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import Account from './pages/Account';
+import Orders from './pages/Orders';
+import Reviews from './pages/Reviews';
 import { CartProvider } from './hooks';
 
 function App() {
@@ -24,6 +27,9 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/account" element={<Account />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/reviews" element={<Reviews />} />
           </Routes>
         </main>
       </div>
