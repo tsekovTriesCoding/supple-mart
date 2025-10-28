@@ -25,7 +25,7 @@ const Header = () => {
   const userRef = useRef<HTMLDivElement>(null);
   const cartTimeoutRef = useRef<number | null>(null);
   const userTimeoutRef = useRef<number | null>(null);
-  const { totalItems } = useCart();
+  const { totalItems, refreshCart } = useCart();
   const { data: categoriesData } = useProductCategories();
 
   const handleCartMouseEnter = () => {
@@ -91,17 +91,26 @@ const Header = () => {
     try {
       await authAPI.logout();
 
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      
       setIsLoggedIn(false);
       setUser(null);
+
+      await refreshCart();
 
       navigate('/');
     } catch (error) {
       console.error('Logout failed:', error);
 
+      // Even if logout API fails, clear local data
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       setIsLoggedIn(false);
       setUser(null);
+      
+      await refreshCart();
+      
       navigate('/');
     } finally {
       setIsLoggingOut(false);
