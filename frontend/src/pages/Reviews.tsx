@@ -2,12 +2,15 @@ import { Star, Edit3, Trash2, Calendar, Package } from 'lucide-react';
 import { useState } from 'react';
 import { useReviews } from '../hooks/useReviews';
 import ReviewModal from '../components/ReviewModal';
+import ProductDetail from '../components/ProductDetail';
 import type { Review } from '../lib/api/reviews';
 
 const Reviews = () => {
   const { reviews, loading, error, getReviewStats, deleteReview, refreshReviews } = useReviews();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingReview, setEditingReview] = useState<Review | null>(null);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [isProductDetailOpen, setIsProductDetailOpen] = useState(false);
 
   const renderStars = (rating: number) => {
     return (
@@ -28,6 +31,16 @@ const Reviews = () => {
       setEditingReview(review);
       setIsEditModalOpen(true);
     }
+  };
+
+  const handleViewProduct = (productId: string) => {
+    setSelectedProductId(productId);
+    setIsProductDetailOpen(true);
+  };
+
+  const handleCloseProductDetail = () => {
+    setIsProductDetailOpen(false);
+    setSelectedProductId(null);
   };
 
   const handleDeleteReview = async (reviewId: string) => {
@@ -165,7 +178,10 @@ const Reviews = () => {
                             <span className="ml-2">(Updated {formatDate(review.updatedAt)})</span>
                           )}
                         </div>
-                        <button className="text-blue-400 hover:text-blue-300 transition-colors">
+                        <button 
+                          onClick={() => handleViewProduct(review.product.id)}
+                          className="text-blue-400 hover:text-blue-300 transition-colors"
+                        >
                           View Product
                         </button>
                       </div>
@@ -228,6 +244,14 @@ const Reviews = () => {
           reviewId={editingReview.id}
           initialRating={editingReview.rating}
           initialComment={editingReview.comment}
+        />
+      )}
+
+      {selectedProductId && (
+        <ProductDetail
+          productId={selectedProductId}
+          isOpen={isProductDetailOpen}
+          onClose={handleCloseProductDetail}
         />
       )}
     </div>
