@@ -3,6 +3,7 @@ package app.review.service;
 import app.product.model.Product;
 import app.product.service.ProductService;
 import app.review.dto.CreateReviewRequest;
+import app.review.dto.UpdateReviewRequest;
 import app.review.dto.ReviewDTO;
 import app.review.dto.ReviewResponseDTO;
 import app.review.mapper.ReviewMapper;
@@ -50,4 +51,30 @@ public class ReviewService {
         return reviewMapper.toDTO(savedReview);
     }
 
+    public void deleteReview(UUID reviewId, UUID userId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+
+        if (!review.getUser().getId().equals(userId)) {
+            throw new RuntimeException("You can only delete your own reviews");
+        }
+
+        reviewRepository.delete(review);
+    }
+
+    public ReviewDTO updateReview(UUID reviewId, UUID userId, UpdateReviewRequest request) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+
+        // Check if the review belongs to the current user
+        if (!review.getUser().getId().equals(userId)) {
+            throw new RuntimeException("You can only update your own reviews");
+        }
+
+        review.setRating(request.getRating());
+        review.setComment(request.getComment());
+
+        Review savedReview = reviewRepository.save(review);
+        return reviewMapper.toDTO(savedReview);
+    }
 }

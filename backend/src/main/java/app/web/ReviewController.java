@@ -1,6 +1,7 @@
 package app.web;
 
 import app.review.dto.CreateReviewRequest;
+import app.review.dto.UpdateReviewRequest;
 import app.review.dto.ReviewDTO;
 import app.review.dto.ReviewResponseDTO;
 import app.review.service.ReviewService;
@@ -13,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/reviews")
@@ -35,4 +37,20 @@ public class ReviewController {
         return ResponseEntity.status(HttpStatus.CREATED).body(review);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteReview(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        reviewService.deleteReview(id, userDetails.getId());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ReviewDTO> updateReview(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody UpdateReviewRequest request) {
+        ReviewDTO updatedReview = reviewService.updateReview(id, userDetails.getId(), request);
+        return ResponseEntity.ok(updatedReview);
+    }
 }

@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Star, X, Send, AlertCircle } from 'lucide-react';
 
 import { reviewsAPI } from '../lib/api/reviews';
-import type { CreateReviewRequest } from '../lib/api/reviews';
+import type { CreateReviewRequest, UpdateReviewRequest } from '../lib/api/reviews';
 
 interface ReviewModalProps {
   productId: string;
@@ -11,6 +11,10 @@ interface ReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   onReviewSubmitted?: () => void;
+  editMode?: boolean;
+  reviewId?: string;
+  initialRating?: number;
+  initialComment?: string;
 }
 
 const ReviewModal = ({ 
@@ -19,13 +23,28 @@ const ReviewModal = ({
   productImage, 
   isOpen, 
   onClose, 
-  onReviewSubmitted 
+  onReviewSubmitted,
+  editMode = false,
+  reviewId,
+  initialRating = 0,
+  initialComment = ''
 }: ReviewModalProps) => {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (editMode && isOpen) {
+      setRating(initialRating);
+      setComment(initialComment);
+    } else if (!editMode && isOpen) {
+      setRating(0);
+      setComment('');
+    }
+    setError(null);
+  }, [editMode, isOpen, initialRating, initialComment]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,13 +68,20 @@ const ReviewModal = ({
     setError(null);
 
     try {
-      const reviewData: CreateReviewRequest = {
-        productId,
-        rating,
-        comment: comment.trim()
-      };
-
-      await reviewsAPI.createReview(reviewData);
+      if (editMode && reviewId) {
+        const updateData: UpdateReviewRequest = {
+          rating,
+          comment: comment.trim()
+        };
+        await reviewsAPI.updateReview(reviewId, updateData);
+      } else {
+        const createData: CreateReviewRequest = {
+          productId,
+          rating,
+          comment: comment.trim()
+        };
+        await reviewsAPI.createReview(createData);
+      }
       
       setRating(0);
       setComment('');
@@ -65,7 +91,7 @@ const ReviewModal = ({
       onClose();
     } catch (err) {
       console.error('Error submitting review:', err);
-      setError('Failed to submit review. Please try again.');
+      setError(`Failed to ${editMode ? 'update' : 'submit'} review. Please try again.`);
     } finally {
       setIsSubmitting(false);
     }
@@ -95,7 +121,7 @@ const ReviewModal = ({
     >
       <div className="bg-gray-900 rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-gray-700 p-6 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-white">Write a Review</h2>
+          <h2 className="text-xl font-bold text-white">{editMode ? 'Edit Review' : 'Write a Review'}</h2>
           <button
             onClick={handleClose}
             disabled={isSubmitting}
@@ -218,12 +244,12 @@ const ReviewModal = ({
                 {isSubmitting ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span>Submitting...</span>
+                    <span>{editMode ? 'Updating...' : 'Submitting...'}</span>
                   </>
                 ) : (
                   <>
                     <Send className="w-4 h-4" />
-                    <span>Submit Review</span>
+                    <span>{editMode ? 'Update Review' : 'Submit Review'}</span>
                   </>
                 )}
               </button>

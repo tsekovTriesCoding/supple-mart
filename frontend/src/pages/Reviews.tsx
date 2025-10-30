@@ -1,8 +1,13 @@
 import { Star, Edit3, Trash2, Calendar, Package } from 'lucide-react';
+import { useState } from 'react';
 import { useReviews } from '../hooks/useReviews';
+import ReviewModal from '../components/ReviewModal';
+import type { Review } from '../lib/api/reviews';
 
 const Reviews = () => {
-  const { reviews, loading, error, getReviewStats, deleteReview } = useReviews();
+  const { reviews, loading, error, getReviewStats, deleteReview, refreshReviews } = useReviews();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingReview, setEditingReview] = useState<Review | null>(null);
 
   const renderStars = (rating: number) => {
     return (
@@ -15,6 +20,14 @@ const Reviews = () => {
         ))}
       </div>
     );
+  };
+
+  const handleUpdateReview = (reviewId: string) => {
+    const review = reviews.find(r => r.id === reviewId);
+    if (review) {
+      setEditingReview(review);
+      setIsEditModalOpen(true);
+    }
   };
 
   const handleDeleteReview = async (reviewId: string) => {
@@ -80,7 +93,7 @@ const Reviews = () => {
               {stats.totalReviews} review{stats.totalReviews !== 1 ? 's' : ''}
             </div>
           </div>
-          
+
           {reviews.length === 0 ? (
             <div className="card p-8 text-center">
               <Star className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -110,8 +123,8 @@ const Reviews = () => {
                         <Package className="w-8 h-8 text-gray-400" />
                       </div>
                     </div>
-                    
-                    <div className="flex-1">
+
+                    <div className="flex-1 min-w-0">
                       <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-3">
                         <div>
                           <h3 className="text-lg font-semibold text-white mb-1">{review.product.name}</h3>
@@ -123,15 +136,16 @@ const Reviews = () => {
                             </span>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center space-x-2">
-                          <button 
+                          <button
+                            onClick={() => handleUpdateReview(review.id)}
                             className="p-2 text-gray-400 hover:text-blue-400 transition-colors"
                             title="Edit Review"
                           >
                             <Edit3 className="w-4 h-4" />
                           </button>
-                          <button 
+                          <button
                             onClick={() => handleDeleteReview(review.id)}
                             className="p-2 text-gray-400 hover:text-red-400 transition-colors"
                             title="Delete Review"
@@ -140,9 +154,9 @@ const Reviews = () => {
                           </button>
                         </div>
                       </div>
-                      
-                      <p className="text-gray-300 mb-3 leading-relaxed">{review.comment}</p>
-                      
+
+                      <p className="text-gray-300 mb-3 leading-relaxed wrap-break-word">{review.comment}</p>
+
                       <div className="flex justify-between items-center text-sm text-gray-400">
                         <div className="flex items-center">
                           <Calendar className="w-4 h-4 mr-1" />
@@ -169,21 +183,21 @@ const Reviews = () => {
                     </div>
                     <div className="text-gray-400 text-sm">Average Rating</div>
                   </div>
-                  
+
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-400">
                       {stats.totalReviews}
                     </div>
                     <div className="text-gray-400 text-sm">Total Reviews</div>
                   </div>
-                  
+
                   <div className="text-center">
                     <div className="text-2xl font-bold text-yellow-400">
                       {stats.ratingDistribution[4]}
                     </div>
                     <div className="text-gray-400 text-sm">5-Star Reviews</div>
                   </div>
-                  
+
                   <div className="text-center">
                     <div className="text-2xl font-bold text-white">
                       {stats.ratingDistribution.reduce((sum, count) => sum + count, 0)}
@@ -196,6 +210,26 @@ const Reviews = () => {
           )}
         </div>
       </div>
+
+      {editingReview && (
+        <ReviewModal
+          productId={editingReview.product.id}
+          productName={editingReview.product.name}
+          productImage={editingReview.product.imageUrl}
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setEditingReview(null);
+          }}
+          onReviewSubmitted={() => {
+            refreshReviews();
+          }}
+          editMode={true}
+          reviewId={editingReview.id}
+          initialRating={editingReview.rating}
+          initialComment={editingReview.comment}
+        />
+      )}
     </div>
   );
 };
