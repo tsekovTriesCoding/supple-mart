@@ -1,68 +1,8 @@
-import { useEffect, useState } from 'react';
-import { Star, Package, Edit3, Trash2 } from 'lucide-react';
-
-interface Review {
-  id: string;
-  productId: string;
-  productName: string;
-  productImage: string;
-  rating: number;
-  title: string;
-  comment: string;
-  date: string;
-  verified: boolean;
-};
+import { Star, Edit3, Trash2, Calendar, Package } from 'lucide-react';
+import { useReviews } from '../hooks/useReviews';
 
 const Reviews = () => {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setLoading(false);
-      return;
-    }
-    setTimeout(() => {
-      const mockReviews: Review[] = [
-        {
-          id: '1',
-          productId: '1',
-          productName: 'Wireless Headphones',
-          productImage: '/placeholder-product.jpg',
-          rating: 5,
-          title: 'Excellent sound quality!',
-          comment: 'These headphones exceeded my expectations. The sound quality is amazing and they are very comfortable to wear for long periods.',
-          date: '2024-10-20',
-          verified: true
-        },
-        {
-          id: '2',
-          productId: '2',
-          productName: 'Bluetooth Speaker',
-          productImage: '/placeholder-product.jpg',
-          rating: 4,
-          title: 'Great portable speaker',
-          comment: 'Good sound quality for the price. Battery life is excellent. Only downside is it could be a bit louder.',
-          date: '2024-10-15',
-          verified: true
-        },
-        {
-          id: '3',
-          productId: '3',
-          productName: 'Phone Case',
-          productImage: '/placeholder-product.jpg',
-          rating: 3,
-          title: 'Decent protection',
-          comment: 'The case provides good protection but the material feels a bit cheap. Does the job though.',
-          date: '2024-10-10',
-          verified: false
-        }
-      ];
-      setReviews(mockReviews);
-      setLoading(false);
-    }, 1000);
-  }, []);
+  const { reviews, loading, error, getReviewStats, deleteReview } = useReviews();
 
   const renderStars = (rating: number) => {
     return (
@@ -75,6 +15,24 @@ const Reviews = () => {
         ))}
       </div>
     );
+  };
+
+  const handleDeleteReview = async (reviewId: string) => {
+    if (window.confirm('Are you sure you want to delete this review?')) {
+      try {
+        await deleteReview(reviewId);
+      } catch (error) {
+        console.error('Failed to delete review:', error);
+      }
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
   if (!localStorage.getItem('token')) {
@@ -99,6 +57,19 @@ const Reviews = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0a0a' }}>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-white mb-4">Error Loading Reviews</h1>
+          <p className="text-red-400">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  const stats = getReviewStats();
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#0a0a0a' }}>
       <div className="container mx-auto px-4 py-8">
@@ -106,7 +77,7 @@ const Reviews = () => {
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold text-white">My Reviews</h1>
             <div className="text-gray-400">
-              {reviews.length} review{reviews.length !== 1 ? 's' : ''}
+              {stats.totalReviews} review{stats.totalReviews !== 1 ? 's' : ''}
             </div>
           </div>
           
@@ -125,7 +96,17 @@ const Reviews = () => {
                 <div key={review.id} className="card p-6">
                   <div className="flex flex-col md:flex-row gap-4">
                     <div className="shrink-0">
-                      <div className="w-20 h-20 bg-gray-700 rounded-lg flex items-center justify-center">
+                      <img
+                        src={review.product.imageUrl}
+                        alt={review.product.name}
+                        className="w-20 h-20 object-cover rounded-lg"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          target.nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                      <div className="w-20 h-20 bg-gray-700 rounded-lg items-center justify-center hidden">
                         <Package className="w-8 h-8 text-gray-400" />
                       </div>
                     </div>
@@ -133,32 +114,43 @@ const Reviews = () => {
                     <div className="flex-1">
                       <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-3">
                         <div>
-                          <h3 className="text-lg font-semibold text-white mb-1">{review.productName}</h3>
+                          <h3 className="text-lg font-semibold text-white mb-1">{review.product.name}</h3>
+                          <p className="text-gray-400 text-sm mb-2">${review.product.price.toFixed(2)}</p>
                           <div className="flex items-center space-x-3 mb-2">
                             {renderStars(review.rating)}
-                            {review.verified && (
-                              <span className="text-xs bg-green-900 text-green-300 px-2 py-1 rounded-full">
-                                Verified Purchase
-                              </span>
-                            )}
+                            <span className="text-xs bg-green-900 text-green-300 px-2 py-1 rounded-full">
+                              Verified Purchase
+                            </span>
                           </div>
                         </div>
                         
                         <div className="flex items-center space-x-2">
-                          <button className="p-2 text-gray-400 hover:text-blue-400 transition-colors">
+                          <button 
+                            className="p-2 text-gray-400 hover:text-blue-400 transition-colors"
+                            title="Edit Review"
+                          >
                             <Edit3 className="w-4 h-4" />
                           </button>
-                          <button className="p-2 text-gray-400 hover:text-red-400 transition-colors">
+                          <button 
+                            onClick={() => handleDeleteReview(review.id)}
+                            className="p-2 text-gray-400 hover:text-red-400 transition-colors"
+                            title="Delete Review"
+                          >
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </div>
                       
-                      <h4 className="text-white font-medium mb-2">{review.title}</h4>
                       <p className="text-gray-300 mb-3 leading-relaxed">{review.comment}</p>
                       
                       <div className="flex justify-between items-center text-sm text-gray-400">
-                        <span>Reviewed on {new Date(review.date).toLocaleDateString()}</span>
+                        <div className="flex items-center">
+                          <Calendar className="w-4 h-4 mr-1" />
+                          <span>Reviewed on {formatDate(review.createdAt)}</span>
+                          {review.updatedAt !== review.createdAt && (
+                            <span className="ml-2">(Updated {formatDate(review.updatedAt)})</span>
+                          )}
+                        </div>
                         <button className="text-blue-400 hover:text-blue-300 transition-colors">
                           View Product
                         </button>
@@ -173,30 +165,30 @@ const Reviews = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-400">
-                      {(reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)}
+                      {stats.averageRating}
                     </div>
                     <div className="text-gray-400 text-sm">Average Rating</div>
                   </div>
                   
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-400">
-                      {reviews.filter(review => review.verified).length}
+                      {stats.totalReviews}
                     </div>
-                    <div className="text-gray-400 text-sm">Verified Reviews</div>
+                    <div className="text-gray-400 text-sm">Total Reviews</div>
                   </div>
                   
                   <div className="text-center">
                     <div className="text-2xl font-bold text-yellow-400">
-                      {reviews.filter(review => review.rating === 5).length}
+                      {stats.ratingDistribution[4]}
                     </div>
                     <div className="text-gray-400 text-sm">5-Star Reviews</div>
                   </div>
                   
                   <div className="text-center">
                     <div className="text-2xl font-bold text-white">
-                      {reviews.length}
+                      {stats.ratingDistribution.reduce((sum, count) => sum + count, 0)}
                     </div>
-                    <div className="text-gray-400 text-sm">Total Reviews</div>
+                    <div className="text-gray-400 text-sm">All Reviews</div>
                   </div>
                 </div>
               </div>

@@ -1,9 +1,10 @@
-import { Heart, Minus, Plus, Share, Shield, ShoppingCart, Star, Truck, X } from 'lucide-react';
+import { Heart, Minus, Plus, Share, Shield, ShoppingCart, Star, Truck, X, MessageSquarePlus } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 import { calculateDiscountPercentage, formatPrice, isProductOnSale, useProduct } from '../hooks/useProducts';
 import { useCart } from '../hooks';
 import ProductReviews from './ProductReviews';
+import ReviewModal from './ReviewModal';
 import { formatCategoryForDisplay } from '../utils/categoryUtils';
 
 interface ProductDetailProps {
@@ -17,9 +18,22 @@ const ProductDetail = ({ productId, isOpen, onClose }: ProductDetailProps) => {
   const [selectedTab, setSelectedTab] = useState<'description' | 'reviews' | 'shipping'>('description');
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
-  const { data: product, isLoading, isError } = useProduct(productId);
+  const { data: product, isLoading, isError, refetch } = useProduct(productId);
   const { addItem } = useCart();
+
+  const hasUserReviewed = () => {
+    if (!product?.reviews || !localStorage.getItem('token')) return false;
+    
+    const userData = localStorage.getItem('user');
+    if (!userData) return false;
+    
+    const user = JSON.parse(userData);
+    const userId = user.id;
+
+    return product.reviews.some((review: { userId?: string }) => review.userId === userId);
+  };
 
   const handleClose = useCallback(() => {
     setIsClosing(true);
@@ -322,6 +336,22 @@ const ProductDetail = ({ productId, isOpen, onClose }: ProductDetailProps) => {
                   </button>
                 </div>
 
+                {/* Leave a Review Button */}
+                {localStorage.getItem('token') && (
+                  <button
+                    onClick={() => setIsReviewModalOpen(true)}
+                    className={`w-full mt-3 px-4 py-3 border rounded-lg transition-colors inline-flex items-center justify-center space-x-2 ${
+                      hasUserReviewed()
+                        ? 'bg-gray-700 border-gray-500 text-gray-400 cursor-not-allowed'
+                        : 'bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-gray-500'
+                    }`}
+                    disabled={hasUserReviewed()}
+                  >
+                    <MessageSquarePlus className="w-5 h-5" />
+                    <span>{hasUserReviewed() ? 'You\'ve already reviewed this product' : 'Leave a Review'}</span>
+                  </button>
+                )}
+
                 {product.inStock && (
                   <div className="text-sm">
                     {product.stockQuantity > 10 ? (
@@ -430,6 +460,21 @@ const ProductDetail = ({ productId, isOpen, onClose }: ProductDetailProps) => {
           </div>
         </div>
       </div>
+
+      {/* Review Modal */}
+      {product && (
+        <ReviewModal
+          productId={String(product.id)}
+          productName={product.name}
+          productImage={product.imageUrl}
+          isOpen={isReviewModalOpen}
+          onClose={() => setIsReviewModalOpen(false)}
+          onReviewSubmitted={() => {
+            refetch(); // Refresh product data to update reviews
+            setSelectedTab('reviews'); // Switch to reviews tab
+          }}
+        />
+      )}
     </div>
   );
 };
