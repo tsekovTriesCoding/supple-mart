@@ -50,7 +50,6 @@ public class OrderService {
             }
         }
 
-        // Set default values if not provided
         int pageNumber = page != null ? page : 0;
         int pageSize = limit != null ? limit : 10;
 
@@ -77,26 +76,20 @@ public class OrderService {
 
     @Transactional
     public OrderDTO createOrder(UUID userId, CreateOrderRequest request) {
-        // Get user
         User user = userService.getUserById(userId);
 
-        // Get user's cart with items
         Cart cart = cartService.getCartWithItemsForOrder(userId);
 
-        // Check if cart is empty
         if (cart.getItems() == null || cart.getItems().isEmpty()) {
             throw new RuntimeException("Cart is empty");
         }
 
-        // Calculate total amount
         BigDecimal totalAmount = cart.getItems().stream()
                 .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // Generate order number
         String orderNumber = generateOrderNumber();
 
-        // Create order
         Order order = Order.builder()
                 .user(user)
                 .orderNumber(orderNumber)
@@ -105,7 +98,6 @@ public class OrderService {
                 .shippingAddress(request.getShippingAddress())
                 .build();
 
-        // Create order items from cart items
         List<OrderItem> orderItems = new ArrayList<>();
         for (CartItem cartItem : cart.getItems()) {
             OrderItem orderItem = OrderItem.builder()
@@ -118,17 +110,14 @@ public class OrderService {
         }
         order.setItems(orderItems);
 
-        // Save order
         Order savedOrder = orderRepository.save(order);
 
-        // Clear cart items using CartService
         cartService.clearCartAfterOrder(userId);
 
         return orderMapper.toOrderDTO(savedOrder);
     }
 
     private String generateOrderNumber() {
-        // Generate a unique order number with format: ORD-YYYYMMDD-XXXXX
         String datePart = LocalDateTime.now().toString().substring(0, 10).replace("-", "");
         String randomPart = String.format("%05d", (int) (Math.random() * 100000));
         return "ORD-" + datePart + "-" + randomPart;
