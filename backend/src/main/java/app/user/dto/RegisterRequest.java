@@ -1,6 +1,7 @@
 package app.user.dto;
 
 import app.user.model.Role;
+import app.validation.UniqueEmail;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +19,7 @@ public class RegisterRequest {
 
     @Email(message = "Email should be valid")
     @NotBlank(message = "Email is required")
+    @UniqueEmail
     private String email;
 
     @NotBlank(message = "Password is required")

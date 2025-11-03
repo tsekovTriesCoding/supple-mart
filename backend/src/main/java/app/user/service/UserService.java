@@ -42,9 +42,6 @@ public class UserService implements UserDetailsService {
     }
 
     public User registerUser(RegisterRequest registerRequest) {
-        if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("User with email " + registerRequest.getEmail() + " already exists");
-        }
 
         String encodedPassword = passwordEncoder.encode(registerRequest.getPassword());
         User user = userMapper.toUser(registerRequest, encodedPassword);
@@ -55,5 +52,9 @@ public class UserService implements UserDetailsService {
     public User getUserById(UUID userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    public boolean existsByEmail(String email) {
+        return userRepository.findByEmail(email).isPresent();
     }
 }
