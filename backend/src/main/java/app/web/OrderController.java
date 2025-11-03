@@ -14,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/orders")
@@ -51,5 +52,13 @@ public class OrderController {
         OrderDTO order = orderService.createOrder(userDetails.getId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
-}
 
+    @PatchMapping("/{orderId}/cancel")
+    public ResponseEntity<OrderDTO> cancelOrder(
+            @PathVariable UUID orderId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        OrderDTO order = orderService.cancelOrder(orderId, userDetails.getId());
+        return ResponseEntity.ok(order);
+    }
+}

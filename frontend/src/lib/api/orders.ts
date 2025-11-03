@@ -31,7 +31,7 @@ export const ordersAPI = {
   },
 
   cancelOrder: async (orderId: string): Promise<Order> => {
-    const response = await api.post(`/orders/${orderId}/cancel`);
+    const response = await api.patch(`/orders/${orderId}/cancel`);
     return response.data;
   },
 

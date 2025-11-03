@@ -117,6 +117,29 @@ public class OrderService {
         return orderMapper.toOrderDTO(savedOrder);
     }
 
+    @Transactional
+    public OrderDTO cancelOrder(UUID orderId, UUID userId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (!order.getUser().getId().equals(userId)) {
+            throw new RuntimeException("You are not authorized to cancel this order");
+        }
+
+        if (order.getStatus() == OrderStatus.CANCELLED) {
+            throw new RuntimeException("Order is already cancelled");
+        }
+
+        if (order.getStatus() == OrderStatus.DELIVERED) {
+            throw new RuntimeException("Cannot cancel a delivered order");
+        }
+
+        order.setStatus(OrderStatus.CANCELLED);
+        Order savedOrder = orderRepository.save(order);
+
+        return orderMapper.toOrderDTO(savedOrder);
+    }
+
     private String generateOrderNumber() {
         String datePart = LocalDateTime.now().toString().substring(0, 10).replace("-", "");
         String randomPart = String.format("%05d", (int) (Math.random() * 100000));
