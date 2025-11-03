@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 import { reviewsAPI } from '../lib/api/reviews';
-import type { Review, CreateReviewRequest, UpdateReviewRequest } from '../lib/api/reviews';
+import type { Review, CreateReviewRequest, UpdateReviewRequest } from '../types/review';
 
 export const useReviews = () => {
   const [reviews, setReviews] = useState<Review[]>([]);

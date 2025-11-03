@@ -14,10 +14,10 @@ export interface Product {
   stock?: number;
   createdAt?: string;
   updatedAt?: string;
-  reviews?: Review[];
+  reviews?: ProductReview[];
 }
 
-export interface Review {
+export interface ProductReview {
   id: string;
   userId: string;
   userName: string;

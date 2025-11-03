@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 import { ordersAPI } from '../lib/api/orders';
-import type { Order, OrderFilters, OrdersResponse } from '../lib/api/orders';
+import type { Order, OrderFilters, OrdersResponse } from '../types/order';
 
 export const useOrders = (initialFilters?: OrderFilters) => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -103,13 +103,13 @@ export const useOrders = (initialFilters?: OrderFilters) => {
   const getOrderStats = () => {
     const stats = {
       total: orders.length,
-      pending: orders.filter(order => order.status === 'PENDING').length,
-      processing: orders.filter(order => ['PAID', 'PROCESSING'].includes(order.status)).length,
-      shipped: orders.filter(order => order.status === 'SHIPPED').length,
-      delivered: orders.filter(order => order.status === 'DELIVERED').length,
-      cancelled: orders.filter(order => order.status === 'CANCELLED').length,
+      pending: orders.filter(order => order.status.toUpperCase() === 'PENDING').length,
+      processing: orders.filter(order => ['PAID', 'PROCESSING'].includes(order.status.toUpperCase())).length,
+      shipped: orders.filter(order => order.status.toUpperCase() === 'SHIPPED').length,
+      delivered: orders.filter(order => order.status.toUpperCase() === 'DELIVERED').length,
+      cancelled: orders.filter(order => order.status.toUpperCase() === 'CANCELLED').length,
       totalSpent: orders
-        .filter(order => order.status !== 'CANCELLED')
+        .filter(order => order.status.toUpperCase() !== 'CANCELLED')
         .reduce((sum, order) => sum + order.totalAmount, 0)
     };
     

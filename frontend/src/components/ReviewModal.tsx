@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Star, X, Send, AlertCircle } from 'lucide-react';
 
 import { reviewsAPI } from '../lib/api/reviews';
-import type { CreateReviewRequest, UpdateReviewRequest } from '../lib/api/reviews';
+import type { CreateReviewRequest, UpdateReviewRequest } from '../types/review';
 
 interface ReviewModalProps {
   productId: string;

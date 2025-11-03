@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useReviews } from '../hooks/useReviews';
 import ReviewModal from '../components/ReviewModal';
 import ProductDetail from '../components/ProductDetail';
-import type { Review } from '../lib/api/reviews';
+import type { Review } from '../types/review';
 
 const Reviews = () => {
   const { reviews, loading, error, getReviewStats, deleteReview, refreshReviews } = useReviews();

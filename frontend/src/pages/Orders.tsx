@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Package, Clock, CheckCircle, XCircle, Eye, Truck, Search } from 'lucide-react';
 
 import { useOrders } from '../hooks/useOrders';
-import type { Order } from '../lib/api/orders';
+import type { Order } from '../types/order';
 
 const Orders = () => {
   const { 
