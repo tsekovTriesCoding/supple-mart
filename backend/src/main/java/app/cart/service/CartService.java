@@ -91,6 +91,23 @@ public class CartService {
         return cartMapper.toCartDTO(savedCart);
     }
 
+    @Transactional(readOnly = true)
+    public Cart getCartWithItemsForOrder(UUID userId) {
+        User user = userService.getUserById(userId);
+        return cartRepository.findByUserWithItems(user)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+    }
+
+    @Transactional
+    public void clearCartAfterOrder(UUID userId) {
+        User user = userService.getUserById(userId);
+        Cart cart = cartRepository.findByUserWithItems(user)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        cart.getItems().clear();
+        cartRepository.save(cart);
+    }
+
     private Cart createEmptyCart(User user) {
         return Cart.builder()
                 .user(user)
