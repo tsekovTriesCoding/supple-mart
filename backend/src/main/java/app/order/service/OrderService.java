@@ -3,6 +3,9 @@ package app.order.service;
 import app.cart.model.Cart;
 import app.cart.service.CartService;
 import app.cartitem.model.CartItem;
+import app.exception.BadRequestException;
+import app.exception.ResourceNotFoundException;
+import app.exception.UnauthorizedException;
 import app.order.dto.CreateOrderRequest;
 import app.order.dto.OrderDTO;
 import app.order.dto.OrdersResponse;
@@ -81,7 +84,7 @@ public class OrderService {
         Cart cart = cartService.getCartWithItemsForOrder(userId);
 
         if (cart.getItems() == null || cart.getItems().isEmpty()) {
-            throw new RuntimeException("Cart is empty");
+            throw new BadRequestException("Cart is empty. Cannot create order with no items");
         }
 
         BigDecimal totalAmount = cart.getItems().stream()
@@ -120,18 +123,18 @@ public class OrderService {
     @Transactional
     public OrderDTO cancelOrder(UUID orderId, UUID userId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
 
         if (!order.getUser().getId().equals(userId)) {
-            throw new RuntimeException("You are not authorized to cancel this order");
+            throw new UnauthorizedException("You are not authorized to cancel this order");
         }
 
         if (order.getStatus() == OrderStatus.CANCELLED) {
-            throw new RuntimeException("Order is already cancelled");
+            throw new BadRequestException("Order is already cancelled");
         }
 
         if (order.getStatus() == OrderStatus.DELIVERED) {
-            throw new RuntimeException("Cannot cancel a delivered order");
+            throw new BadRequestException("Cannot cancel a delivered order");
         }
 
         order.setStatus(OrderStatus.CANCELLED);

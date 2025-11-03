@@ -1,5 +1,7 @@
 package app.review.service;
 
+import app.exception.ResourceNotFoundException;
+import app.exception.UnauthorizedException;
 import app.product.model.Product;
 import app.product.service.ProductService;
 import app.review.dto.CreateReviewRequest;
@@ -53,10 +55,10 @@ public class ReviewService {
 
     public void deleteReview(UUID reviewId, UUID userId) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("Review not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Review with ID " + reviewId + " not found"));
 
         if (!review.getUser().getId().equals(userId)) {
-            throw new RuntimeException("You can only delete your own reviews");
+            throw new UnauthorizedException("You can only delete your own reviews");
         }
 
         reviewRepository.delete(review);
@@ -64,11 +66,10 @@ public class ReviewService {
 
     public ReviewDTO updateReview(UUID reviewId, UUID userId, UpdateReviewRequest request) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("Review not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Review with ID " + reviewId + " not found"));
 
-        // Check if the review belongs to the current user
         if (!review.getUser().getId().equals(userId)) {
-            throw new RuntimeException("You can only update your own reviews");
+            throw new UnauthorizedException("You can only update your own reviews");
         }
 
         review.setRating(request.getRating());

@@ -1,5 +1,6 @@
 package app.product.service;
 
+import app.exception.ResourceNotFoundException;
 import app.product.dto.ProductDetailsDTO;
 import app.product.dto.ProductPageResponse;
 import app.product.mapper.ProductMapper;
@@ -57,12 +58,12 @@ public class ProductService {
 
     public ProductDetailsDTO getProductDetailsById(UUID id) {
         Product product = productRepository.findByIdWithReviews(id)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Product with ID " + id + " not found"));
         return productMapper.toDetailsDTO(product);
     }
 
     public Product getProductById(UUID id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product with ID " + id + " not found"));
     }
 }

@@ -3,6 +3,8 @@ package app.cartitem.service;
 import app.cartitem.dto.UpdateCartItemRequest;
 import app.cartitem.model.CartItem;
 import app.cartitem.repository.CartItemRepository;
+import app.exception.BadRequestException;
+import app.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,10 +20,10 @@ public class CartItemService {
     @Transactional
     public CartItem updateCartItemQuantity(UUID cartItemId, UUID userId, UpdateCartItemRequest request) {
         CartItem cartItem = cartItemRepository.findByIdAndUserId(cartItemId, userId)
-                .orElseThrow(() -> new RuntimeException("Cart item not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart item with ID " + cartItemId + " not found"));
 
         if (cartItem.getProduct().getStockQuantity() < request.getQuantity()) {
-            throw new RuntimeException("Insufficient stock. Available: " + cartItem.getProduct().getStockQuantity());
+            throw new BadRequestException("Insufficient stock. Available: " + cartItem.getProduct().getStockQuantity());
         }
 
         cartItem.setQuantity(request.getQuantity());
@@ -31,7 +33,7 @@ public class CartItemService {
     @Transactional
     public void deleteCartItem(UUID cartItemId, UUID userId) {
         CartItem cartItem = cartItemRepository.findByIdAndUserId(cartItemId, userId)
-                .orElseThrow(() -> new RuntimeException("Cart item not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart item with ID " + cartItemId + " not found"));
 
         cartItemRepository.delete(cartItem);
     }

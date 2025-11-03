@@ -6,6 +6,8 @@ import app.cart.mapper.CartMapper;
 import app.cart.model.Cart;
 import app.cartitem.model.CartItem;
 import app.cart.repository.CartRepository;
+import app.exception.BadRequestException;
+import app.exception.ResourceNotFoundException;
 import app.product.model.Product;
 import app.product.service.ProductService;
 import app.user.model.User;
@@ -43,11 +45,11 @@ public class CartService {
         Product product = productService.getProductById(request.getProductId());
 
         if (!product.isActive()) {
-            throw new RuntimeException("Product is not available");
+            throw new BadRequestException("Product is not available");
         }
 
         if (product.getStockQuantity() < request.getQuantity()) {
-            throw new RuntimeException("Insufficient stock");
+            throw new BadRequestException("Insufficient stock. Available: " + product.getStockQuantity());
         }
 
         Cart cart = cartRepository.findByUserWithItems(user)
@@ -61,7 +63,7 @@ public class CartService {
         if (existingItem != null) {
             int newQuantity = existingItem.getQuantity() + request.getQuantity();
             if (product.getStockQuantity() < newQuantity) {
-                throw new RuntimeException("Insufficient stock");
+                throw new BadRequestException("Insufficient stock. Available: " + product.getStockQuantity());
             }
             existingItem.setQuantity(newQuantity);
         } else {
@@ -95,14 +97,14 @@ public class CartService {
     public Cart getCartWithItemsForOrder(UUID userId) {
         User user = userService.getUserById(userId);
         return cartRepository.findByUserWithItems(user)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found for user with ID " + userId));
     }
 
     @Transactional
     public void clearCartAfterOrder(UUID userId) {
         User user = userService.getUserById(userId);
         Cart cart = cartRepository.findByUserWithItems(user)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found for user with ID " + userId));
 
         cart.getItems().clear();
         cartRepository.save(cart);

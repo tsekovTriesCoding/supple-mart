@@ -1,5 +1,6 @@
 package app.user.service;
 
+import app.exception.ResourceNotFoundException;
 import app.user.dto.RegisterRequest;
 import app.user.mapper.UserMapper;
 import app.user.model.User;
@@ -51,7 +52,7 @@ public class UserService implements UserDetailsService {
 
     public User getUserById(UUID userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User with ID " + userId + " not found"));
     }
 
     public boolean existsByEmail(String email) {
