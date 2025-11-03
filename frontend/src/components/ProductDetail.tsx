@@ -6,6 +6,7 @@ import { useCart } from '../hooks';
 import ProductReviews from './ProductReviews';
 import ReviewModal from './ReviewModal';
 import { formatCategoryForDisplay } from '../utils/categoryUtils';
+import type { ApiError } from '../types/error';
 
 interface ProductDetailProps {
   productId: number | string;
@@ -20,7 +21,7 @@ const ProductDetail = ({ productId, isOpen, onClose }: ProductDetailProps) => {
   const [isClosing, setIsClosing] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
-  const { data: product, isLoading, isError, refetch } = useProduct(productId);
+  const { data: product, isLoading, isError, error, refetch } = useProduct(productId);
   const { addItem } = useCart();
 
   const hasUserReviewed = () => {
@@ -186,11 +187,15 @@ const ProductDetail = ({ productId, isOpen, onClose }: ProductDetailProps) => {
   }
 
   if (isError || !product) {
+    const errorMessage = 
+      (error as ApiError)?.response?.data?.message || 
+      'Sorry, we couldn\'t load the product details.';
+    
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div className="bg-gray-900 rounded-2xl p-8 max-w-md w-full text-center">
           <h3 className="text-xl font-semibold text-white mb-4">Product Not Found</h3>
-          <p className="text-gray-400 mb-6">Sorry, we couldn't load the product details.</p>
+          <p className="text-gray-400 mb-6">{errorMessage}</p>
           <button onClick={onClose} className="btn-primary">
             Close
           </button>
@@ -461,7 +466,6 @@ const ProductDetail = ({ productId, isOpen, onClose }: ProductDetailProps) => {
         </div>
       </div>
 
-      {/* Review Modal */}
       {product && (
         <ReviewModal
           productId={String(product.id)}
@@ -470,8 +474,8 @@ const ProductDetail = ({ productId, isOpen, onClose }: ProductDetailProps) => {
           isOpen={isReviewModalOpen}
           onClose={() => setIsReviewModalOpen(false)}
           onReviewSubmitted={() => {
-            refetch(); // Refresh product data to update reviews
-            setSelectedTab('reviews'); // Switch to reviews tab
+            refetch();
+            setSelectedTab('reviews');
           }}
         />
       )}

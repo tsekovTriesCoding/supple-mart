@@ -5,7 +5,6 @@ import type { Product, StockStatus } from '../types/product';
 
 export type { 
   Product, 
-  Review, 
   ProductQueryParams, 
   ProductSearchFilters,
   ProductData,

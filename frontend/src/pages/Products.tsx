@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import ProductDetail from '../components/ProductDetail';
 import { useProductCategories, useProducts, type Product } from '../hooks/useProducts';
+import type { ApiError } from '../types/error';
 import { 
   formatCategoryForDisplay, 
   formatCategoryFromUrl, 
@@ -38,7 +39,7 @@ const Products = () => {
     }
   }, [searchParams]);
 
-  const { data, isLoading, isError } = useProducts({
+  const { data, isLoading, isError, error } = useProducts({
     page: currentPage,
     limit: 12,
     category: urlCategoryToBackend(formatCategoryForUrl(selectedCategory)),
@@ -121,12 +122,16 @@ const Products = () => {
   };
 
   if (isError) {
+    const errorMessage = 
+      (error as ApiError)?.response?.data?.message || 
+      'Unable to load products. Please try again later.';
+    
     return (
       <div className="animate-fade-in">
         <div className="text-center py-16">
           <div className="card p-12">
             <h2 className="text-2xl font-bold text-red-400 mb-4">Something went wrong</h2>
-            <p className="text-gray-400 mb-6">Unable to load products. Please try again later.</p>
+            <p className="text-gray-400 mb-6">{errorMessage}</p>
             <button
               onClick={() => window.location.reload()}
               className="btn-primary"
