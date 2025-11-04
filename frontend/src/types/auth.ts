@@ -1,9 +1,13 @@
+// User role type
+export type UserRole = 'CUSTOMER' | 'ADMIN';
+
 // User types
 export interface User {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
+  role: UserRole;
   name?: string; // Computed full name or display name
   createdAt?: string;
   updatedAt?: string;

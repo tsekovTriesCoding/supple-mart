@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, Search, Menu, X, LogOut, UserCircle, Package, Star, Settings, ChevronDown } from 'lucide-react';
+import { ShoppingCart, User, Search, Menu, X, LogOut, UserCircle, Package, Star, Settings, ChevronDown, Shield } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 
 import { authAPI } from '../lib/api';
@@ -8,7 +8,7 @@ import { useProductCategories } from '../hooks/useProducts';
 import CartDropdown from './CartDropdown';
 import AuthModal from './AuthModal';
 import CategoryNavigation from './CategoryNavigation';
-import type { UserData } from '../types/auth';
+import type { UserData, UserRole } from '../types/auth';
 import { formatCategoryForDisplay, formatCategoryForUrl } from '../utils/categoryUtils';
 
 const Header = () => {
@@ -230,6 +230,17 @@ const Header = () => {
                         <Settings className="w-5 h-5" />
                         <span>My Account</span>
                       </Link>
+                      
+                      {user && (user as { role?: UserRole }).role === 'ADMIN' && (
+                        <Link
+                          to="/admin"
+                          className="flex items-center space-x-3 px-4 py-3 text-blue-400 hover:text-blue-300 hover:bg-gray-700 transition-colors"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                        >
+                          <Shield className="w-5 h-5" />
+                          <span>Admin Panel</span>
+                        </Link>
+                      )}
                       
                       <Link
                         to="/orders"

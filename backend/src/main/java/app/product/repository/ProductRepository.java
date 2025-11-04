@@ -33,4 +33,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     @Query("SELECT p FROM Product p LEFT JOIN FETCH p.reviews r LEFT JOIN FETCH r.user WHERE p.id = :id")
     Optional<Product> findByIdWithReviews(@Param("id") UUID id);
+
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.stockQuantity < 10")
+    Long countLowStockProducts();
 }
