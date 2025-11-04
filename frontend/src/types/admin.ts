@@ -1,4 +1,3 @@
-// Admin-specific product type with all management fields
 export interface AdminProduct {
   id: number;
   name: string;
@@ -9,36 +8,35 @@ export interface AdminProduct {
   stockQuantity: number;
   imageUrl?: string;
   inStock: boolean;
+  active: boolean;
   createdAt?: string;
   updatedAt?: string;
-  // Admin-specific fields that customers don't see
   totalSales?: number;
   views?: number;
 }
 
-// Request type for creating a product
 export interface CreateProductRequest {
   name: string;
   description: string;
   price: number;
   originalPrice?: number;
   category: string;
-  stock: number;
+  stockQuantity: number;
   imageUrl?: string;
+  isActive: boolean;
 }
 
-// Request type for updating a product
 export interface UpdateProductRequest {
   name?: string;
   description?: string;
   price?: number;
   originalPrice?: number;
   category?: string;
-  stock?: number;
+  stockQuantity?: number;
   imageUrl?: string;
+  isActive?: boolean;
 }
 
-// Paginated response for admin products list
 export interface AdminProductsResponse {
   products: AdminProduct[];
   totalPages: number;
@@ -47,7 +45,6 @@ export interface AdminProductsResponse {
   pageSize: number;
 }
 
-// Dashboard statistics
 export interface DashboardStats {
   totalProducts: number;
   totalOrders: number;
@@ -56,7 +53,6 @@ export interface DashboardStats {
   lowStockProducts: number;
 }
 
-// Admin order type (simplified for now)
 export interface AdminOrder {
   id: number;
   orderNumber: string;
@@ -75,7 +71,6 @@ export interface AdminOrderItem {
   price: number;
 }
 
-// Admin user type
 export interface AdminUser {
   id: string;
   firstName: string;

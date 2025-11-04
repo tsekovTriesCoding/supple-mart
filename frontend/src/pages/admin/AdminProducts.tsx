@@ -29,8 +29,9 @@ const AdminProducts = () => {
     price: 0,
     originalPrice: 0,
     category: '',
-    stock: 0,
+    stockQuantity: 0,
     imageUrl: '',
+    isActive: true,
   });
 
   const { data: categoriesData } = useProductCategories();
@@ -117,8 +118,9 @@ const AdminProducts = () => {
       price: product.price,
       originalPrice: product.originalPrice || 0,
       category: product.category,
-      stock: product.stockQuantity || 0,
+      stockQuantity: product.stockQuantity || 0,
       imageUrl: product.imageUrl || '',
+      isActive: product.active,
     });
     setShowModal(true);
   };
@@ -143,8 +145,9 @@ const AdminProducts = () => {
       price: 0,
       originalPrice: 0,
       category: '',
-      stock: 0,
+      stockQuantity: 0,
       imageUrl: '',
+      isActive: true,
     });
     setEditingProduct(null);
   };
@@ -177,7 +180,7 @@ const AdminProducts = () => {
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search products..."
@@ -186,7 +189,8 @@ const AdminProducts = () => {
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="input pl-10 w-full"
+                className="input w-full"
+                style={{ paddingLeft: '3rem', paddingRight: '1rem' }}
               />
             </div>
           </div>
@@ -228,6 +232,9 @@ const AdminProducts = () => {
                   Stock
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -235,13 +242,13 @@ const AdminProducts = () => {
             <tbody className="divide-y divide-gray-800">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-400">
+                  <td colSpan={7} className="px-6 py-8 text-center text-gray-400">
                     Loading...
                   </td>
                 </tr>
               ) : products.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-400">
+                  <td colSpan={7} className="px-6 py-8 text-center text-gray-400">
                     No products found
                   </td>
                 </tr>
@@ -278,6 +285,17 @@ const AdminProducts = () => {
                         }`}
                       >
                         {product.stockQuantity || 0}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-3 py-1 text-xs rounded-full ${
+                          product.active
+                            ? 'bg-green-900/30 text-green-400'
+                            : 'bg-gray-900/30 text-gray-400'
+                        }`}
+                      >
+                        {product.active ? 'Active' : 'Inactive'}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -448,15 +466,29 @@ const AdminProducts = () => {
                 </label>
                 <input
                   type="number"
-                  value={formData.stock}
+                  value={formData.stockQuantity}
                   onChange={(e) =>
-                    setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })
+                    setFormData({ ...formData, stockQuantity: parseInt(e.target.value) || 0 })
                   }
                   className="input w-full"
                   required
                 />
               </div>
 
+              <div className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id="isActive"
+                  checked={formData.isActive}
+                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                  className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+                />
+                <label htmlFor="isActive" className="text-sm font-medium text-gray-400">
+                  Active (Product is visible to customers)
+                </label>
+              </div>
+
+              {/* Submit Buttons */}
               <div className="flex justify-end space-x-4 pt-4">
                 <button
                   type="button"
@@ -478,4 +510,3 @@ const AdminProducts = () => {
 };
 
 export default AdminProducts;
-

@@ -1,15 +1,12 @@
 package app.admin.service;
 
-import app.admin.dto.CreateProductRequest;
-import app.admin.dto.DashboardStatsDTO;
-import app.admin.dto.ImageUploadResponse;
-import app.admin.dto.UpdateProductRequest;
+import app.admin.dto.*;
 import app.admin.mapper.AdminProductMapper;
 import app.exception.BadRequestException;
 import app.exception.ResourceNotFoundException;
+import app.order.repository.OrderItemRepository;
 import app.order.repository.OrderRepository;
 import app.product.dto.ProductDetailsDTO;
-import app.product.dto.ProductPageResponse;
 import app.product.mapper.ProductMapper;
 import app.product.model.Category;
 import app.product.model.Product;
@@ -31,6 +28,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -42,6 +41,7 @@ public class AdminService {
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final ProductMapper productMapper;
+    private final OrderItemRepository orderItemRepository;
     private final AdminProductMapper adminProductMapper;
 
     private static final String UPLOAD_DIR = "uploads/products/";
@@ -68,7 +68,7 @@ public class AdminService {
                 .build();
     }
 
-    public ProductPageResponse getAllProductsForAdmin(
+    public AdminProductPageResponse getAllProductsForAdmin(
             String search,
             Category category,
             BigDecimal minPrice,
@@ -91,7 +91,14 @@ public class AdminService {
                 search, category, minPrice, maxPrice, active, pageable
         );
 
-        return productMapper.toPageResponse(productPage);
+        // Calculate total sales for each product
+        Map<UUID, Integer> salesMap = new HashMap<>();
+        for (Product product : productPage.getContent()) {
+            Integer totalSales = orderItemRepository.getTotalSalesByProductId(product.getId());
+            salesMap.put(product.getId(), totalSales);
+        }
+
+        return adminProductMapper.toAdminPageResponse(productPage, salesMap);
     }
 
     @Transactional

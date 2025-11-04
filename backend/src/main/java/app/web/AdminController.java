@@ -1,12 +1,12 @@
 package app.web;
 
+import app.admin.dto.AdminProductPageResponse;
 import app.admin.dto.CreateProductRequest;
 import app.admin.dto.DashboardStatsDTO;
 import app.admin.dto.ImageUploadResponse;
 import app.admin.dto.UpdateProductRequest;
 import app.admin.service.AdminService;
 import app.product.dto.ProductDetailsDTO;
-import app.product.dto.ProductPageResponse;
 import app.product.model.Category;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +38,7 @@ public class AdminController {
     }
 
     @GetMapping("/products")
-    public ResponseEntity<ProductPageResponse> getAllProducts(
+    public ResponseEntity<AdminProductPageResponse> getAllProducts(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Category category,
             @RequestParam(required = false) BigDecimal minPrice,
@@ -50,7 +50,7 @@ public class AdminController {
             @RequestParam(defaultValue = "desc") String sortDirection
     ) {
         log.info("Admin: Fetching all products - page: {}, size: {}", page, size);
-        ProductPageResponse response = adminService.getAllProductsForAdmin(
+        AdminProductPageResponse response = adminService.getAllProductsForAdmin(
                 search, category, minPrice, maxPrice, active, page, size, sortBy, sortDirection
         );
         return ResponseEntity.ok(response);
