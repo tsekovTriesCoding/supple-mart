@@ -3,15 +3,13 @@ package app.admin.service;
 import app.admin.dto.*;
 import app.admin.mapper.AdminProductMapper;
 import app.exception.BadRequestException;
-import app.exception.ResourceNotFoundException;
-import app.order.repository.OrderItemRepository;
-import app.order.repository.OrderRepository;
 import app.product.dto.ProductDetailsDTO;
 import app.product.mapper.ProductMapper;
 import app.product.model.Category;
 import app.product.model.Product;
-import app.product.repository.ProductRepository;
-import app.user.repository.UserRepository;
+import app.product.service.ProductService;
+import app.order.service.OrderService;
+import app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -37,32 +35,31 @@ import java.util.UUID;
 @Slf4j
 public class AdminService {
 
-    private final ProductRepository productRepository;
-    private final UserRepository userRepository;
-    private final OrderRepository orderRepository;
+    private final ProductService productService;
+    private final UserService userService;
+    private final OrderService orderService;
     private final ProductMapper productMapper;
-    private final OrderItemRepository orderItemRepository;
     private final AdminProductMapper adminProductMapper;
 
     private static final String UPLOAD_DIR = "uploads/products/";
-    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
     private static final String[] ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"};
 
     public DashboardStatsDTO getDashboardStats() {
         log.info("Fetching dashboard statistics");
 
-        Long totalProducts = productRepository.count();
-        Long totalUsers = userRepository.count();
-        Long totalOrders = orderRepository.count();
-        BigDecimal totalRevenue = orderRepository.calculateTotalRevenue();
-        Long pendingOrders = orderRepository.countPendingOrders();
-        Long lowStockProducts = productRepository.countLowStockProducts();
+        Long totalProducts = productService.getTotalProductsCount();
+        Long totalUsers = userService.getTotalUsersCount();
+        Long totalOrders = orderService.getTotalOrdersCount();
+        BigDecimal totalRevenue = orderService.getTotalRevenue();
+        Long pendingOrders = orderService.getPendingOrdersCount();
+        Long lowStockProducts = productService.getLowStockProductsCount();
 
         return DashboardStatsDTO.builder()
                 .totalProducts(totalProducts)
                 .totalUsers(totalUsers)
                 .totalOrders(totalOrders)
-                .totalRevenue(totalRevenue != null ? totalRevenue : BigDecimal.ZERO)
+                .totalRevenue(totalRevenue)
                 .pendingOrders(pendingOrders)
                 .lowStockProducts(lowStockProducts)
                 .build();
@@ -87,14 +84,14 @@ public class AdminService {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
-        Page<Product> productPage = productRepository.findProductsWithFilters(
+        Page<Product> productPage = productService.getProductsWithFilters(
                 search, category, minPrice, maxPrice, active, pageable
         );
 
         // Calculate total sales for each product
         Map<UUID, Integer> salesMap = new HashMap<>();
         for (Product product : productPage.getContent()) {
-            Integer totalSales = orderItemRepository.getTotalSalesByProductId(product.getId());
+            Integer totalSales = orderService.getTotalSalesByProductId(product.getId());
             salesMap.put(product.getId(), totalSales);
         }
 
@@ -106,7 +103,7 @@ public class AdminService {
         log.info("Creating new product: {}", request.getName());
 
         Product product = adminProductMapper.toEntity(request);
-        Product savedProduct = productRepository.save(product);
+        Product savedProduct = productService.createProduct(product);
 
         log.info("Product created successfully with ID: {}", savedProduct.getId());
         return productMapper.toDetailsDTO(savedProduct);
@@ -116,11 +113,10 @@ public class AdminService {
     public ProductDetailsDTO updateProduct(UUID id, UpdateProductRequest request) {
         log.info("Updating product with ID: {}", id);
 
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product with ID " + id + " not found"));
+        Product product = productService.getProductById(id);
 
         adminProductMapper.updateEntity(product, request);
-        Product updatedProduct = productRepository.save(product);
+        Product updatedProduct = productService.updateProduct(product);
 
         log.info("Product updated successfully: {}", id);
         return productMapper.toDetailsDTO(updatedProduct);
@@ -129,15 +125,7 @@ public class AdminService {
     @Transactional
     public void deleteProduct(UUID id) {
         log.info("Deleting product with ID: {}", id);
-
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product with ID " + id + " not found"));
-
-        if (product.getOrderItems() != null && !product.getOrderItems().isEmpty()) {
-            throw new BadRequestException("Cannot delete product with existing orders. Consider marking it as inactive instead.");
-        }
-
-        productRepository.delete(product);
+        productService.deleteProduct(id);
         log.info("Product deleted successfully: {}", id);
     }
 

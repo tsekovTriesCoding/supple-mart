@@ -1,5 +1,6 @@
 package app.product.service;
 
+import app.exception.BadRequestException;
 import app.exception.ResourceNotFoundException;
 import app.product.dto.ProductDetailsDTO;
 import app.product.dto.ProductPageResponse;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -65,5 +67,47 @@ public class ProductService {
     public Product getProductById(UUID id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product with ID " + id + " not found"));
+    }
+
+    public Long getTotalProductsCount() {
+        return productRepository.count();
+    }
+
+    public Long getLowStockProductsCount() {
+        return productRepository.countLowStockProducts();
+    }
+
+    public Page<Product> getProductsWithFilters(
+            String search,
+            Category category,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            Boolean active,
+            Pageable pageable
+    ) {
+        return productRepository.findProductsWithFilters(
+                search, category, minPrice, maxPrice, active, pageable
+        );
+    }
+
+    @Transactional
+    public Product createProduct(Product product) {
+        return productRepository.save(product);
+    }
+
+    @Transactional
+    public Product updateProduct(Product product) {
+        return productRepository.save(product);
+    }
+
+    @Transactional
+    public void deleteProduct(UUID id) {
+        Product product = getProductById(id);
+
+        if (product.getOrderItems() != null && !product.getOrderItems().isEmpty()) {
+            throw new BadRequestException("Cannot delete product with existing orders. Consider marking it as inactive instead.");
+        }
+
+        productRepository.delete(product);
     }
 }

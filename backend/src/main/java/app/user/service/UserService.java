@@ -58,4 +58,8 @@ public class UserService implements UserDetailsService {
     public boolean existsByEmail(String email) {
         return userRepository.findByEmail(email).isPresent();
     }
+
+    public Long getTotalUsersCount() {
+        return userRepository.count();
+    }
 }

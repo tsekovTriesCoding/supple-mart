@@ -34,4 +34,10 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     @Query("SELECT COUNT(o) FROM Order o WHERE o.status = 'PENDING'")
     Long countPendingOrders();
+
+    @Query("SELECT COALESCE(SUM(oi.quantity), 0) FROM Order o " +
+           "JOIN o.items oi " +
+           "WHERE oi.product.id = :productId " +
+           "AND o.status IN ('DELIVERED', 'PROCESSING', 'SHIPPED')")
+    Integer getTotalSalesByProductId(@Param("productId") UUID productId);
 }

@@ -148,4 +148,21 @@ public class OrderService {
         String randomPart = String.format("%05d", (int) (Math.random() * 100000));
         return "ORD-" + datePart + "-" + randomPart;
     }
+
+    public Long getTotalOrdersCount() {
+        return orderRepository.count();
+    }
+
+    public BigDecimal getTotalRevenue() {
+        BigDecimal revenue = orderRepository.calculateTotalRevenue();
+        return revenue != null ? revenue : BigDecimal.ZERO;
+    }
+
+    public Long getPendingOrdersCount() {
+        return orderRepository.countPendingOrders();
+    }
+
+    public Integer getTotalSalesByProductId(UUID productId) {
+        return orderRepository.getTotalSalesByProductId(productId);
+    }
 }
