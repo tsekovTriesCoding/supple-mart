@@ -1,7 +1,7 @@
 package app.admin.service;
 
 import app.admin.dto.*;
-import app.admin.mapper.AdminProductMapper;
+import app.admin.mapper.AdminMapper;
 import app.exception.BadRequestException;
 import app.product.dto.ProductDetailsDTO;
 import app.product.mapper.ProductMapper;
@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -39,7 +40,7 @@ public class AdminService {
     private final UserService userService;
     private final OrderService orderService;
     private final ProductMapper productMapper;
-    private final AdminProductMapper adminProductMapper;
+    private final AdminMapper adminMapper;
 
     private static final String UPLOAD_DIR = "uploads/products/";
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -55,14 +56,14 @@ public class AdminService {
         Long pendingOrders = orderService.getPendingOrdersCount();
         Long lowStockProducts = productService.getLowStockProductsCount();
 
-        return DashboardStatsDTO.builder()
-                .totalProducts(totalProducts)
-                .totalUsers(totalUsers)
-                .totalOrders(totalOrders)
-                .totalRevenue(totalRevenue)
-                .pendingOrders(pendingOrders)
-                .lowStockProducts(lowStockProducts)
-                .build();
+        return adminMapper.toDashboardStatsDTO(
+                totalProducts,
+                totalUsers,
+                totalOrders,
+                totalRevenue,
+                pendingOrders,
+                lowStockProducts
+        );
     }
 
     public AdminProductPageResponse getAllProductsForAdmin(
@@ -88,21 +89,20 @@ public class AdminService {
                 search, category, minPrice, maxPrice, active, pageable
         );
 
-        // Calculate total sales for each product
         Map<UUID, Integer> salesMap = new HashMap<>();
         for (Product product : productPage.getContent()) {
             Integer totalSales = orderService.getTotalSalesByProductId(product.getId());
             salesMap.put(product.getId(), totalSales);
         }
 
-        return adminProductMapper.toAdminPageResponse(productPage, salesMap);
+        return adminMapper.toAdminProductPageResponse(productPage, salesMap);
     }
 
     @Transactional
     public ProductDetailsDTO createProduct(CreateProductRequest request) {
         log.info("Creating new product: {}", request.getName());
 
-        Product product = adminProductMapper.toEntity(request);
+        Product product = adminMapper.toProductEntity(request);
         Product savedProduct = productService.createProduct(product);
 
         log.info("Product created successfully with ID: {}", savedProduct.getId());
@@ -115,7 +115,7 @@ public class AdminService {
 
         Product product = productService.getProductById(id);
 
-        adminProductMapper.updateEntity(product, request);
+        adminMapper.updateProductEntity(product, request);
         Product updatedProduct = productService.updateProduct(product);
 
         log.info("Product updated successfully: {}", id);
@@ -170,6 +170,15 @@ public class AdminService {
             log.error("Failed to upload image", e);
             throw new BadRequestException("Failed to upload image: " + e.getMessage());
         }
+    }
+
+    public AdminOrdersResponse getAllOrders(String status, LocalDateTime startDate,
+                                           LocalDateTime endDate, Integer page, Integer limit) {
+        log.info("Admin: Fetching all orders - page: {}, limit: {}", page, limit);
+
+        Page<app.order.model.Order> orderPage = orderService.getAllOrdersPage(status, startDate, endDate, page, limit);
+
+        return adminMapper.toAdminOrdersResponse(orderPage);
     }
 
     private boolean hasValidExtension(String filename) {

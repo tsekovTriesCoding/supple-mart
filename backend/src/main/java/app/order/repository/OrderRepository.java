@@ -29,6 +29,18 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
             Pageable pageable
     );
 
+    @Query("SELECT o FROM Order o WHERE " +
+            "(:status IS NULL OR o.status = :status) " +
+            "AND (:startDate IS NULL OR o.createdAt >= :startDate) " +
+            "AND (:endDate IS NULL OR o.createdAt <= :endDate) " +
+            "ORDER BY o.createdAt DESC")
+    Page<Order> findAllOrdersWithFilters(
+            @Param("status") OrderStatus status,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable
+    );
+
     @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.status IN ('DELIVERED', 'PROCESSING', 'SHIPPED')")
     BigDecimal calculateTotalRevenue();
 

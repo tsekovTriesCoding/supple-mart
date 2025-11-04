@@ -91,10 +91,10 @@ class AdminAPI {
 
     const { data } = await api.get(`/admin/orders?${queryParams.toString()}`);
     return {
-      content: data.content,
+      content: data.orders,
       totalPages: data.totalPages,
       totalElements: data.totalElements,
-      currentPage: data.number + 1,
+      currentPage: data.currentPage + 1,
       pageSize: data.size
     };
   }

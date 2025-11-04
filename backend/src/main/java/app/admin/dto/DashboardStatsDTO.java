@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class DashboardStatsDTO {
     private Long totalProducts;
-    private Long totalUsers;
+    private Long totalCustomers;
     private Long totalOrders;
     private BigDecimal totalRevenue;
     private Long pendingOrders;

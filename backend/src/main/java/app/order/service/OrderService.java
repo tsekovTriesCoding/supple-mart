@@ -165,4 +165,60 @@ public class OrderService {
     public Integer getTotalSalesByProductId(UUID productId) {
         return orderRepository.getTotalSalesByProductId(productId);
     }
+
+    @Transactional(readOnly = true)
+    public OrdersResponse getAllOrders(String statusStr, LocalDateTime startDate,
+                                       LocalDateTime endDate, Integer page, Integer limit) {
+        OrderStatus status = null;
+        if (statusStr != null && !statusStr.isEmpty()) {
+            try {
+                status = OrderStatus.valueOf(statusStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                log.warn("Invalid order status provided: '{}'. Ignoring status filter.", statusStr);
+            }
+        }
+
+        int pageNumber = page != null ? page : 0;
+        int pageSize = limit != null ? limit : 10;
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+        Page<Order> orderPage = orderRepository.findAllOrdersWithFilters(
+                status, startDate, endDate, pageable
+        );
+
+        return OrdersResponse.builder()
+                .orders(orderPage.getContent().stream()
+                        .map(orderMapper::toOrderDTO)
+                        .collect(Collectors.toList()))
+                .currentPage(orderPage.getNumber())
+                .totalPages(orderPage.getTotalPages())
+                .totalElements(orderPage.getTotalElements())
+                .size(orderPage.getSize())
+                .first(orderPage.isFirst())
+                .last(orderPage.isLast())
+                .hasNext(orderPage.hasNext())
+                .hasPrevious(orderPage.hasPrevious())
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Order> getAllOrdersPage(String statusStr, LocalDateTime startDate,
+                                        LocalDateTime endDate, Integer page, Integer limit) {
+        OrderStatus status = null;
+        if (statusStr != null && !statusStr.isEmpty()) {
+            try {
+                status = OrderStatus.valueOf(statusStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                log.warn("Invalid order status provided: '{}'. Ignoring status filter.", statusStr);
+            }
+        }
+
+        int pageNumber = page != null ? page : 0;
+        int pageSize = limit != null ? limit : 10;
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+        return orderRepository.findAllOrdersWithFilters(status, startDate, endDate, pageable);
+    }
 }

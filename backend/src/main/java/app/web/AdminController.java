@@ -1,6 +1,7 @@
 package app.web;
 
 import app.admin.dto.AdminProductPageResponse;
+import app.admin.dto.AdminOrdersResponse;
 import app.admin.dto.CreateProductRequest;
 import app.admin.dto.DashboardStatsDTO;
 import app.admin.dto.ImageUploadResponse;
@@ -19,12 +20,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
-@Slf4j
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
@@ -86,6 +88,19 @@ public class AdminController {
     ) {
         log.info("Admin: Uploading product image");
         ImageUploadResponse response = adminService.uploadProductImage(file);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/orders")
+    public ResponseEntity<AdminOrdersResponse> getAllOrders(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) LocalDateTime startDate,
+            @RequestParam(required = false) LocalDateTime endDate,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer limit
+    ) {
+        log.info("Admin: Fetching all orders - page: {}, limit: {}", page, limit);
+        AdminOrdersResponse response = adminService.getAllOrders(status, startDate, endDate, page, limit);
         return ResponseEntity.ok(response);
     }
 }
