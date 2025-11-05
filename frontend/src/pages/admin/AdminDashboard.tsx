@@ -47,8 +47,8 @@ const AdminDashboard = () => {
     return (
       <div className="min-h-screen bg-gray-950">
         <div className="flex">
-          <aside className="w-64 min-h-screen bg-gray-900 border-r border-gray-800 flex flex-col">
-            <div className="p-6 flex-1">
+          <aside className="w-64 h-screen bg-gray-900 border-r border-gray-800 flex flex-col fixed left-0 top-0">
+            <div className="p-6 flex-1 overflow-y-auto">
               <h1 className="text-2xl font-bold text-white mb-8">Admin Panel</h1>
               <nav className="space-y-2">
                 {navItems.map((item) => {
@@ -82,7 +82,7 @@ const AdminDashboard = () => {
             </div>
           </aside>
 
-          <main className="flex-1 p-8">
+          <main className="flex-1 p-8 ml-64">
             <Outlet />
           </main>
         </div>
@@ -93,8 +93,8 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-950">
       <div className="flex">
-        <aside className="w-64 min-h-screen bg-gray-900 border-r border-gray-800 flex flex-col">
-          <div className="p-6 flex-1">
+        <aside className="w-64 h-screen bg-gray-900 border-r border-gray-800 flex flex-col fixed left-0 top-0">
+          <div className="p-6 flex-1 overflow-y-auto">
             <h1 className="text-2xl font-bold text-white mb-8">Admin Panel</h1>
             <nav className="space-y-2">
               {navItems.map((item) => {
@@ -128,7 +128,7 @@ const AdminDashboard = () => {
           </div>
         </aside>
 
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-8 ml-64">
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-white mb-2">Dashboard</h2>
             <p className="text-gray-400">Welcome to your admin panel</p>
