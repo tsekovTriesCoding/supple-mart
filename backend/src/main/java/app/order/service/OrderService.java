@@ -221,4 +221,17 @@ public class OrderService {
 
         return orderRepository.findAllOrdersWithFilters(status, startDate, endDate, pageable);
     }
+
+    @Transactional
+    public OrderDTO updateOrderStatus(UUID orderId, OrderStatus newStatus) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
+
+        log.info("Updating order {} status from {} to {}", orderId, order.getStatus(), newStatus);
+
+        order.setStatus(newStatus);
+        Order savedOrder = orderRepository.save(order);
+
+        return orderMapper.toOrderDTO(savedOrder);
+    }
 }

@@ -3,6 +3,8 @@ package app.admin.service;
 import app.admin.dto.*;
 import app.admin.mapper.AdminMapper;
 import app.exception.BadRequestException;
+import app.order.dto.OrderDTO;
+import app.order.model.OrderStatus;
 import app.product.dto.ProductDetailsDTO;
 import app.product.mapper.ProductMapper;
 import app.product.model.Category;
@@ -173,12 +175,20 @@ public class AdminService {
     }
 
     public AdminOrdersResponse getAllOrders(String status, LocalDateTime startDate,
-                                           LocalDateTime endDate, Integer page, Integer limit) {
+                                            LocalDateTime endDate, Integer page, Integer limit) {
         log.info("Admin: Fetching all orders - page: {}, limit: {}", page, limit);
 
         Page<app.order.model.Order> orderPage = orderService.getAllOrdersPage(status, startDate, endDate, page, limit);
 
         return adminMapper.toAdminOrdersResponse(orderPage);
+    }
+
+    public OrderDTO updateOrderStatus(UUID orderId, String statusStr) {
+        log.info("Admin: Updating order {} status to {}", orderId, statusStr);
+
+        OrderStatus newStatus = OrderStatus.valueOf(statusStr);
+
+        return orderService.updateOrderStatus(orderId, newStatus);
     }
 
     private boolean hasValidExtension(String filename) {

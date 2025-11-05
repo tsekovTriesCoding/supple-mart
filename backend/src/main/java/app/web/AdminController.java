@@ -1,12 +1,8 @@
 package app.web;
 
-import app.admin.dto.AdminProductPageResponse;
-import app.admin.dto.AdminOrdersResponse;
-import app.admin.dto.CreateProductRequest;
-import app.admin.dto.DashboardStatsDTO;
-import app.admin.dto.ImageUploadResponse;
-import app.admin.dto.UpdateProductRequest;
+import app.admin.dto.*;
 import app.admin.service.AdminService;
+import app.order.dto.OrderDTO;
 import app.product.dto.ProductDetailsDTO;
 import app.product.model.Category;
 import jakarta.validation.Valid;
@@ -102,5 +98,15 @@ public class AdminController {
         log.info("Admin: Fetching all orders - page: {}, limit: {}", page, limit);
         AdminOrdersResponse response = adminService.getAllOrders(status, startDate, endDate, page, limit);
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/orders/{orderId}/status")
+    public ResponseEntity<OrderDTO> updateOrderStatus(
+            @PathVariable UUID orderId,
+            @Valid @RequestBody UpdateOrderStatusRequest request
+    ) {
+        log.info("Admin: Updating order {} status to {}", orderId, request.getStatus());
+        OrderDTO order = adminService.updateOrderStatus(orderId, request.getStatus());
+        return ResponseEntity.ok(order);
     }
 }
