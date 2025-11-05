@@ -109,4 +109,15 @@ public class AdminController {
         OrderDTO order = adminService.updateOrderStatus(orderId, request.getStatus());
         return ResponseEntity.ok(order);
     }
+
+    @GetMapping("/users")
+    public ResponseEntity<AdminUsersResponse> getAllUsers(
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size
+    ) {
+        log.info("Admin: Fetching all users - page: {}, size: {}", page, size);
+        AdminUsersResponse response = adminService.getAllUsers(search, page, size);
+        return ResponseEntity.ok(response);
+    }
 }

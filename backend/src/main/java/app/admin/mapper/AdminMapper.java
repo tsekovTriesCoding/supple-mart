@@ -4,6 +4,7 @@ import app.admin.dto.*;
 import app.order.model.Order;
 import app.order.model.OrderItem;
 import app.product.model.Product;
+import app.user.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -166,5 +167,42 @@ public class AdminMapper {
                 .hasPrevious(orderPage.hasPrevious())
                 .build();
     }
-}
 
+    //User Mapping Methods
+
+    public AdminUserDTO toAdminUserDTO(User user) {
+        if (user == null) {
+            return null;
+        }
+
+        return AdminUserDTO.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .role(user.getRole())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .build();
+    }
+
+    public AdminUsersResponse toAdminUsersResponse(Page<User> userPage) {
+        if (userPage == null) {
+            return null;
+        }
+
+        List<AdminUserDTO> users = userPage.getContent().stream()
+                .map(this::toAdminUserDTO)
+                .collect(Collectors.toList());
+
+        return AdminUsersResponse.builder()
+                .content(users)
+                .number(userPage.getNumber())
+                .size(userPage.getSize())
+                .totalPages(userPage.getTotalPages())
+                .totalElements(userPage.getTotalElements())
+                .first(userPage.isFirst())
+                .last(userPage.isLast())
+                .build();
+    }
+}

@@ -6,6 +6,10 @@ import app.user.mapper.UserMapper;
 import app.user.model.User;
 import app.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -61,5 +65,10 @@ public class UserService implements UserDetailsService {
 
     public Long getTotalUsersCount() {
         return userRepository.count();
+    }
+
+    public Page<User> getAllUsers(String search, Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return userRepository.findUsersWithSearch(search, pageable);
     }
 }

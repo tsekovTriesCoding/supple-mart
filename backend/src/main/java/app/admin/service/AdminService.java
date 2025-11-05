@@ -11,6 +11,7 @@ import app.product.model.Category;
 import app.product.model.Product;
 import app.product.service.ProductService;
 import app.order.service.OrderService;
+import app.user.model.User;
 import app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -189,6 +190,14 @@ public class AdminService {
         OrderStatus newStatus = OrderStatus.valueOf(statusStr);
 
         return orderService.updateOrderStatus(orderId, newStatus);
+    }
+
+    public AdminUsersResponse getAllUsers(String search, Integer page, Integer size) {
+        log.info("Admin: Fetching all users - page: {}, size: {}", page, size);
+
+        Page<User> userPage = userService.getAllUsers(search, page, size);
+
+        return adminMapper.toAdminUsersResponse(userPage);
     }
 
     private boolean hasValidExtension(String filename) {
