@@ -1,4 +1,4 @@
-import { BarChart3, Package, ShoppingBag, Users, AlertTriangle } from 'lucide-react';
+import { BarChart3, Package, ShoppingBag, Users, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 
@@ -47,8 +47,8 @@ const AdminDashboard = () => {
     return (
       <div className="min-h-screen bg-gray-950">
         <div className="flex">
-          <aside className="w-64 min-h-screen bg-gray-900 border-r border-gray-800">
-            <div className="p-6">
+          <aside className="w-64 min-h-screen bg-gray-900 border-r border-gray-800 flex flex-col">
+            <div className="p-6 flex-1">
               <h1 className="text-2xl font-bold text-white mb-8">Admin Panel</h1>
               <nav className="space-y-2">
                 {navItems.map((item) => {
@@ -70,6 +70,16 @@ const AdminDashboard = () => {
                 })}
               </nav>
             </div>
+            
+            <div className="p-6 border-t border-gray-800">
+              <Link
+                to="/"
+                className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                <ArrowLeft size={20} />
+                <span>Back to Store</span>
+              </Link>
+            </div>
           </aside>
 
           <main className="flex-1 p-8">
@@ -83,8 +93,8 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-950">
       <div className="flex">
-        <aside className="w-64 min-h-screen bg-gray-900 border-r border-gray-800">
-          <div className="p-6">
+        <aside className="w-64 min-h-screen bg-gray-900 border-r border-gray-800 flex flex-col">
+          <div className="p-6 flex-1">
             <h1 className="text-2xl font-bold text-white mb-8">Admin Panel</h1>
             <nav className="space-y-2">
               {navItems.map((item) => {
@@ -105,6 +115,16 @@ const AdminDashboard = () => {
                 );
               })}
             </nav>
+          </div>
+          
+          <div className="p-6 border-t border-gray-800">
+            <Link
+              to="/"
+              className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+            >
+              <ArrowLeft size={20} />
+              <span>Back to Store</span>
+            </Link>
           </div>
         </aside>
 
