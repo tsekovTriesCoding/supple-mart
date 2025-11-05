@@ -23,7 +23,6 @@ function App() {
   return (
     <CartProvider>
       <Routes>
-        {/* Admin Routes - No Header/Container */}
         <Route
           path="/admin/*"
           element={
@@ -44,7 +43,6 @@ function App() {
           }
         />
 
-        {/* Public Routes - With Header/Container */}
         <Route
           path="/*"
           element={
