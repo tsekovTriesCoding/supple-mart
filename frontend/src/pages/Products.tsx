@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import ProductDetail from '../components/ProductDetail';
+import { useCart } from '../hooks/useCart';
 import { useProductCategories, useProducts, type Product } from '../hooks/useProducts';
 import type { ApiError } from '../types/error';
 import { 
@@ -14,6 +15,7 @@ import {
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { addItem } = useCart();
   
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -26,6 +28,7 @@ const Products = () => {
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loadingProductId, setLoadingProductId] = useState<number | null>(null);
+  const [addingToCartId, setAddingToCartId] = useState<number | null>(null);
 
   useEffect(() => {
     const categoryFromUrl = searchParams.get('category');
@@ -113,8 +116,20 @@ const Products = () => {
     setLoadingProductId(null);
   };
 
-  const addToCart = (product: Product) => {
-    console.log('Adding to cart:', product);
+  const addToCart = async (product: Product) => {
+    if (!product.inStock) return;
+    
+    setAddingToCartId(product.id);
+    try {
+      await addItem(product.id.toString(), 1);
+      console.log(`Added ${product.name} to cart`);
+      // TODO: Show success toast/notification
+    } catch (error) {
+      console.error('Failed to add item to cart:', error);
+      // TODO: Show error toast/notification
+    } finally {
+      setAddingToCartId(null);
+    }
   };
 
   const toggleWishlist = (product: Product) => {
@@ -320,7 +335,10 @@ const Products = () => {
                           </div>
                         )}
                         <button
-                          onClick={() => toggleWishlist(product)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleWishlist(product);
+                          }}
                           className="absolute top-2 right-2 p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
                         >
                           <Heart className="w-4 h-4 text-white" />
@@ -348,12 +366,24 @@ const Products = () => {
                         </div>
 
                         <button
-                          onClick={() => addToCart(product)}
-                          disabled={!product.inStock}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addToCart(product);
+                          }}
+                          disabled={!product.inStock || addingToCartId === product.id}
                           className="btn-primary w-full inline-flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <ShoppingBag className="w-4 h-4" />
-                          <span>{product.inStock ? 'Add to Cart' : 'Out of Stock'}</span>
+                          {addingToCartId === product.id ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                              <span>Adding...</span>
+                            </>
+                          ) : (
+                            <>
+                              <ShoppingBag className="w-4 h-4" />
+                              <span>{product.inStock ? 'Add to Cart' : 'Out of Stock'}</span>
+                            </>
+                          )}
                         </button>
                       </div>
                     </div>
@@ -400,7 +430,10 @@ const Products = () => {
                             <p className="text-gray-400 mt-1">{product.brand}</p>
                           </div>
                           <button
-                            onClick={() => toggleWishlist(product)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleWishlist(product);
+                            }}
                             className="p-2 rounded-full hover:bg-gray-700 transition-colors"
                           >
                             <Heart className="w-5 h-5 text-gray-400" />
@@ -423,12 +456,24 @@ const Products = () => {
                             )}
                           </div>
                           <button
-                            onClick={() => addToCart(product)}
-                            disabled={!product.inStock}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addToCart(product);
+                            }}
+                            disabled={!product.inStock || addingToCartId === product.id}
                             className="btn-primary inline-flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            <ShoppingBag className="w-4 h-4" />
-                            <span>{product.inStock ? 'Add to Cart' : 'Out of Stock'}</span>
+                            {addingToCartId === product.id ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                <span>Adding...</span>
+                              </>
+                            ) : (
+                              <>
+                                <ShoppingBag className="w-4 h-4" />
+                                <span>{product.inStock ? 'Add to Cart' : 'Out of Stock'}</span>
+                              </>
+                            )}
                           </button>
                         </div>
                       </div>
