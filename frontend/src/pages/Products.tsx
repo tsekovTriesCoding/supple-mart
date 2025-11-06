@@ -286,7 +286,7 @@ const Products = () => {
           <>
             <div className="flex justify-between items-center mb-6">
               <p className="text-gray-400">
-                Showing {data?.products.length || 0} of {data?.totalElements || 0} products
+                Showing {data?.products.length ? ((currentPage - 1) * 12) + 1 : 0}-{Math.min(currentPage * 12, data?.totalElements || 0)} of {data?.totalElements || 0} products
               </p>
             </div>
             {viewMode === 'grid' ? (
