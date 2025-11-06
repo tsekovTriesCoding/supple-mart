@@ -1,6 +1,5 @@
 package app.user.service;
 
-import app.exception.BadRequestException;
 import app.exception.ResourceNotFoundException;
 import app.user.dto.RegisterRequest;
 import app.user.dto.UpdateUserProfileRequest;
@@ -96,5 +95,22 @@ public class UserService implements UserDetailsService {
         user.setUpdatedAt(LocalDateTime.now());
 
         return userRepository.save(user);
+    }
+
+    @Transactional
+    public void changePassword(UUID userId, String currentPassword, String newPassword) {
+        User user = getUserById(userId);
+
+        // Verify current password
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new BadCredentialsException("Current password is incorrect");
+        }
+
+        // Encode and set new password
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(encodedPassword);
+        user.setUpdatedAt(LocalDateTime.now());
+
+        userRepository.save(user);
     }
 }

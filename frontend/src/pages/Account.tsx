@@ -3,6 +3,7 @@ import { User, Mail, Loader, Calendar, AlertCircle } from 'lucide-react';
 
 import { useUserProfile } from '../hooks/useUserProfile';
 import type { UpdateUserProfileRequest } from '../lib/api/user';
+import { PasswordChangeModal } from '../components/PasswordChangeModal';
 
 const Account = () => {
   const { user, loading, error, updateProfile } = useUserProfile();
@@ -14,6 +15,7 @@ const Account = () => {
   const [updateError, setUpdateError] = useState<string | null>(null);
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   const handleEdit = () => {
     if (user) {
@@ -228,7 +230,10 @@ const Account = () => {
               <h2 className="text-xl font-semibold text-white mb-4">Account Settings</h2>
               
               <div className="space-y-3">
-                <button className="w-full text-left p-3 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors">
+                <button 
+                  onClick={() => setShowPasswordModal(true)}
+                  className="w-full text-left p-3 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors"
+                >
                   <h3 className="text-white font-medium">Change Password</h3>
                   <p className="text-gray-400 text-sm">Update your account password</p>
                 </button>
@@ -247,6 +252,11 @@ const Account = () => {
           </div>
         </div>
       </div>
+
+      <PasswordChangeModal 
+        isOpen={showPasswordModal} 
+        onClose={() => setShowPasswordModal(false)} 
+      />
     </div>
   );
 };

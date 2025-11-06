@@ -1,6 +1,7 @@
 package app.web;
 
 import app.security.CustomUserDetails;
+import app.user.dto.ChangePasswordRequest;
 import app.user.dto.UpdateUserProfileRequest;
 import app.user.dto.UserProfileResponse;
 import app.user.mapper.UserMapper;
@@ -46,6 +47,23 @@ public class UserController {
 
         log.info("Profile updated successfully for user: {}", updatedUser.getEmail());
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/change-password")
+    public ResponseEntity<Void> changePassword(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody ChangePasswordRequest request
+    ) {
+        log.info("Password change requested for user: {}", userDetails.getUsername());
+
+        userService.changePassword(
+                userDetails.getId(),
+                request.getCurrentPassword(),
+                request.getNewPassword()
+        );
+
+        log.info("Password changed successfully for user: {}", userDetails.getUsername());
+        return ResponseEntity.ok().build();
     }
 }
 
