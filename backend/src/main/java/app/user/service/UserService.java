@@ -101,12 +101,10 @@ public class UserService implements UserDetailsService {
     public void changePassword(UUID userId, String currentPassword, String newPassword) {
         User user = getUserById(userId);
 
-        // Verify current password
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
             throw new BadCredentialsException("Current password is incorrect");
         }
 
-        // Encode and set new password
         String encodedPassword = passwordEncoder.encode(newPassword);
         user.setPassword(encodedPassword);
         user.setUpdatedAt(LocalDateTime.now());
