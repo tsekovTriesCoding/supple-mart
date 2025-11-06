@@ -1,19 +1,15 @@
-// User role type
 export type UserRole = 'CUSTOMER' | 'ADMIN';
-
-// User types
 export interface User {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
   role: UserRole;
-  name?: string; // Computed full name or display name
+  name?: string;
   createdAt?: string;
   updatedAt?: string;
 }
 
-// Legacy UserData interface (for backward compatibility)
 export interface UserData {
   id?: string;
   name?: string;
@@ -22,7 +18,6 @@ export interface UserData {
   email?: string;
 }
 
-// Authentication form types
 export interface LoginForm {
   email: string;
   password: string;
@@ -36,7 +31,6 @@ export interface RegisterForm {
   confirmPassword: string;
 }
 
-// Auth API request types
 export interface LoginRequest {
   email: string;
   password: string;
@@ -49,7 +43,6 @@ export interface RegisterRequest {
   password: string;
 }
 
-// Auth API response types
 export interface AuthResponse {
   token: string;
   user: User;

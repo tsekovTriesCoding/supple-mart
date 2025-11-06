@@ -3,6 +3,7 @@ package app.user.mapper;
 import app.security.CustomUserDetails;
 import app.user.dto.AuthResponse;
 import app.user.dto.RegisterRequest;
+import app.user.dto.UserProfileResponse;
 import app.user.model.User;
 import org.springframework.stereotype.Component;
 
@@ -45,6 +46,21 @@ public class UserMapper {
                 .role(registerRequest.getRole())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    public UserProfileResponse toUserProfileResponse(User user) {
+        String fullName = user.getFirstName() + " " + user.getLastName();
+
+        return UserProfileResponse.builder()
+                .id(user.getId().toString())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .name(fullName)
+                .createdAt(user.getCreatedAt() != null ? user.getCreatedAt().toString() : null)
+                .updatedAt(user.getUpdatedAt() != null ? user.getUpdatedAt().toString() : null)
                 .build();
     }
 }

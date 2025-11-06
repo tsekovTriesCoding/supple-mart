@@ -1,7 +1,9 @@
 package app.user.service;
 
+import app.exception.BadRequestException;
 import app.exception.ResourceNotFoundException;
 import app.user.dto.RegisterRequest;
+import app.user.dto.UpdateUserProfileRequest;
 import app.user.mapper.UserMapper;
 import app.user.model.User;
 import app.user.repository.UserRepository;
@@ -16,7 +18,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -70,5 +74,27 @@ public class UserService implements UserDetailsService {
     public Page<User> getAllUsers(String search, Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         return userRepository.findUsersWithSearch(search, pageable);
+    }
+
+    @Transactional
+    public User updateUserProfile(UUID userId, UpdateUserProfileRequest request) {
+        User user = getUserById(userId);
+
+        // Check if email is being changed and if it's already taken by another user
+//        if (!user.getEmail().equals(request.getEmail())) {
+//            userRepository.findByEmail(request.getEmail())
+//                    .ifPresent(existingUser -> {
+//                        if (!existingUser.getId().equals(userId)) {
+//                            throw new BadRequestException("Email is already in use by another account");
+//                        }
+//                    });
+//        }
+
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+//        user.setEmail(request.getEmail());
+        user.setUpdatedAt(LocalDateTime.now());
+
+        return userRepository.save(user);
     }
 }
