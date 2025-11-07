@@ -1,4 +1,5 @@
 import { Navigate } from 'react-router-dom';
+
 import type { UserRole } from '../types/auth';
 
 interface AdminRouteProps {

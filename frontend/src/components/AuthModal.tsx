@@ -86,13 +86,25 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
       onClose();
       window.location.reload();
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error && 'response' in err && 
-        err.response && typeof err.response === 'object' && 
-        'data' in err.response && err.response.data &&
-        typeof err.response.data === 'object' && 'message' in err.response.data
-        ? String(err.response.data.message)
-        : 'Login failed. Please try again.';
-      setError(errorMessage);
+      const axiosError = err as {
+        response?: { 
+          status?: number; 
+          data?: { 
+            message?: string;
+            errors?: Record<string, string>;
+          } 
+        };
+      };
+
+      if (axiosError.response?.data?.errors) {
+        const validationErrors = axiosError.response.data.errors;
+        const errorMessages = Object.values(validationErrors).join('\n');
+        setError(errorMessages);
+      } else if (axiosError.response?.data?.message) {
+        setError(axiosError.response.data.message);
+      } else {
+        setError('Login failed. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -123,13 +135,25 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
       onClose();
       window.location.reload();
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error && 'response' in err && 
-        err.response && typeof err.response === 'object' && 
-        'data' in err.response && err.response.data &&
-        typeof err.response.data === 'object' && 'message' in err.response.data
-        ? String(err.response.data.message)
-        : 'Registration failed. Please try again.';
-      setError(errorMessage);
+      const axiosError = err as {
+        response?: { 
+          status?: number; 
+          data?: { 
+            message?: string;
+            errors?: Record<string, string>;
+          } 
+        };
+      };
+
+      if (axiosError.response?.data?.errors) {
+        const validationErrors = axiosError.response.data.errors;
+        const errorMessages = Object.values(validationErrors).join('\n');
+        setError(errorMessages);
+      } else if (axiosError.response?.data?.message) {
+        setError(axiosError.response.data.message);
+      } else {
+        setError('Registration failed. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -139,7 +163,6 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
 
   return (
     <>
-      {/* Backdrop */}
       <div 
         className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
         onClick={onClose}
@@ -161,7 +184,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
           </div>
           {error && (
             <div className="mb-4 p-3 bg-red-900/50 border border-red-600 rounded-lg">
-              <p className="text-red-400 text-sm">{error}</p>
+              <p className="text-red-400 text-sm whitespace-pre-line">{error}</p>
             </div>
           )}
           {authMode === 'login' && (
