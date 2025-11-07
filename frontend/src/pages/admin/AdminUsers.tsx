@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Users, Search, Shield, User, Calendar, Mail, ChevronLeft, ChevronRight, UserCheck } from 'lucide-react';
+import { Users, Search, Shield, User, Calendar, Mail, UserCheck } from 'lucide-react';
 
+import { Pagination } from '../../components/Pagination';
 import { adminAPI } from '../../lib/api/admin';
 import type { AdminUser } from '../../types/admin';
 
@@ -227,29 +228,15 @@ const AdminUsers = () => {
         </div>
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-700">
+          <div className="flex flex-col items-center px-6 py-4 border-t border-gray-700 space-y-4">
             <div className="text-sm text-gray-400">
               Showing {(currentPage - 1) * 10 + 1} to {Math.min(currentPage * 10, totalElements)} of {totalElements} users
             </div>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-                className="p-2 rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronLeft size={20} />
-              </button>
-              <span className="text-sm text-gray-400">
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages}
-                className="p-2 rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronRight size={20} />
-              </button>
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         )}
       </div>

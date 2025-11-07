@@ -1,6 +1,7 @@
 import { Edit, Plus, Search, Trash2, Upload, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
+import { Pagination } from '../../components/Pagination';
 import { adminAPI } from '../../lib/api/admin';
 import type { AdminProduct, CreateProductRequest } from '../../types/admin';
 import type { ApiError } from '../../types/error';
@@ -322,24 +323,12 @@ const AdminProducts = () => {
         </div>
 
         {totalPages > 1 && (
-          <div className="flex justify-center items-center space-x-2 p-4 border-t border-gray-800">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="px-4 py-2 rounded bg-gray-800 text-white disabled:opacity-50"
-            >
-              Previous
-            </button>
-            <span className="text-gray-400">
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="px-4 py-2 rounded bg-gray-800 text-white disabled:opacity-50"
-            >
-              Next
-            </button>
+          <div className="p-4 border-t border-gray-800">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         )}
       </div>
@@ -488,7 +477,6 @@ const AdminProducts = () => {
                 </label>
               </div>
 
-              {/* Submit Buttons */}
               <div className="flex justify-end space-x-4 pt-4">
                 <button
                   type="button"
