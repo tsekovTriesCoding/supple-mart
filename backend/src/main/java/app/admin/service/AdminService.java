@@ -46,7 +46,6 @@ public class AdminService {
     private final AdminMapper adminMapper;
 
     private static final String UPLOAD_DIR = "uploads/products/";
-    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
     private static final String[] ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"};
 
     public DashboardStatsDTO getDashboardStats() {
@@ -138,10 +137,6 @@ public class AdminService {
 
         if (file.isEmpty()) {
             throw new BadRequestException("Please select a file to upload");
-        }
-
-        if (file.getSize() > MAX_FILE_SIZE) {
-            throw new BadRequestException("File size exceeds maximum limit of 5MB");
         }
 
         String originalFilename = file.getOriginalFilename();
