@@ -5,62 +5,47 @@ import app.user.dto.AuthResponse;
 import app.user.dto.RegisterRequest;
 import app.user.dto.UserProfileResponse;
 import app.user.model.User;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import java.time.LocalDateTime;
 
-@Component
-public class UserMapper {
+@Mapper(componentModel = "spring")
+public interface UserMapper {
 
-    public CustomUserDetails toCustomUserDetails(User user) {
-        return CustomUserDetails.builder()
-                .id(user.getId())
-                .username(user.getEmail())
-                .password(user.getPassword())
-                .role(user.getRole())
-                .isEnabled(true)
-                .build();
-    }
+    @Mapping(target = "username", source = "email")
+    @Mapping(target = "isEnabled", constant = "true")
+    CustomUserDetails toCustomUserDetails(User user);
 
-    public AuthResponse toAuthResponse(User user, String accessToken, String refreshToken) {
+    default AuthResponse toAuthResponse(User user, String accessToken, String refreshToken) {
         return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .tokenType("Bearer")
-                .user(AuthResponse.UserInfo.builder()
-                        .id(user.getId())
-                        .email(user.getEmail())
-                        .firstName(user.getFirstName())
-                        .lastName(user.getLastName())
-                        .role(user.getRole())
-                        .build())
+                .user(toUserInfo(user))
                 .build();
     }
 
-    public User toUser(RegisterRequest registerRequest, String encodedPassword) {
-        return User.builder()
-                .email(registerRequest.getEmail())
-                .password(encodedPassword)
-                .firstName(registerRequest.getFirstName())
-                .lastName(registerRequest.getLastName())
-                .role(registerRequest.getRole())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-    }
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "email", source = "email")
+    @Mapping(target = "firstName", source = "firstName")
+    @Mapping(target = "lastName", source = "lastName")
+    @Mapping(target = "role", source = "role")
+    AuthResponse.UserInfo toUserInfo(User user);
 
-    public UserProfileResponse toUserProfileResponse(User user) {
-        String fullName = user.getFirstName() + " " + user.getLastName();
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "password", source = "encodedPassword")
+    @Mapping(target = "email", source = "registerRequest.email")
+    @Mapping(target = "firstName", source = "registerRequest.firstName")
+    @Mapping(target = "lastName", source = "registerRequest.lastName")
+    @Mapping(target = "role", source = "registerRequest.role")
+    @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
+    User toUser(RegisterRequest registerRequest, String encodedPassword);
 
-        return UserProfileResponse.builder()
-                .id(user.getId().toString())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .email(user.getEmail())
-                .role(user.getRole())
-                .name(fullName)
-                .createdAt(user.getCreatedAt() != null ? user.getCreatedAt().toString() : null)
-                .updatedAt(user.getUpdatedAt() != null ? user.getUpdatedAt().toString() : null)
-                .build();
-    }
+    @Mapping(target = "id", expression = "java(user.getId().toString())")
+    @Mapping(target = "name", expression = "java(user.getFirstName() + \" \" + user.getLastName())")
+    @Mapping(target = "createdAt", expression = "java(user.getCreatedAt() != null ? user.getCreatedAt().toString() : null)")
+    @Mapping(target = "updatedAt", expression = "java(user.getUpdatedAt() != null ? user.getUpdatedAt().toString() : null)")
+    UserProfileResponse toUserProfileResponse(User user);
 }

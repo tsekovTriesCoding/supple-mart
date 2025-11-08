@@ -4,39 +4,21 @@ import app.order.dto.OrderDTO;
 import app.order.dto.OrderItemDTO;
 import app.order.model.Order;
 import app.order.model.OrderItem;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-import java.util.stream.Collectors;
+@Mapper(componentModel = "spring")
+public interface OrderMapper {
 
-@Component
-public class OrderMapper {
+    @Mapping(target = "status", expression = "java(order.getStatus().name().toLowerCase())")
+    OrderDTO toOrderDTO(Order order);
 
-    public OrderDTO toOrderDTO(Order order) {
-        return OrderDTO.builder()
-                .id(order.getId())
-                .orderNumber(order.getOrderNumber())
-                .totalAmount(order.getTotalAmount())
-                .status(order.getStatus().name().toLowerCase())
-                .shippingAddress(order.getShippingAddress())
-                .createdAt(order.getCreatedAt())
-                .updatedAt(order.getUpdatedAt())
-                .items(order.getItems().stream()
-                        .map(this::toOrderItemDTO)
-                        .collect(Collectors.toList()))
-                .build();
-    }
+    @Mapping(target = "product", source = "product")
+    OrderItemDTO toOrderItemDTO(OrderItem orderItem);
 
-    private OrderItemDTO toOrderItemDTO(OrderItem orderItem) {
-        return OrderItemDTO.builder()
-                .id(orderItem.getId())
-                .product(OrderItemDTO.ProductInfo.builder()
-                        .id(orderItem.getProduct().getId())
-                        .name(orderItem.getProduct().getName())
-                        .imageUrl(orderItem.getProduct().getImageUrl())
-                        .build())
-                .quantity(orderItem.getQuantity())
-                .price(orderItem.getPrice())
-                .build();
-    }
+    @Mapping(target = "id", source = "product.id")
+    @Mapping(target = "name", source = "product.name")
+    @Mapping(target = "imageUrl", source = "product.imageUrl")
+    OrderItemDTO.ProductInfo toProductInfo(app.product.model.Product product);
 }
 

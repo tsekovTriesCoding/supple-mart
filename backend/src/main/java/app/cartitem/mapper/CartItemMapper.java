@@ -2,26 +2,14 @@ package app.cartitem.mapper;
 
 import app.cartitem.dto.CartItemDTO;
 import app.cartitem.model.CartItem;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-import java.math.BigDecimal;
+@Mapper(componentModel = "spring")
+public interface CartItemMapper {
 
-@Component
-public class CartItemMapper {
-
-    public CartItemDTO toCartItemDTO(CartItem cartItem) {
-        if (cartItem == null) {
-            return null;
-        }
-
-        return CartItemDTO.builder()
-                .id(cartItem.getId())
-                .productId(cartItem.getProduct().getId())
-                .productName(cartItem.getProduct().getName())
-                .productImageUrl(cartItem.getProduct().getImageUrl())
-                .price(cartItem.getPrice())
-                .quantity(cartItem.getQuantity())
-                .subtotal(cartItem.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())))
-                .build();
-    }
+    @Mapping(target = "productId", source = "product.id")
+    @Mapping(target = "productName", source = "product.name")
+    @Mapping(target = "productImageUrl", source = "product.imageUrl")
+    CartItemDTO toCartItemDTO(CartItem cartItem);
 }
