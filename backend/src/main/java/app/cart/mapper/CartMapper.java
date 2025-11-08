@@ -5,44 +5,49 @@ import app.cart.model.Cart;
 import app.cartitem.dto.CartItemDTO;
 import app.cartitem.mapper.CartItemMapper;
 import app.cartitem.model.CartItem;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.stream.Collectors;
+import java.util.List;
 
-@Component
-@RequiredArgsConstructor
-public class CartMapper {
+@Mapper(componentModel = "spring", uses = {CartItemMapper.class})
+public abstract class CartMapper {
 
-    private final CartItemMapper cartItemMapper;
+    @Autowired
+    protected CartItemMapper cartItemMapper;
 
-    public CartDTO toCartDTO(Cart cart) {
-        if (cart == null) {
-            return null;
+    @Mapping(target = "items", expression = "java(mapCartItems(cart))")
+    @Mapping(target = "totalAmount", expression = "java(calculateTotalAmount(cart))")
+    @Mapping(target = "totalItems", expression = "java(calculateTotalItems(cart))")
+    public abstract CartDTO toCartDTO(Cart cart);
+
+    protected List<CartItemDTO> mapCartItems(Cart cart) {
+        if (cart == null || cart.getItems() == null) {
+            return new ArrayList<>();
         }
-
-        // Handle null items list
-        var items = cart.getItems() != null ? cart.getItems() : new ArrayList<CartItem>();
-
-        var cartItemDTOs = items.stream()
+        return cart.getItems().stream()
                 .map(cartItemMapper::toCartItemDTO)
-                .collect(Collectors.toList());
+                .toList();
+    }
 
-        BigDecimal totalAmount = cartItemDTOs.stream()
-                .map(CartItemDTO::getSubtotal)
+    protected BigDecimal calculateTotalAmount(Cart cart) {
+        if (cart == null || cart.getItems() == null) {
+            return BigDecimal.ZERO;
+        }
+        return cart.getItems().stream()
+                .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 
-        Integer totalItems = cartItemDTOs.stream()
-                .mapToInt(CartItemDTO::getQuantity)
+    protected Integer calculateTotalItems(Cart cart) {
+        if (cart == null || cart.getItems() == null) {
+            return 0;
+        }
+        return cart.getItems().stream()
+                .mapToInt(CartItem::getQuantity)
                 .sum();
-
-        return CartDTO.builder()
-                .id(cart.getId())
-                .items(cartItemDTOs)
-                .totalAmount(totalAmount)
-                .totalItems(totalItems)
-                .build();
     }
 }
