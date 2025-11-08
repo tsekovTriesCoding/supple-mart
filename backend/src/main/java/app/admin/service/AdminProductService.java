@@ -1,18 +1,17 @@
 package app.admin.service;
 
-import app.admin.dto.*;
+import app.admin.dto.AdminProductPageResponse;
+import app.admin.dto.CreateProductRequest;
+import app.admin.dto.ImageUploadResponse;
+import app.admin.dto.UpdateProductRequest;
 import app.admin.mapper.AdminMapper;
 import app.exception.BadRequestException;
-import app.order.dto.OrderDTO;
-import app.order.model.OrderStatus;
+import app.order.service.OrderService;
 import app.product.dto.ProductDetailsDTO;
 import app.product.mapper.ProductMapper;
 import app.product.model.Category;
 import app.product.model.Product;
 import app.product.service.ProductService;
-import app.order.service.OrderService;
-import app.user.model.User;
-import app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -29,7 +28,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -37,36 +35,15 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AdminService {
+public class AdminProductService {
 
     private final ProductService productService;
-    private final UserService userService;
     private final OrderService orderService;
     private final ProductMapper productMapper;
     private final AdminMapper adminMapper;
 
     private static final String UPLOAD_DIR = "uploads/products/";
     private static final String[] ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"};
-
-    public DashboardStatsDTO getDashboardStats() {
-        log.info("Fetching dashboard statistics");
-
-        Long totalProducts = productService.getTotalProductsCount();
-        Long totalUsers = userService.getTotalUsersCount();
-        Long totalOrders = orderService.getTotalOrdersCount();
-        BigDecimal totalRevenue = orderService.getTotalRevenue();
-        Long pendingOrders = orderService.getPendingOrdersCount();
-        Long lowStockProducts = productService.getLowStockProductsCount();
-
-        return adminMapper.toDashboardStatsDTO(
-                totalProducts,
-                totalUsers,
-                totalOrders,
-                totalRevenue,
-                pendingOrders,
-                lowStockProducts
-        );
-    }
 
     public AdminProductPageResponse getAllProductsForAdmin(
             String search,
@@ -168,31 +145,6 @@ public class AdminService {
             log.error("Failed to upload image", e);
             throw new BadRequestException("Failed to upload image: " + e.getMessage());
         }
-    }
-
-    public AdminOrdersResponse getAllOrders(String status, LocalDateTime startDate,
-                                            LocalDateTime endDate, Integer page, Integer limit) {
-        log.info("Admin: Fetching all orders - page: {}, limit: {}", page, limit);
-
-        Page<app.order.model.Order> orderPage = orderService.getAllOrdersPage(status, startDate, endDate, page, limit);
-
-        return adminMapper.toAdminOrdersResponse(orderPage);
-    }
-
-    public OrderDTO updateOrderStatus(UUID orderId, String statusStr) {
-        log.info("Admin: Updating order {} status to {}", orderId, statusStr);
-
-        OrderStatus newStatus = OrderStatus.valueOf(statusStr);
-
-        return orderService.updateOrderStatus(orderId, newStatus);
-    }
-
-    public AdminUsersResponse getAllUsers(String search, Integer page, Integer size) {
-        log.info("Admin: Fetching all users - page: {}, size: {}", page, size);
-
-        Page<User> userPage = userService.getAllUsers(search, page, size);
-
-        return adminMapper.toAdminUsersResponse(userPage);
     }
 
     private boolean hasValidExtension(String filename) {
