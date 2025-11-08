@@ -16,8 +16,15 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {CartItemMapper.class})
 public abstract class CartMapper {
 
+    private CartItemMapper cartItemMapper;
+
+    protected CartMapper() {
+    }
+
     @Autowired
-    protected CartItemMapper cartItemMapper;
+    public void setCartItemMapper(CartItemMapper cartItemMapper) {
+        this.cartItemMapper = cartItemMapper;
+    }
 
     @Mapping(target = "items", expression = "java(mapCartItems(cart))")
     @Mapping(target = "totalAmount", expression = "java(calculateTotalAmount(cart))")

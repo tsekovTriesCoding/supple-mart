@@ -17,8 +17,15 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {ReviewMapper.class})
 public abstract class ProductMapper {
 
-    @Autowired
     protected ReviewMapper reviewMapper;
+
+    public ProductMapper() {
+    }
+
+    @Autowired
+    public void setReviewMapper(ReviewMapper reviewMapper) {
+        this.reviewMapper = reviewMapper;
+    }
 
     @Mapping(target = "inStock", expression = "java(isInStock(product))")
     @Mapping(target = "averageRating", expression = "java(calculateAverageRating(product))")
