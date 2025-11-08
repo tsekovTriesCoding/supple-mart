@@ -1,4 +1,4 @@
-package app.web;
+package app.web.admin;
 
 import app.admin.dto.AdminUsersResponse;
 import app.admin.service.AdminUserService;

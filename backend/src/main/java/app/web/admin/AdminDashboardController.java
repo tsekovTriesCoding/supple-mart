@@ -1,4 +1,4 @@
-package app.web;
+package app.web.admin;
 
 import app.admin.dto.DashboardStatsDTO;
 import app.admin.service.AdminDashboardService;

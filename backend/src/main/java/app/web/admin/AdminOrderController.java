@@ -1,4 +1,4 @@
-package app.web;
+package app.web.admin;
 
 import app.admin.dto.AdminOrdersResponse;
 import app.admin.dto.UpdateOrderStatusRequest;
