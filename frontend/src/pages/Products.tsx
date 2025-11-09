@@ -95,7 +95,8 @@ const Products = () => {
                   placeholder="Search products..."
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
-                  className="input w-full pl-10"
+                  className="input w-full"
+                  style={{ paddingLeft: '2.75rem', paddingRight: '1rem' }}
                 />
               </div>
             </form>
