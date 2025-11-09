@@ -3,7 +3,7 @@ import { ShoppingCart } from 'lucide-react';
 import { useRef, useState } from 'react';
 
 import { useCart } from '../../hooks/useCart';
-import CartDropdown from '../CartDropdown';
+import CartDropdown from './CartDropdown';
 
 export const CartButton = () => {
   const [isCartDropdownOpen, setIsCartDropdownOpen] = useState(false);

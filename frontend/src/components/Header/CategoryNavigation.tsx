@@ -2,8 +2,8 @@ import { Link } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 
-import { useProductCategories } from '../hooks/useProducts';
-import { formatCategoryForDisplay, formatCategoryForUrl } from '../utils/categoryUtils';
+import { useProductCategories } from '../../hooks/useProducts';
+import { formatCategoryForDisplay, formatCategoryForUrl } from '../../utils/categoryUtils';
 
 const CategoryNavigation = () => {
   const { data: categoriesData, isLoading } = useProductCategories();

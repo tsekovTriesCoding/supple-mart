@@ -1,7 +1,7 @@
 import { X, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-import { useCart, formatCartPrice } from '../hooks';
+import { useCart, formatCartPrice } from '../../hooks';
 
 interface CartDropdownProps {
   isOpen: boolean;

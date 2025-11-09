@@ -8,11 +8,11 @@ import { ordersAPI } from '../lib/api/orders';
 const Checkout = () => {
   const navigate = useNavigate();
   const { items, totalPrice, refreshCart } = useCart();
-  
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [orderSuccess, setOrderSuccess] = useState(false);
-  
+
   const [shippingAddress, setShippingAddress] = useState({
     fullName: '',
     street: '',
@@ -52,7 +52,7 @@ const Checkout = () => {
 
   const validateForm = () => {
     const { fullName, street, city, state, zipCode, country, phone } = shippingAddress;
-    
+
     if (!fullName.trim()) return 'Full name is required';
     if (!street.trim()) return 'Street address is required';
     if (!city.trim()) return 'City is required';
@@ -60,13 +60,13 @@ const Checkout = () => {
     if (!zipCode.trim()) return 'ZIP code is required';
     if (!country.trim()) return 'Country is required';
     if (!phone.trim()) return 'Phone number is required';
-    
+
     return null;
   };
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!isLoggedIn) {
       setError('You must be logged in to place an order');
       return;
@@ -93,9 +93,9 @@ Phone: ${shippingAddress.phone}`;
       });
 
       await refreshCart();
-      
+
       setOrderSuccess(true);
-      
+
       setTimeout(() => {
         navigate('/orders');
       }, 3000);

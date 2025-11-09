@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 
-import CategoryNavigation from '../CategoryNavigation';
+import CategoryNavigation from './CategoryNavigation';
 
 const navLinks = [
   { path: '/', label: 'Home' },
