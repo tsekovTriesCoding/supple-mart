@@ -1,6 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 
-import Header from './components/Header/Header';
+import Header from './components/Header';
 import AdminRoute from './components/AdminRoute';
 import Home from './pages/Home';
 import Products from './pages/Products';
@@ -11,6 +11,7 @@ import Contact from './pages/Contact';
 import Account from './pages/Account';
 import Orders from './pages/Orders';
 import Reviews from './pages/Reviews';
+import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminOrders from './pages/admin/AdminOrders';
@@ -22,24 +23,18 @@ function App() {
     <CartProvider>
       <Routes>
         <Route
-          path="/admin/*"
+          path="/admin"
           element={
             <AdminRoute>
-              <Routes>
-                <Route path="/" element={<AdminDashboard />} />
-                <Route path="/products" element={<AdminDashboard />}>
-                  <Route index element={<AdminProducts />} />
-                </Route>
-                <Route path="/orders" element={<AdminDashboard />}>
-                  <Route index element={<AdminOrders />} />
-                </Route>
-                <Route path="/users" element={<AdminDashboard />}>
-                  <Route index element={<AdminUsers />} />
-                </Route>
-              </Routes>
+              <AdminLayout />
             </AdminRoute>
           }
-        />
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="products" element={<AdminProducts />} />
+          <Route path="orders" element={<AdminOrders />} />
+          <Route path="users" element={<AdminUsers />} />
+        </Route>
 
         <Route
           path="/*"
