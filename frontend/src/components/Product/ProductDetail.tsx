@@ -1,12 +1,12 @@
 import { Heart, Minus, Plus, Share, Shield, ShoppingCart, Star, Truck, X, MessageSquarePlus } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
-import { calculateDiscountPercentage, formatPrice, isProductOnSale, useProduct } from '../hooks/useProducts';
-import { useCart } from '../hooks';
+import { calculateDiscountPercentage, formatPrice, isProductOnSale, useProduct } from '../../hooks/useProducts';
+import { useCart } from '../../hooks';
 import ProductReviews from './ProductReviews';
-import ReviewModal from './ReviewModal';
-import { formatCategoryForDisplay } from '../utils/categoryUtils';
-import type { ApiError } from '../types/error';
+import ReviewModal from '../ReviewModal';
+import { formatCategoryForDisplay } from '../../utils/categoryUtils';
+import type { ApiError } from '../../types/error';
 
 interface ProductDetailProps {
   productId: number | string;

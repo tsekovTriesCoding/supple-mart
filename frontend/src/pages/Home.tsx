@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 
 import { ArrowRight, Star, ShoppingBag, Truck, Shield, Headphones, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useProducts, type Product } from '../hooks/useProducts';
-import ProductDetail from '../components/ProductDetail';
+import ProductDetail from '../components/Product/ProductDetail';
 import { formatCategoryForDisplay } from '../utils/categoryUtils';
 
 const Home = () => {

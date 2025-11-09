@@ -1,4 +1,4 @@
-import { formatCategoryForDisplay } from '../utils/categoryUtils';
+import { formatCategoryForDisplay } from '../../utils/categoryUtils';
 
 interface ProductFiltersProps {
   categories: string[];

@@ -1,6 +1,6 @@
 import { Heart, ShoppingBag, Star } from 'lucide-react';
 
-import type { Product } from '../hooks/useProducts';
+import type { Product } from '../../hooks/useProducts';
 
 interface ProductListItemProps {
   product: Product;

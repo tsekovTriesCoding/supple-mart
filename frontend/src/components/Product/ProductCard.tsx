@@ -1,7 +1,7 @@
 import { Heart, ShoppingBag, Star } from 'lucide-react';
 
-import type { Product } from '../hooks/useProducts';
-import { formatCategoryForDisplay } from '../utils/categoryUtils';
+import type { Product } from '../../hooks/useProducts';
+import { formatCategoryForDisplay } from '../../utils/categoryUtils';
 
 interface ProductCardProps {
   product: Product;

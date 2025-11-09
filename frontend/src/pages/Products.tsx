@@ -1,10 +1,7 @@
 import { Filter, Grid, List, Search } from 'lucide-react';
 
-import ProductDetail from '../components/ProductDetail';
+import { ProductDetail, ProductCard, ProductFilters, ProductListItem } from '../components/Product';
 import { Pagination } from '../components/Pagination';
-import { ProductCard } from '../components/ProductCard';
-import { ProductFilters } from '../components/ProductFilters';
-import { ProductListItem } from '../components/ProductListItem';
 import { useProductsPage } from '../hooks/useProductsPage';
 import type { Product } from '../hooks/useProducts';
 import type { ApiError } from '../types/error';

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Star, User, Calendar } from 'lucide-react';
 
-import { type Review } from '../hooks/useProducts';
+import type { Review } from '../../types/review';
 
 interface ProductReviewsProps {
   reviews: Review[];

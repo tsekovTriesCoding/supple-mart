@@ -1,16 +1,7 @@
 export interface Review {
   id: string;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-  };
-  product: {
-    id: string;
-    name: string;
-    imageUrl: string;
-    price: number;
-  };
+  userId: string;
+  userName: string;
   rating: number;
   comment: string;
   createdAt: string;

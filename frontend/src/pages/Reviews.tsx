@@ -2,7 +2,7 @@ import { Star, Edit3, Trash2, Calendar, Package } from 'lucide-react';
 import { useState } from 'react';
 import { useReviews } from '../hooks/useReviews';
 import ReviewModal from '../components/ReviewModal';
-import ProductDetail from '../components/ProductDetail';
+import ProductDetail from '../components/Product/ProductDetail';
 import type { Review } from '../types/review';
 
 const Reviews = () => {
