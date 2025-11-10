@@ -5,13 +5,13 @@ import app.admin.dto.CreateProductRequest;
 import app.admin.dto.ImageUploadResponse;
 import app.admin.dto.UpdateProductRequest;
 import app.admin.mapper.AdminMapper;
-import app.exception.BadRequestException;
 import app.order.service.OrderService;
 import app.product.dto.ProductDetailsDTO;
 import app.product.mapper.ProductMapper;
 import app.product.model.Category;
 import app.product.model.Product;
 import app.product.service.ProductService;
+import app.service.CloudinaryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -22,12 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -41,9 +36,9 @@ public class AdminProductService {
     private final OrderService orderService;
     private final ProductMapper productMapper;
     private final AdminMapper adminMapper;
+    private final CloudinaryService cloudinaryService;
 
-    private static final String UPLOAD_DIR = "uploads/products/";
-    private static final String[] ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"};
+    private static final String CLOUDINARY_FOLDER = "supplemart/products";
 
     public AdminProductPageResponse getAllProductsForAdmin(
             String search,
@@ -94,6 +89,15 @@ public class AdminProductService {
 
         Product product = productService.getProductById(id);
 
+        String oldImageUrl = product.getImageUrl();
+        String newImageUrl = request.getImageUrl();
+
+        // If the image URL has changed and both are Cloudinary URLs, delete the old image
+        if (oldImageUrl != null && !oldImageUrl.isEmpty() &&
+            newImageUrl != null && !newImageUrl.equals(oldImageUrl)) {
+            deleteImageFromCloudinary(id, oldImageUrl);
+        }
+
         adminMapper.updateProductEntity(product, request);
         Product updatedProduct = productService.updateProduct(product);
 
@@ -104,57 +108,40 @@ public class AdminProductService {
     @Transactional
     public void deleteProduct(UUID id) {
         log.info("Deleting product with ID: {}", id);
+
+        Product product = productService.getProductById(id);
+
+        if (product.getImageUrl() != null && !product.getImageUrl().isEmpty()) {
+            deleteImageFromCloudinary(id, product.getImageUrl());
+        }
+
         productService.deleteProduct(id);
         log.info("Product deleted successfully: {}", id);
     }
 
     @Transactional
     public ImageUploadResponse uploadProductImage(MultipartFile file) {
-        log.info("Uploading product image: {}", file.getOriginalFilename());
+        log.info("Uploading product image to Cloudinary: {}", file.getOriginalFilename());
 
-        if (file.isEmpty()) {
-            throw new BadRequestException("Please select a file to upload");
-        }
+        String imageUrl = cloudinaryService.uploadImage(file, CLOUDINARY_FOLDER);
 
-        String originalFilename = file.getOriginalFilename();
-        if (originalFilename == null || !hasValidExtension(originalFilename)) {
-            throw new BadRequestException("Invalid file type. Allowed types: jpg, jpeg, png, gif, webp");
-        }
+        log.info("Image uploaded successfully to Cloudinary: {}", imageUrl);
 
-        try {
-            Path uploadPath = Paths.get(UPLOAD_DIR);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
-
-            String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
-            String uniqueFilename = UUID.randomUUID() + fileExtension;
-            Path filePath = uploadPath.resolve(uniqueFilename);
-
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-            String imageUrl = "/uploads/products/" + uniqueFilename;
-            log.info("Image uploaded successfully: {}", imageUrl);
-
-            return ImageUploadResponse.builder()
-                    .imageUrl(imageUrl)
-                    .message("Image uploaded successfully")
-                    .build();
-
-        } catch (IOException e) {
-            log.error("Failed to upload image", e);
-            throw new BadRequestException("Failed to upload image: " + e.getMessage());
-        }
+        return ImageUploadResponse.builder()
+                .imageUrl(imageUrl)
+                .message("Image uploaded successfully")
+                .build();
     }
 
-    private boolean hasValidExtension(String filename) {
-        String lowerCaseFilename = filename.toLowerCase();
-        for (String extension : ALLOWED_EXTENSIONS) {
-            if (lowerCaseFilename.endsWith(extension)) {
-                return true;
+    private void deleteImageFromCloudinary(UUID id, String oldImageUrl) {
+        try {
+            String publicId = cloudinaryService.extractPublicId(oldImageUrl);
+            if (publicId != null) {
+                cloudinaryService.deleteImage(publicId);
+                log.info("Old image deleted from Cloudinary for product: {}", id);
             }
+        } catch (Exception e) {
+            log.error("Failed to delete old image from Cloudinary for product: {}", id, e);
         }
-        return false;
     }
 }
-
