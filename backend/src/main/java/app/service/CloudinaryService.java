@@ -75,11 +75,6 @@ public class CloudinaryService {
         return pathAfterUpload;
     }
 
-    /**
-     * Check if the URL is a Cloudinary URL
-     * @param imageUrl the image URL to check
-     * @return true if it's a Cloudinary URL, false otherwise
-     */
     public boolean isCloudinaryUrl(String imageUrl) {
         return imageUrl != null && imageUrl.contains("cloudinary.com");
     }
