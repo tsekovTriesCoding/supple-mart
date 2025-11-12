@@ -8,7 +8,7 @@ import type {
 
 export const ordersAPI = {
   createOrder: async (orderData: CreateOrderRequest): Promise<Order> => {
-    const response = await api.post('/orders', orderData);
+    const response = await api.post('orders', orderData);
     return response.data;
   },
 
@@ -21,33 +21,33 @@ export const ordersAPI = {
     if (filters?.page) params.append('page', (filters.page - 1).toString());
     if (filters?.limit) params.append('limit', filters.limit.toString());
 
-    const response = await api.get(`/orders?${params.toString()}`);
+    const response = await api.get(`orders?${params.toString()}`);
     return response.data;
   },
 
   getOrderById: async (orderId: string): Promise<Order> => {
-    const response = await api.get(`/orders/${orderId}`);
+    const response = await api.get(`orders/${orderId}`);
     return response.data;
   },
 
   cancelOrder: async (orderId: string): Promise<Order> => {
-    const response = await api.patch(`/orders/${orderId}/cancel`);
+    const response = await api.patch(`orders/${orderId}/cancel`);
     return response.data;
   },
 
 
   trackOrder: async (orderNumber: string): Promise<Order> => {
-    const response = await api.get(`/orders/track/${orderNumber}`);
+    const response = await api.get(`orders/track/${orderNumber}`);
     return response.data;
   },
 
   getOrderHistory: async (orderId: string) => {
-    const response = await api.get(`/orders/${orderId}/history`);
+    const response = await api.get(`orders/${orderId}/history`);
     return response.data;
   },
 
   requestReturn: async (orderId: string, reason: string, items?: string[]) => {
-    const response = await api.post(`/orders/${orderId}/return`, {
+    const response = await api.post(`orders/${orderId}/return`, {
       reason,
       items
     });

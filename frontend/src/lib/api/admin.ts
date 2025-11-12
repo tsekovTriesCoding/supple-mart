@@ -17,7 +17,7 @@ export type {
 
 class AdminAPI {
   async getDashboardStats(): Promise<DashboardStats> {
-    const { data } = await api.get('/admin/dashboard/stats');
+    const { data } = await api.get('admin/dashboard/stats');
     return data;
   }
 
@@ -38,7 +38,7 @@ class AdminAPI {
     if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
     if (params?.sortOrder) queryParams.append('sortOrder', params.sortOrder);
 
-    const { data } = await api.get(`/admin/products?${queryParams.toString()}`);
+    const { data } = await api.get(`admin/products?${queryParams.toString()}`);
     
     console.log('Admin API Response:', data);
     
@@ -52,12 +52,12 @@ class AdminAPI {
   }
 
   async createProduct(productData: CreateProductRequest): Promise<AdminProduct> {
-    const { data } = await api.post('/admin/products', productData);
+    const { data } = await api.post('admin/products', productData);
     return data;
   }
 
   async updateProduct(id: number, productData: UpdateProductRequest): Promise<AdminProduct> {
-    const { data } = await api.put(`/admin/products/${id}`, productData);
+    const { data } = await api.put(`admin/products/${id}`, productData);
     return data;
   }
 
@@ -69,7 +69,7 @@ class AdminAPI {
     const formData = new FormData();
     formData.append('file', file);
 
-    const { data } = await api.post('/admin/products/upload-image', formData, {
+    const { data } = await api.post('admin/products/upload-image', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -89,7 +89,7 @@ class AdminAPI {
     if (params?.limit) queryParams.append('size', params.limit.toString());
     if (params?.status && params.status !== 'all') queryParams.append('status', params.status.toUpperCase());
 
-    const { data } = await api.get(`/admin/orders?${queryParams.toString()}`);
+    const { data } = await api.get(`admin/orders?${queryParams.toString()}`);
     return {
       content: data.orders,
       totalPages: data.totalPages,
@@ -100,7 +100,7 @@ class AdminAPI {
   }
 
   async updateOrderStatus(orderId: number, status: string): Promise<void> {
-    await api.patch(`/admin/orders/${orderId}/status`, { status: status.toUpperCase() });
+    await api.patch(`admin/orders/${orderId}/status`, { status: status.toUpperCase() });
   }
 
   async getAllUsers(params?: {
@@ -114,7 +114,7 @@ class AdminAPI {
     if (params?.limit) queryParams.append('size', params.limit.toString());
     if (params?.search) queryParams.append('search', params.search);
 
-    const { data } = await api.get(`/admin/users?${queryParams.toString()}`);
+    const { data } = await api.get(`admin/users?${queryParams.toString()}`);
     return {
       content: data.content,
       totalPages: data.totalPages,

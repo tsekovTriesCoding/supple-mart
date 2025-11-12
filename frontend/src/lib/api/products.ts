@@ -22,17 +22,17 @@ export const productsAPI = {
     if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
     if (params?.sortOrder) queryParams.append('sortDirection', params.sortOrder);
 
-    const response = await api.get(`/products?${queryParams.toString()}`);
+    const response = await api.get(`products?${queryParams.toString()}`);
     return response.data;
   },
 
   getProductById: async (id: string | number) => {
-    const response = await api.get(`/products/${id}`);
+    const response = await api.get(`products/${id}`);
     return response.data;
   },
 
   getCategories: async () => {
-    const response = await api.get('/products/categories');
+    const response = await api.get('products/categories');
     return response.data;
   },
 
@@ -48,13 +48,13 @@ export const productsAPI = {
     if (filters?.minPrice) queryParams.append('minPrice', filters.minPrice.toString());
     if (filters?.maxPrice) queryParams.append('maxPrice', filters.maxPrice.toString());
 
-    const response = await api.get(`/products/search?${queryParams.toString()}`);
+    const response = await api.get(`products/search?${queryParams.toString()}`);
     return response.data;
   },
 
   getFeaturedProducts: async (limit?: number) => {
     const queryParams = limit ? `?limit=${limit}` : '';
-    const response = await api.get(`/products/featured${queryParams}`);
+    const response = await api.get(`products/featured${queryParams}`);
     return response.data;
   },
 
@@ -72,39 +72,9 @@ export const productsAPI = {
     if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
     if (params?.sortOrder) queryParams.append('sortDirection', params.sortOrder);
 
-    const response = await api.get(`/products?${queryParams.toString()}`);
+    const response = await api.get(`products?${queryParams.toString()}`);
     return response.data;
   },
-
-  // Admin/Auth required endpoints (if user has admin privileges)
-  createProduct: async (productData: {
-    name: string;
-    description: string;
-    price: number;
-    category: string;
-    imageUrl?: string;
-    stock?: number;
-  }) => {
-    const response = await api.post('/products', productData);
-    return response.data;
-  },
-
-  updateProduct: async (id: string | number, productData: {
-    name?: string;
-    description?: string;
-    price?: number;
-    category?: string;
-    imageUrl?: string;
-    stock?: number;
-  }) => {
-    const response = await api.put(`/products/${id}`, productData);
-    return response.data;
-  },
-
-  deleteProduct: async (id: string | number) => {
-    const response = await api.delete(`/products/${id}`);
-    return response.data;
-  }
 };
 
 export default productsAPI;

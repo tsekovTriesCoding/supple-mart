@@ -19,20 +19,20 @@ export interface UserProfileResponse extends User {
 
 export const userAPI = {
   getProfile: async (): Promise<UserProfileResponse> => {
-    const { data } = await api.get<UserProfileResponse>('/user/profile');
+    const { data } = await api.get<UserProfileResponse>('user/profile');
     return data;
   },
 
   updateProfile: async (profileData: UpdateUserProfileRequest): Promise<UserProfileResponse> => {
-    const { data } = await api.put<UserProfileResponse>('/user/profile', profileData);
+    const { data } = await api.put<UserProfileResponse>('user/profile', profileData);
     return data;
   },
 
   changePassword: async (passwordData: ChangePasswordRequest): Promise<void> => {
-    await api.put('/user/change-password', passwordData);
+    await api.put('user/change-password', passwordData);
   },
 
   deleteAccount: async (): Promise<void> => {
-    await api.delete('/user/account');
+    await api.delete('user/account');
   },
 };

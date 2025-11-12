@@ -2,7 +2,7 @@ import { api } from './index';
 
 export const authAPI = {
   login: async (email: string, password: string) => {
-    const response = await api.post('/auth/login', { email, password });
+    const response = await api.post('auth/login', { email, password });
     return response.data;
   },
 
@@ -12,13 +12,13 @@ export const authAPI = {
     email: string;
     password: string;
   }) => {
-    const response = await api.post('/auth/register', userData);
+    const response = await api.post('auth/register', userData);
     return response.data;
   },
 
   logout: async () => {
     try {
-      await api.post('/auth/logout');
+      await api.post('auth/logout');
     } catch (error) {
       console.warn('Logout API call failed:', error);
     } finally {
@@ -28,12 +28,12 @@ export const authAPI = {
   },
 
   refreshToken: async () => {
-    const response = await api.post('/auth/refresh');
+    const response = await api.post('auth/refresh');
     return response.data;
   },
 
   getCurrentUser: async () => {
-    const response = await api.get('/auth/me');
+    const response = await api.get('auth/me');
     return response.data;
   }
 };

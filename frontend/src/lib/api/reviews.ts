@@ -7,31 +7,31 @@ import type {
 
 export const reviewsAPI = {
   getUserReviews: async (): Promise<Review[]> => {
-    const response = await api.get('/reviews');
+    const response = await api.get('reviews');
     return response.data;
   },
 
   getReviewById: async (reviewId: string): Promise<Review> => {
-    const response = await api.get(`/reviews/${reviewId}`);
+    const response = await api.get(`reviews/${reviewId}`);
     return response.data;
   },
 
   createReview: async (review: CreateReviewRequest): Promise<Review> => {
-    const response = await api.post('/reviews', review);
+    const response = await api.post('reviews', review);
     return response.data;
   },
 
   updateReview: async (reviewId: string, review: UpdateReviewRequest): Promise<Review> => {
-    const response = await api.put(`/reviews/${reviewId}`, review);
+    const response = await api.put(`reviews/${reviewId}`, review);
     return response.data;
   },
 
   deleteReview: async (reviewId: string): Promise<void> => {
-    await api.delete(`/reviews/${reviewId}`);
+    await api.delete(`reviews/${reviewId}`);
   },
 
   getProductReviews: async (productId: string): Promise<Review[]> => {
-    const response = await api.get(`/reviews/product/${productId}`);
+    const response = await api.get(`reviews/product/${productId}`);
     return response.data;
   }
 };
