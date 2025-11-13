@@ -2,8 +2,8 @@ import { api } from './index';
 import type { 
   Order, 
   OrderFilters, 
-  OrdersResponse, 
-  CreateOrderRequest 
+  OrdersResponse,
+  CreateOrderRequest
 } from '../../types/order';
 
 export const ordersAPI = {

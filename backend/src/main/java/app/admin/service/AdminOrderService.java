@@ -3,6 +3,7 @@ package app.admin.service;
 import app.admin.dto.AdminOrdersResponse;
 import app.admin.mapper.AdminMapper;
 import app.order.dto.OrderDTO;
+import app.order.model.Order;
 import app.order.model.OrderStatus;
 import app.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class AdminOrderService {
                                             LocalDateTime endDate, Integer page, Integer limit) {
         log.info("Admin: Fetching all orders - page: {}, limit: {}", page, limit);
 
-        Page<app.order.model.Order> orderPage = orderService.getAllOrdersPage(status, startDate, endDate, page, limit);
+        Page<Order> orderPage = orderService.getAllOrdersPage(status, startDate, endDate, page, limit);
 
         return adminMapper.toAdminOrdersResponse(orderPage);
     }

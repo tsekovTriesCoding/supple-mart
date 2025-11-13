@@ -11,10 +11,13 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, UUID> {
+
+    Optional<Order> findByStripePaymentIntentId(String stripePaymentIntentId);
 
     @Query("SELECT o FROM Order o WHERE o.user.id = :userId " +
             "AND (:status IS NULL OR o.status = :status) " +
