@@ -11,3 +11,5 @@ export * from './common';
 export * from './order';
 
 export * from './review';
+
+export * from './payment';

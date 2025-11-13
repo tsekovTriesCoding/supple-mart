@@ -77,6 +77,18 @@ public class OrderService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public OrderDTO getOrderById(UUID orderId, UUID userId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
+
+        if (!order.getUser().getId().equals(userId)) {
+            throw new UnauthorizedException("You are not authorized to view this order");
+        }
+
+        return orderMapper.toOrderDTO(order);
+    }
+
     @Transactional
     public OrderDTO createOrder(UUID userId, CreateOrderRequest request) {
         User user = userService.getUserById(userId);
@@ -116,8 +128,44 @@ public class OrderService {
         Order savedOrder = orderRepository.save(order);
 
         cartService.clearCartAfterOrder(userId);
+        log.info("Cart cleared for user: {} after placing order: {}", userId, orderNumber);
+
+        log.info("Order created with PENDING status: {} for user: {}", orderNumber, userId);
 
         return orderMapper.toOrderDTO(savedOrder);
+    }
+
+    /**
+     * Updates order with payment intent ID
+     */
+    @Transactional
+    public void updateOrderPaymentIntentId(UUID orderId, String paymentIntentId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
+
+        order.setStripePaymentIntentId(paymentIntentId);
+        orderRepository.save(order);
+
+        log.info("Order {} updated with payment intent ID: {}", orderId, paymentIntentId);
+    }
+
+    /**
+     * Updates order status by payment intent ID (called by webhook)
+     */
+    @Transactional
+    public void updateOrderStatusByPaymentIntentId(String paymentIntentId, OrderStatus newStatus) {
+        Order order = orderRepository.findByStripePaymentIntentId(paymentIntentId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Order with payment intent ID " + paymentIntentId + " not found"));
+
+        log.info("Updating order {} status from {} to {} via webhook for payment intent: {}",
+                order.getId(), order.getStatus(), newStatus, paymentIntentId);
+
+        order.setStatus(newStatus);
+        orderRepository.save(order);
+
+        // If payment failed or was cancelled, we might want to restore the cart
+        // For now, we just update the status
     }
 
     @Transactional
@@ -143,12 +191,6 @@ public class OrderService {
         return orderMapper.toOrderDTO(savedOrder);
     }
 
-    private String generateOrderNumber() {
-        String datePart = LocalDateTime.now().toString().substring(0, 10).replace("-", "");
-        String randomPart = String.format("%05d", (int) (Math.random() * 100000));
-        return "ORD-" + datePart + "-" + randomPart;
-    }
-
     public Long getTotalOrdersCount() {
         return orderRepository.count();
     }
@@ -164,42 +206,6 @@ public class OrderService {
 
     public Integer getTotalSalesByProductId(UUID productId) {
         return orderRepository.getTotalSalesByProductId(productId);
-    }
-
-    @Transactional(readOnly = true)
-    public OrdersResponse getAllOrders(String statusStr, LocalDateTime startDate,
-                                       LocalDateTime endDate, Integer page, Integer limit) {
-        OrderStatus status = null;
-        if (statusStr != null && !statusStr.isEmpty()) {
-            try {
-                status = OrderStatus.valueOf(statusStr.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                log.warn("Invalid order status provided: '{}'. Ignoring status filter.", statusStr);
-            }
-        }
-
-        int pageNumber = page != null ? page : 0;
-        int pageSize = limit != null ? limit : 10;
-
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-
-        Page<Order> orderPage = orderRepository.findAllOrdersWithFilters(
-                status, startDate, endDate, pageable
-        );
-
-        return OrdersResponse.builder()
-                .orders(orderPage.getContent().stream()
-                        .map(orderMapper::toOrderDTO)
-                        .collect(Collectors.toList()))
-                .currentPage(orderPage.getNumber())
-                .totalPages(orderPage.getTotalPages())
-                .totalElements(orderPage.getTotalElements())
-                .size(orderPage.getSize())
-                .first(orderPage.isFirst())
-                .last(orderPage.isLast())
-                .hasNext(orderPage.hasNext())
-                .hasPrevious(orderPage.hasPrevious())
-                .build();
     }
 
     @Transactional(readOnly = true)
@@ -233,5 +239,11 @@ public class OrderService {
         Order savedOrder = orderRepository.save(order);
 
         return orderMapper.toOrderDTO(savedOrder);
+    }
+
+    private String generateOrderNumber() {
+        String datePart = LocalDateTime.now().toString().substring(0, 10).replace("-", "");
+        String randomPart = String.format("%05d", (int) (Math.random() * 100000));
+        return "ORD-" + datePart + "-" + randomPart;
     }
 }

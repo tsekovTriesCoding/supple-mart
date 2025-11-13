@@ -15,7 +15,7 @@ const AdminOrders = () => {
   const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
-  const statusOptions = ['all', 'pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+  const statusOptions = ['all', 'pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled'];
 
   const loadOrders = useCallback(async () => {
     try {
@@ -60,6 +60,8 @@ const AdminOrders = () => {
     switch (statusLower) {
       case 'pending':
         return 'bg-yellow-900/30 text-yellow-400';
+      case 'paid':
+        return 'bg-emerald-900/30 text-emerald-400';
       case 'processing':
         return 'bg-blue-900/30 text-blue-400';
       case 'shipped':
@@ -183,6 +185,7 @@ const AdminOrders = () => {
                         }}
                       >
                         <option value="PENDING">Pending</option>
+                        <option value="PAID">Paid</option>
                         <option value="PROCESSING">Processing</option>
                         <option value="SHIPPED">Shipped</option>
                         <option value="DELIVERED">Delivered</option>
