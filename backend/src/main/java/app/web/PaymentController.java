@@ -55,10 +55,8 @@ public class PaymentController {
                         .body("Missing Stripe-Signature header");
             }
 
-            // Construct and verify the webhook event
             Event event = paymentService.constructWebhookEvent(payload, signatureHeader);
 
-            // Process the webhook event
             paymentService.handleWebhookEvent(event);
 
             log.info("Webhook processed successfully: {}", event.getType());
