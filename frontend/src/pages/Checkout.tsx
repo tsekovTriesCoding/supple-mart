@@ -90,14 +90,12 @@ const Checkout = () => {
     setIsProcessing(true);
     
     try {
-      // Step 1: Create the order with PENDING status
       console.log('Creating order...');
       const order = await ordersAPI.createOrder({
         shippingAddress: formatAddressString()
       });
       console.log('Order created:', order.id);
 
-      // Step 2: Create payment intent for the order
       console.log('Creating payment intent for order:', order.id);
       await createPaymentIntent({
         orderId: order.id,
@@ -279,11 +277,11 @@ const Checkout = () => {
                   </div>
                   <div className="flex justify-between text-gray-400">
                     <span>Tax:</span>
-                    <span>Calculated at checkout</span>
+                    <span>{formatCartPrice(totalPrice * 0.08)}</span>
                   </div>
                   <div className="border-t border-gray-700 pt-3 flex justify-between text-white font-semibold text-lg">
                     <span>Total:</span>
-                    <span>{formatCartPrice(totalPrice)}</span>
+                    <span>{formatCartPrice(totalPrice * 1.08)}</span>
                   </div>
                 </div>
 
