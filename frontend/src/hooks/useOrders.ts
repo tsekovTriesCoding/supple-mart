@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 
 import { ordersAPI } from '../lib/api/orders';
-import type { Order, OrderFilters, OrdersResponse } from '../types/order';
+import type { Order, OrderFilters, OrdersResponse, OrderStats } from '../types/order';
 
 export const useOrders = (initialFilters?: OrderFilters) => {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [stats, setStats] = useState<OrderStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -100,20 +102,16 @@ export const useOrders = (initialFilters?: OrderFilters) => {
     fetchOrders();
   };
 
-  const getOrderStats = () => {
-    const stats = {
-      total: orders.length,
-      pending: orders.filter(order => order.status.toUpperCase() === 'PENDING').length,
-      processing: orders.filter(order => ['PAID', 'PROCESSING'].includes(order.status.toUpperCase())).length,
-      shipped: orders.filter(order => order.status.toUpperCase() === 'SHIPPED').length,
-      delivered: orders.filter(order => order.status.toUpperCase() === 'DELIVERED').length,
-      cancelled: orders.filter(order => order.status.toUpperCase() === 'CANCELLED').length,
-      totalSpent: orders
-        .filter(order => order.status.toUpperCase() !== 'CANCELLED')
-        .reduce((sum, order) => sum + order.totalAmount, 0)
-    };
-    
-    return stats;
+  const fetchStats = async () => {
+    try {
+      setStatsLoading(true);
+      const statsData = await ordersAPI.getOrderStats();
+      setStats(statsData);
+    } catch (err) {
+      console.error('Error fetching order stats:', err);
+    } finally {
+      setStatsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -139,9 +137,15 @@ export const useOrders = (initialFilters?: OrderFilters) => {
     loadOrders();
   }, [filters]);
 
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
   return {
     orders,
+    stats,
     loading,
+    statsLoading,
     error,
     totalElements,
     totalPages,
@@ -153,6 +157,6 @@ export const useOrders = (initialFilters?: OrderFilters) => {
     requestReturn,
     updateFilters,
     refreshOrders,
-    getOrderStats
+    fetchStats
   };
 };

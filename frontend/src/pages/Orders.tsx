@@ -8,14 +8,14 @@ import type { Order } from '../types/order';
 const Orders = () => {
   const { 
     orders, 
+    stats,
     loading, 
     error, 
     totalElements, 
     currentPage, 
     totalPages,
     updateFilters, 
-    cancelOrder, 
-    getOrderStats 
+    cancelOrder
   } = useOrders();
   
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -101,8 +101,6 @@ const Orders = () => {
     return true;
   });
 
-  const stats = getOrderStats();
-
   if (!localStorage.getItem('token')) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0a0a' }}>
@@ -147,29 +145,33 @@ const Orders = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
             <div className="card p-4 text-center">
-              <div className="text-2xl font-bold text-blue-400">{stats.total}</div>
-              <div className="text-gray-400 text-sm">Total Orders</div>
+              <div className="text-2xl font-bold text-blue-400">{stats?.totalOrders ?? 0}</div>
+              <div className="text-gray-400 text-sm">Total</div>
             </div>
             <div className="card p-4 text-center">
-              <div className="text-2xl font-bold text-yellow-400">{stats.pending}</div>
+              <div className="text-2xl font-bold text-yellow-400">{stats?.pendingCount ?? 0}</div>
               <div className="text-gray-400 text-sm">Pending</div>
             </div>
             <div className="card p-4 text-center">
-              <div className="text-2xl font-bold text-blue-400">{stats.processing}</div>
+              <div className="text-2xl font-bold text-green-400">{stats?.paidCount ?? 0}</div>
+              <div className="text-gray-400 text-sm">Paid</div>
+            </div>
+            <div className="card p-4 text-center">
+              <div className="text-2xl font-bold text-blue-400">{stats?.processingCount ?? 0}</div>
               <div className="text-gray-400 text-sm">Processing</div>
             </div>
             <div className="card p-4 text-center">
-              <div className="text-2xl font-bold text-purple-400">{stats.shipped}</div>
+              <div className="text-2xl font-bold text-purple-400">{stats?.shippedCount ?? 0}</div>
               <div className="text-gray-400 text-sm">Shipped</div>
             </div>
             <div className="card p-4 text-center">
-              <div className="text-2xl font-bold text-green-400">{stats.delivered}</div>
+              <div className="text-2xl font-bold text-green-400">{stats?.deliveredCount ?? 0}</div>
               <div className="text-gray-400 text-sm">Delivered</div>
             </div>
             <div className="card p-4 text-center">
-              <div className="text-2xl font-bold text-white">${stats.totalSpent.toFixed(2)}</div>
+              <div className="text-2xl font-bold text-white">${stats?.totalSpent.toFixed(2) ?? '0.00'}</div>
               <div className="text-gray-400 text-sm">Total Spent</div>
             </div>
           </div>

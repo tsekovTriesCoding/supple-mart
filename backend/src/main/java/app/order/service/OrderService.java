@@ -8,6 +8,7 @@ import app.exception.ResourceNotFoundException;
 import app.exception.UnauthorizedException;
 import app.order.dto.CreateOrderRequest;
 import app.order.dto.OrderDTO;
+import app.order.dto.OrderStatsDTO;
 import app.order.dto.OrdersResponse;
 import app.order.mapper.OrderMapper;
 import app.order.model.Order;
@@ -239,6 +240,29 @@ public class OrderService {
         Order savedOrder = orderRepository.save(order);
 
         return orderMapper.toOrderDTO(savedOrder);
+    }
+
+    @Transactional(readOnly = true)
+    public OrderStatsDTO getUserOrderStats(UUID userId) {
+        Long totalOrders = orderRepository.countTotalOrdersByUser(userId);
+        Long pendingCount = orderRepository.countOrdersByUserAndStatus(userId, OrderStatus.PENDING);
+        Long paidCount = orderRepository.countOrdersByUserAndStatus(userId, OrderStatus.PAID);
+        Long processingCount = orderRepository.countOrdersByUserAndStatus(userId, OrderStatus.PROCESSING);
+        Long shippedCount = orderRepository.countOrdersByUserAndStatus(userId, OrderStatus.SHIPPED);
+        Long deliveredCount = orderRepository.countOrdersByUserAndStatus(userId, OrderStatus.DELIVERED);
+        Long cancelledCount = orderRepository.countOrdersByUserAndStatus(userId, OrderStatus.CANCELLED);
+        BigDecimal totalSpent = orderRepository.calculateTotalSpentByUser(userId);
+
+        return OrderStatsDTO.builder()
+                .totalOrders(totalOrders)
+                .pendingCount(pendingCount)
+                .paidCount(paidCount)
+                .processingCount(processingCount)
+                .shippedCount(shippedCount)
+                .deliveredCount(deliveredCount)
+                .cancelledCount(cancelledCount)
+                .totalSpent(totalSpent)
+                .build();
     }
 
     private String generateOrderNumber() {

@@ -3,7 +3,8 @@ import type {
   Order, 
   OrderFilters, 
   OrdersResponse,
-  CreateOrderRequest
+  CreateOrderRequest,
+  OrderStats
 } from '../../types/order';
 
 export const ordersAPI = {
@@ -51,6 +52,11 @@ export const ordersAPI = {
       reason,
       items
     });
+    return response.data;
+  },
+
+  getOrderStats: async (): Promise<OrderStats> => {
+    const response = await api.get('orders/stats');
     return response.data;
   }
 };

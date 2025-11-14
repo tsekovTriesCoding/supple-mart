@@ -48,3 +48,14 @@ export interface OrdersResponse {
 export interface CreateOrderRequest {
   shippingAddress: string;
 }
+
+export interface OrderStats {
+  totalOrders: number;
+  pendingCount: number;
+  paidCount: number;
+  processingCount: number;
+  shippedCount: number;
+  deliveredCount: number;
+  cancelledCount: number;
+  totalSpent: number;
+}

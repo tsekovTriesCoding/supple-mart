@@ -2,6 +2,7 @@ package app.web;
 
 import app.order.dto.CreateOrderRequest;
 import app.order.dto.OrderDTO;
+import app.order.dto.OrderStatsDTO;
 import app.order.dto.OrdersResponse;
 import app.order.service.OrderService;
 import app.security.CustomUserDetails;
@@ -42,6 +43,14 @@ public class OrderController {
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<OrderStatsDTO> getOrderStats(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        OrderStatsDTO stats = orderService.getUserOrderStats(userDetails.getId());
+        return ResponseEntity.ok(stats);
     }
 
     @PostMapping
