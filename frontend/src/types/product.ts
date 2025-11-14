@@ -1,3 +1,5 @@
+import type { Review } from "./review";
+
 export interface Product {
   id: number;
   name: string;
@@ -14,17 +16,7 @@ export interface Product {
   stock?: number;
   createdAt?: string;
   updatedAt?: string;
-  reviews?: ProductReview[];
-}
-
-export interface ProductReview {
-  id: string;
-  userId: string;
-  userName: string;
-  rating: number;
-  comment: string;
-  createdAt: string;
-  updatedAt: string;
+  reviews?: Review[];
 }
 
 export interface ProductQueryParams {

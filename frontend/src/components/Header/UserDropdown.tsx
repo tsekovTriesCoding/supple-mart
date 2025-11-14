@@ -149,7 +149,7 @@ export const UserDropdown = ({ isLoggedIn, user, onAuthModalOpen }: UserDropdown
                   setIsUserDropdownOpen(false);
                 }}
                 disabled={isLoggingOut}
-                className={`flex items-center space-x-3 px-4 py-3 w-full text-left transition-colors ${
+                className={`flex items-center space-x-3 px-4 py-3 w-full text-left transition-colors cursor-pointer ${
                   isLoggingOut ? 'opacity-50 cursor-not-allowed text-gray-500' : 'text-gray-300 hover:text-red-400 hover:bg-gray-700'
                 }`}
               >

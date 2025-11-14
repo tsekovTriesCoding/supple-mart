@@ -12,7 +12,7 @@ const CategoryNavigation = () => {
   if (isLoading) {
     return (
       <div className="relative">
-        <button className="nav-link flex items-center space-x-1 font-medium">
+        <button className="nav-link flex items-center space-x-1 font-medium cursor-pointer">
           <span>Categories</span>
           <ChevronDown className="w-4 h-4" />
         </button>

@@ -3,12 +3,12 @@ import { useState } from 'react';
 import { useReviews } from '../hooks/useReviews';
 import ReviewModal from '../components/ReviewModal';
 import ProductDetail from '../components/Product/ProductDetail';
-import type { Review } from '../types/review';
+import type { ReviewResponseDTO } from '../types/review';
 
 const Reviews = () => {
   const { reviews, loading, error, getReviewStats, deleteReview, refreshReviews } = useReviews();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingReview, setEditingReview] = useState<Review | null>(null);
+  const [editingReview, setEditingReview] = useState<ReviewResponseDTO | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [isProductDetailOpen, setIsProductDetailOpen] = useState(false);
 
@@ -112,7 +112,7 @@ const Reviews = () => {
               <Star className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <h2 className="text-xl font-semibold text-white mb-2">No Reviews Yet</h2>
               <p className="text-gray-400 mb-6">You haven't written any reviews yet. Purchase and review products to share your experience!</p>
-              <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
                 Start Shopping
               </button>
             </div>

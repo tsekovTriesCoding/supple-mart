@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 
 import { reviewsAPI } from '../lib/api/reviews';
-import type { Review, CreateReviewRequest, UpdateReviewRequest } from '../types/review';
+import type { ReviewResponseDTO, CreateReviewRequest, UpdateReviewRequest } from '../types/review';
 
 export const useReviews = () => {
-  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviews, setReviews] = useState<ReviewResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

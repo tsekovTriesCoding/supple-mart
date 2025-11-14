@@ -60,7 +60,7 @@ export const ProductFilters = ({
                 className="input flex-1"
               />
             </div>
-            <button className="btn-secondary w-full">Apply</button>
+            <button className="btn-secondary w-full cursor-pointer">Apply</button>
           </div>
         </div>
 

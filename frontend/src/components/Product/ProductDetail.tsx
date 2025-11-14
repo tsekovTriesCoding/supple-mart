@@ -196,7 +196,7 @@ const ProductDetail = ({ productId, isOpen, onClose }: ProductDetailProps) => {
         <div className="bg-gray-900 rounded-2xl p-8 max-w-md w-full text-center">
           <h3 className="text-xl font-semibold text-white mb-4">Product Not Found</h3>
           <p className="text-gray-400 mb-6">{errorMessage}</p>
-          <button onClick={onClose} className="btn-primary">
+          <button onClick={onClose} className="btn-primary cursor-pointer">
             Close
           </button>
         </div>

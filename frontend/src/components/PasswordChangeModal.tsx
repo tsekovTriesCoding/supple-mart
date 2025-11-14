@@ -144,7 +144,7 @@ export const PasswordChangeModal = ({ isOpen, onClose }: PasswordChangeModalProp
               </button>
             </div>
             <p className="text-xs text-gray-400 mt-1">
-              Must be at least 8 characters with uppercase, lowercase, and number
+              Must be at least 6 characters with uppercase, lowercase, and number
             </p>
           </div>
 
@@ -192,7 +192,7 @@ export const PasswordChangeModal = ({ isOpen, onClose }: PasswordChangeModalProp
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {isLoading ? 'Changing...' : 'Change Password'}
             </button>
@@ -200,7 +200,7 @@ export const PasswordChangeModal = ({ isOpen, onClose }: PasswordChangeModalProp
               type="button"
               onClick={handleClose}
               disabled={isLoading}
-              className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               Cancel
             </button>

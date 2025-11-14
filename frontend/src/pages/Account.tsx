@@ -162,7 +162,7 @@ const Account = () => {
                   
                   <button 
                     onClick={handleEdit}
-                    className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
                   >
                     Edit Profile
                   </button>
@@ -209,7 +209,7 @@ const Account = () => {
                     <button
                       type="submit"
                       disabled={isUpdating}
-                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                     >
                       {isUpdating ? 'Saving...' : 'Save Changes'}
                     </button>
@@ -217,7 +217,7 @@ const Account = () => {
                       type="button"
                       onClick={handleCancel}
                       disabled={isUpdating}
-                      className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                     >
                       Cancel
                     </button>
@@ -232,18 +232,18 @@ const Account = () => {
               <div className="space-y-3">
                 <button 
                   onClick={() => setShowPasswordModal(true)}
-                  className="w-full text-left p-3 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors"
+                  className="w-full text-left p-3 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer"
                 >
                   <h3 className="text-white font-medium">Change Password</h3>
                   <p className="text-gray-400 text-sm">Update your account password</p>
                 </button>
                 
-                <button className="w-full text-left p-3 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors">
+                <button className="w-full text-left p-3 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer">
                   <h3 className="text-white font-medium">Notification Preferences</h3>
                   <p className="text-gray-400 text-sm">Manage email and push notifications</p>
                 </button>
                 
-                <button className="w-full text-left p-3 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors">
+                <button className="w-full text-left p-3 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer">
                   <h3 className="text-white font-medium">Privacy Settings</h3>
                   <p className="text-gray-400 text-sm">Control your privacy preferences</p>
                 </button>

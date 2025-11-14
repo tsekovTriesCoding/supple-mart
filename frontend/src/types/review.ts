@@ -8,6 +8,25 @@ export interface Review {
   updatedAt: string;
 }
 
+export interface ReviewResponseDTO {
+  id: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  updatedAt: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  product: {
+    id: string;
+    name: string;
+    imageUrl: string;
+    price: number;
+  };
+}
+
 export interface CreateReviewRequest {
   productId: string;
   rating: number;

@@ -340,7 +340,7 @@ const AdminProducts = () => {
               <h3 className="text-2xl font-bold text-white">
                 {editingProduct ? 'Edit Product' : 'Add New Product'}
               </h3>
-              <button onClick={handleCloseModal} className="text-gray-400 hover:text-white">
+              <button onClick={handleCloseModal} className="text-gray-400 hover:text-white cursor-pointer">
                 <X size={24} />
               </button>
             </div>
