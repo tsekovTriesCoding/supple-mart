@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import { formatCategoryForDisplay } from '../../utils/categoryUtils';
 
 interface ProductFiltersProps {
@@ -15,6 +17,12 @@ export const ProductFilters = ({
   onCategoryChange,
   onPriceRangeChange,
 }: ProductFiltersProps) => {
+  const [tempPriceRange, setTempPriceRange] = useState(priceRange);
+
+  const handleApplyPriceFilter = () => {
+    onPriceRangeChange(tempPriceRange);
+  };
+
   return (
     <div className="mt-6 pt-6 border-t border-gray-600 animate-slide-in">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -44,23 +52,28 @@ export const ProductFilters = ({
               <input
                 type="number"
                 placeholder="Min"
-                value={priceRange.min}
+                value={tempPriceRange.min}
                 onChange={(e) =>
-                  onPriceRangeChange({ ...priceRange, min: e.target.value })
+                  setTempPriceRange({ ...tempPriceRange, min: e.target.value })
                 }
                 className="input flex-1"
               />
               <input
                 type="number"
                 placeholder="Max"
-                value={priceRange.max}
+                value={tempPriceRange.max}
                 onChange={(e) =>
-                  onPriceRangeChange({ ...priceRange, max: e.target.value })
+                  setTempPriceRange({ ...tempPriceRange, max: e.target.value })
                 }
                 className="input flex-1"
               />
             </div>
-            <button className="btn-secondary w-full cursor-pointer">Apply</button>
+            <button 
+              onClick={handleApplyPriceFilter}
+              className="btn-secondary w-full cursor-pointer"
+            >
+              Apply
+            </button>
           </div>
         </div>
 

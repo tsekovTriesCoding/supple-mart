@@ -43,6 +43,8 @@ export const useProductsPage = () => {
     limit: 12,
     category: urlCategoryToBackend(formatCategoryForUrl(selectedCategory)),
     search: searchQuery || undefined,
+    minPrice: priceRange.min ? parseFloat(priceRange.min) : undefined,
+    maxPrice: priceRange.max ? parseFloat(priceRange.max) : undefined,
     sortBy,
     sortOrder,
   });
