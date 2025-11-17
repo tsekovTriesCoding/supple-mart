@@ -1,40 +1,38 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useReducer } from 'react';
 import { Package, Search, Eye, Calendar, DollarSign, User } from 'lucide-react';
 
 import { Pagination } from '../../components/Pagination';
 import { adminAPI } from '../../lib/api/admin';
 import type { AdminOrder } from '../../types/admin';
+import { adminOrdersReducer, initialState } from '../../reducers/adminOrdersReducer';
 
 const AdminOrders = () => {
-  const [orders, setOrders] = useState<AdminOrder[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalElements, setTotalElements] = useState(0);
-  const [selectedStatus, setSelectedStatus] = useState('all');
-  const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [state, dispatch] = useReducer(adminOrdersReducer, initialState);
 
   const statusOptions = ['all', 'pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled'];
 
   const loadOrders = useCallback(async () => {
     try {
-      setLoading(true);
+      dispatch({ type: 'SET_LOADING', payload: true });
       const response = await adminAPI.getAllOrders({
-        page: currentPage,
+        page: state.currentPage,
         limit: 10,
-        status: selectedStatus !== 'all' ? selectedStatus : undefined,
+        status: state.selectedStatus !== 'all' ? state.selectedStatus : undefined,
       });
 
-      setOrders(response.content || []);
-      setTotalPages(response.totalPages || 0);
-      setTotalElements(response.totalElements || 0);
+      dispatch({
+        type: 'SET_ORDERS',
+        payload: {
+          orders: response.content || [],
+          totalPages: response.totalPages || 0,
+          totalElements: response.totalElements || 0,
+        },
+      });
     } catch (error) {
       console.error('Failed to load orders:', error);
-    } finally {
-      setLoading(false);
+      dispatch({ type: 'SET_LOADING', payload: false });
     }
-  }, [currentPage, selectedStatus]);
+  }, [state.currentPage, state.selectedStatus]);
 
   useEffect(() => {
     loadOrders();
@@ -51,8 +49,7 @@ const AdminOrders = () => {
   };
 
   const handleViewDetails = (order: AdminOrder) => {
-    setSelectedOrder(order);
-    setShowDetailsModal(true);
+    dispatch({ type: 'OPEN_DETAILS_MODAL', payload: order });
   };
 
   const getStatusColor = (status: string) => {
@@ -98,17 +95,16 @@ const AdminOrders = () => {
         </div>
         <div className="flex items-center space-x-2 text-gray-400">
           <Package size={20} />
-          <span className="text-sm">Total: {totalElements} orders</span>
+          <span className="text-sm">Total: {state.totalElements} orders</span>
         </div>
       </div>
 
       <div className="card p-4 mb-6">
         <div className="flex flex-col md:flex-row gap-4">
           <select
-            value={selectedStatus}
+            value={state.selectedStatus}
             onChange={(e) => {
-              setSelectedStatus(e.target.value);
-              setCurrentPage(1);
+              dispatch({ type: 'SET_SELECTED_STATUS', payload: e.target.value });
             }}
             className="input"
           >
@@ -143,20 +139,20 @@ const AdminOrders = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-700">
-              {loading ? (
+              {state.loading ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
                     Loading orders...
                   </td>
                 </tr>
-              ) : orders.length === 0 ? (
+              ) : state.orders.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
                     No orders found
                   </td>
                 </tr>
               ) : (
-                orders.map((order) => (
+                state.orders.map((order) => (
                   <tr key={order.id} className="hover:bg-gray-800/50 transition-colors">
                     <td className="px-6 py-4">
                       <span className="font-mono text-sm text-gray-300">{order.orderNumber}</span>
@@ -208,27 +204,27 @@ const AdminOrders = () => {
           </table>
         </div>
 
-        {totalPages > 1 && (
+        {state.totalPages > 1 && (
           <div className="flex items-center justify-between px-6 py-4 border-t border-gray-700">
             <div className="text-sm text-gray-400">
-              Showing {(currentPage - 1) * 10 + 1} to {Math.min(currentPage * 10, totalElements)} of {totalElements} orders
+              Showing {(state.currentPage - 1) * 10 + 1} to {Math.min(state.currentPage * 10, state.totalElements)} of {state.totalElements} orders
             </div>
             <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
+              currentPage={state.currentPage}
+              totalPages={state.totalPages}
+              onPageChange={(page) => dispatch({ type: 'SET_CURRENT_PAGE', payload: page })}
             />
           </div>
         )}
       </div>
 
-      {showDetailsModal && selectedOrder && (
+      {state.showDetailsModal && state.selectedOrder && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="card max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-white">Order Details</h3>
               <button
-                onClick={() => setShowDetailsModal(false)}
+                onClick={() => dispatch({ type: 'CLOSE_DETAILS_MODAL' })}
                 className="text-gray-400 hover:text-white"
               >
                 ×
@@ -241,7 +237,7 @@ const AdminOrders = () => {
                   <Package size={18} />
                   <span className="text-sm">Order Number</span>
                 </div>
-                <p className="text-white font-mono">{selectedOrder.orderNumber}</p>
+                <p className="text-white font-mono">{state.selectedOrder.orderNumber}</p>
               </div>
 
               <div className="bg-gray-800/50 p-4 rounded-lg">
@@ -249,7 +245,7 @@ const AdminOrders = () => {
                   <Calendar size={18} />
                   <span className="text-sm">Order Date</span>
                 </div>
-                <p className="text-white">{formatDate(selectedOrder.createdAt)}</p>
+                <p className="text-white">{formatDate(state.selectedOrder.createdAt)}</p>
               </div>
 
               <div className="bg-gray-800/50 p-4 rounded-lg">
@@ -257,8 +253,8 @@ const AdminOrders = () => {
                   <User size={18} />
                   <span className="text-sm">Customer</span>
                 </div>
-                <p className="text-white">{selectedOrder.customerName}</p>
-                <p className="text-sm text-gray-400">{selectedOrder.customerEmail}</p>
+                <p className="text-white">{state.selectedOrder.customerName}</p>
+                <p className="text-sm text-gray-400">{state.selectedOrder.customerEmail}</p>
               </div>
 
               <div className="bg-gray-800/50 p-4 rounded-lg">
@@ -266,14 +262,14 @@ const AdminOrders = () => {
                   <DollarSign size={18} />
                   <span className="text-sm">Total Amount</span>
                 </div>
-                <p className="text-white text-xl font-bold">{formatPrice(selectedOrder.totalAmount)}</p>
+                <p className="text-white text-xl font-bold">{formatPrice(state.selectedOrder.totalAmount)}</p>
               </div>
             </div>
 
             <div className="mb-6">
               <h4 className="text-lg font-semibold text-white mb-4">Order Items</h4>
               <div className="space-y-3">
-                {selectedOrder.items.map((item) => (
+                {state.selectedOrder.items.map((item) => (
                   <div key={item.id} className="flex items-center justify-between bg-gray-800/50 p-4 rounded-lg">
                     <div className="flex-1">
                       <p className="text-white font-medium">{item.productName}</p>
@@ -290,8 +286,8 @@ const AdminOrders = () => {
 
             <div className="flex items-center justify-between pt-4 border-t border-gray-700">
               <span className="text-gray-400">Current Status:</span>
-              <span className={`px-4 py-2 rounded-full text-sm font-medium ${getStatusColor(selectedOrder.status)}`}>
-                {selectedOrder.status}
+              <span className={`px-4 py-2 rounded-full text-sm font-medium ${getStatusColor(state.selectedOrder.status)}`}>
+                {state.selectedOrder.status}
               </span>
             </div>
           </div>

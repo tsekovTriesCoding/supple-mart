@@ -4,6 +4,8 @@ export * from './product';
 
 export * from './productsPage';
 
+export * from './adminOrders';
+
 export * from './auth';
 
 export * from './api';
