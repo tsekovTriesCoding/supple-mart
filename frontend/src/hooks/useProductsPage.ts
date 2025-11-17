@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useReducer, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import { useCart } from './useCart';
@@ -8,45 +8,37 @@ import {
   formatCategoryForUrl,
   urlCategoryToBackend,
 } from '../utils/categoryUtils';
+import { productsPageReducer, initialState } from '../reducers/productsPageReducer';
 
 export const useProductsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { addItem } = useCart();
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [showFilters, setShowFilters] = useState(false);
-  const [priceRange, setPriceRange] = useState({ min: '', max: '' });
-  const [sortBy, setSortBy] = useState<'name' | 'price' | 'createdAt'>('name');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [loadingProductId, setLoadingProductId] = useState<number | null>(null);
-  const [addingToCartId, setAddingToCartId] = useState<number | null>(null);
+  const [state, dispatch] = useReducer(productsPageReducer, initialState);
 
   useEffect(() => {
     const categoryFromUrl = searchParams.get('category');
     const searchFromUrl = searchParams.get('search');
 
-    if (categoryFromUrl) {
-      setSelectedCategory(formatCategoryFromUrl(categoryFromUrl));
-    }
-    if (searchFromUrl) {
-      setSearchQuery(searchFromUrl);
+    if (categoryFromUrl || searchFromUrl) {
+      dispatch({
+        type: 'INIT_FROM_URL',
+        payload: {
+          category: categoryFromUrl ? formatCategoryFromUrl(categoryFromUrl) : undefined,
+          search: searchFromUrl || undefined,
+        },
+      });
     }
   }, [searchParams]);
 
   const { data, isLoading, isError, error } = useProducts({
-    page: currentPage,
+    page: state.currentPage,
     limit: 12,
-    category: urlCategoryToBackend(formatCategoryForUrl(selectedCategory)),
-    search: searchQuery || undefined,
-    minPrice: priceRange.min ? parseFloat(priceRange.min) : undefined,
-    maxPrice: priceRange.max ? parseFloat(priceRange.max) : undefined,
-    sortBy,
-    sortOrder,
+    category: urlCategoryToBackend(formatCategoryForUrl(state.selectedCategory)),
+    search: state.searchQuery || undefined,
+    minPrice: state.priceRange.min ? parseFloat(state.priceRange.min) : undefined,
+    maxPrice: state.priceRange.max ? parseFloat(state.priceRange.max) : undefined,
+    sortBy: state.sortBy,
+    sortOrder: state.sortOrder,
   });
 
   const { data: categoriesData } = useProductCategories();
@@ -54,8 +46,7 @@ export const useProductsPage = () => {
 
   const handleCategoryChange = (category: string) => {
     const newCategory = category === 'all' ? '' : category;
-    setSelectedCategory(newCategory);
-    setCurrentPage(1);
+    dispatch({ type: 'SET_SELECTED_CATEGORY', payload: newCategory });
 
     const newSearchParams = new URLSearchParams(searchParams);
     if (newCategory) {
@@ -71,14 +62,11 @@ export const useProductsPage = () => {
       'name' | 'price' | 'createdAt',
       'asc' | 'desc'
     ];
-    setSortBy(field);
-    setSortOrder(order);
-    setCurrentPage(1);
+    dispatch({ type: 'SET_SORT', payload: { sortBy: field, sortOrder: order } });
   };
 
   const handleSearchChange = (query: string) => {
-    setSearchQuery(query);
-    setCurrentPage(1);
+    dispatch({ type: 'SET_SEARCH_QUERY', payload: query });
 
     const newSearchParams = new URLSearchParams(searchParams);
     if (query) {
@@ -90,32 +78,28 @@ export const useProductsPage = () => {
   };
 
   const handleProductClick = (productId: number) => {
-    setLoadingProductId(productId);
-    setSelectedProductId(productId);
-    setIsModalOpen(true);
+    dispatch({ type: 'OPEN_PRODUCT_MODAL', payload: productId });
 
     setTimeout(() => {
-      setLoadingProductId(null);
+      dispatch({ type: 'SET_LOADING_PRODUCT_ID', payload: null });
     }, 500);
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedProductId(null);
-    setLoadingProductId(null);
+    dispatch({ type: 'CLOSE_PRODUCT_MODAL' });
   };
 
   const addToCart = async (product: Product) => {
     if (!product.inStock) return;
 
-    setAddingToCartId(product.id);
+    dispatch({ type: 'SET_ADDING_TO_CART_ID', payload: product.id });
     try {
       await addItem(product.id.toString(), 1);
       console.log(`Added ${product.name} to cart`);
     } catch (error) {
       console.error('Failed to add item to cart:', error);
     } finally {
-      setAddingToCartId(null);
+      dispatch({ type: 'SET_ADDING_TO_CART_ID', payload: null });
     }
   };
 
@@ -124,18 +108,18 @@ export const useProductsPage = () => {
   };
 
   return {
-    currentPage,
-    selectedCategory,
-    searchQuery,
-    viewMode,
-    showFilters,
-    priceRange,
-    sortBy,
-    sortOrder,
-    selectedProductId,
-    isModalOpen,
-    loadingProductId,
-    addingToCartId,
+    currentPage: state.currentPage,
+    selectedCategory: state.selectedCategory,
+    searchQuery: state.searchQuery,
+    viewMode: state.viewMode,
+    showFilters: state.showFilters,
+    priceRange: state.priceRange,
+    sortBy: state.sortBy,
+    sortOrder: state.sortOrder,
+    selectedProductId: state.selectedProductId,
+    isModalOpen: state.isModalOpen,
+    loadingProductId: state.loadingProductId,
+    addingToCartId: state.addingToCartId,
     categories,
     
     data,
@@ -143,10 +127,10 @@ export const useProductsPage = () => {
     isError,
     error,
     
-    setCurrentPage,
-    setViewMode,
-    setShowFilters,
-    setPriceRange,
+    setCurrentPage: (page: number) => dispatch({ type: 'SET_CURRENT_PAGE', payload: page }),
+    setViewMode: (mode: 'grid' | 'list') => dispatch({ type: 'SET_VIEW_MODE', payload: mode }),
+    setShowFilters: (show: boolean) => dispatch({ type: 'SET_SHOW_FILTERS', payload: show }),
+    setPriceRange: (range: { min: string; max: string }) => dispatch({ type: 'SET_PRICE_RANGE', payload: range }),
     handleCategoryChange,
     handleSortChange,
     handleSearchChange,

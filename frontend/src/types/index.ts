@@ -2,6 +2,8 @@ export * from './cart';
 
 export * from './product';
 
+export * from './productsPage';
+
 export * from './auth';
 
 export * from './api';
