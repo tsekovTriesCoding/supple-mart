@@ -1,9 +1,9 @@
 import { Edit, Plus, Search, Trash2, Upload, X } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useReducer } from 'react';
 
 import { Pagination } from '../../components/Pagination';
 import { adminAPI } from '../../lib/api/admin';
-import type { AdminProduct, CreateProductRequest } from '../../types/admin';
+import type { AdminProduct } from '../../types/admin';
 import type { ApiError } from '../../types/error';
 import { useProductCategories } from '../../hooks/useProducts';
 import { 
@@ -11,54 +11,39 @@ import {
   formatCategoryForUrl, 
   urlCategoryToBackend 
 } from '../../utils/categoryUtils';
+import { adminProductsReducer, initialState } from '../../reducers/adminProductsReducer';
 
 const AdminProducts = () => {
-  const [products, setProducts] = useState<AdminProduct[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [showModal, setShowModal] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<AdminProduct | null>(null);
-  const [uploading, setUploading] = useState(false);
-
-  const [formData, setFormData] = useState<CreateProductRequest>({
-    name: '',
-    description: '',
-    price: 0,
-    originalPrice: 0,
-    category: '',
-    stockQuantity: 0,
-    imageUrl: '',
-    isActive: true,
-  });
+  const [state, dispatch] = useReducer(adminProductsReducer, initialState);
 
   const { data: categoriesData } = useProductCategories();
   const categories = ['all', ...(categoriesData || [])];
 
   const loadProducts = useCallback(async () => {
     try {
-      setIsLoading(true);
-      setError(null);
+      dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'SET_ERROR', payload: null });
       const response = await adminAPI.getAllProducts({
-        page: currentPage,
+        page: state.currentPage,
         limit: 10,
-        search: searchQuery || undefined,
-        category: selectedCategory !== 'all' 
-          ? urlCategoryToBackend(formatCategoryForUrl(selectedCategory))
+        search: state.searchQuery || undefined,
+        category: state.selectedCategory !== 'all' 
+          ? urlCategoryToBackend(formatCategoryForUrl(state.selectedCategory))
           : undefined,
       });
-      setProducts(response.products);
-      setTotalPages(response.totalPages);
+      dispatch({
+        type: 'SET_PRODUCTS',
+        payload: { products: response.products, totalPages: response.totalPages },
+      });
     } catch (err) {
       const apiError = err as ApiError;
-      setError(apiError.response?.data?.message || 'Failed to load products');
-    } finally {
-      setIsLoading(false);
+      dispatch({ 
+        type: 'SET_ERROR', 
+        payload: apiError.response?.data?.message || 'Failed to load products' 
+      });
+      dispatch({ type: 'SET_LOADING', payload: false });
     }
-  }, [currentPage, searchQuery, selectedCategory]);
+  }, [state.currentPage, state.searchQuery, state.selectedCategory]);
 
   useEffect(() => {
     loadProducts();
@@ -69,25 +54,28 @@ const AdminProducts = () => {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      setError('Please select an image file');
+      dispatch({ type: 'SET_ERROR', payload: 'Please select an image file' });
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setError('Image size should be less than 5MB');
+      dispatch({ type: 'SET_ERROR', payload: 'Image size should be less than 5MB' });
       return;
     }
 
     try {
-      setUploading(true);
-      setError(null);
+      dispatch({ type: 'SET_UPLOADING', payload: true });
+      dispatch({ type: 'SET_ERROR', payload: null });
       const imageUrl = await adminAPI.uploadProductImage(file);
-      setFormData({ ...formData, imageUrl });
+      dispatch({ type: 'UPDATE_FORM_DATA', payload: { imageUrl } });
     } catch (err) {
       const apiError = err as ApiError;
-      setError(apiError.response?.data?.message || 'Failed to upload image');
+      dispatch({ 
+        type: 'SET_ERROR', 
+        payload: apiError.response?.data?.message || 'Failed to upload image' 
+      });
     } finally {
-      setUploading(false);
+      dispatch({ type: 'SET_UPLOADING', payload: false });
     }
   };
 
@@ -95,67 +83,42 @@ const AdminProducts = () => {
     e.preventDefault();
     
     try {
-      setError(null);
-      if (editingProduct) {
-        await adminAPI.updateProduct(editingProduct.id, formData);
+      dispatch({ type: 'SET_ERROR', payload: null });
+      if (state.editingProduct) {
+        await adminAPI.updateProduct(state.editingProduct.id, state.formData);
       } else {
-        await adminAPI.createProduct(formData);
+        await adminAPI.createProduct(state.formData);
       }
       
-      setShowModal(false);
-      resetForm();
+      dispatch({ type: 'CLOSE_MODAL' });
       loadProducts();
     } catch (err) {
       const apiError = err as ApiError;
-      setError(apiError.response?.data?.message || 'Failed to save product');
+      dispatch({ 
+        type: 'SET_ERROR', 
+        payload: apiError.response?.data?.message || 'Failed to save product' 
+      });
     }
   };
 
   const handleEdit = (product: AdminProduct) => {
-    setEditingProduct(product);
-    setFormData({
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      originalPrice: product.originalPrice || 0,
-      category: product.category,
-      stockQuantity: product.stockQuantity || 0,
-      imageUrl: product.imageUrl || '',
-      isActive: product.active,
-    });
-    setShowModal(true);
+    dispatch({ type: 'START_EDIT', payload: product });
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to delete this product?')) return;
 
     try {
-      setError(null);
+      dispatch({ type: 'SET_ERROR', payload: null });
       await adminAPI.deleteProduct(id);
       loadProducts();
     } catch (err) {
       const apiError = err as ApiError;
-      setError(apiError.response?.data?.message || 'Failed to delete product');
+      dispatch({ 
+        type: 'SET_ERROR', 
+        payload: apiError.response?.data?.message || 'Failed to delete product' 
+      });
     }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      description: '',
-      price: 0,
-      originalPrice: 0,
-      category: '',
-      stockQuantity: 0,
-      imageUrl: '',
-      isActive: true,
-    });
-    setEditingProduct(null);
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    resetForm();
   };
 
   return (
@@ -163,7 +126,7 @@ const AdminProducts = () => {
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-white">Products Management</h2>
         <button
-          onClick={() => setShowModal(true)}
+          onClick={() => dispatch({ type: 'OPEN_MODAL' })}
           className="btn-primary flex items-center space-x-2"
         >
           <Plus size={20} />
@@ -171,9 +134,9 @@ const AdminProducts = () => {
         </button>
       </div>
 
-      {error && (
+      {state.error && (
         <div className="mb-4 p-4 bg-red-900/20 border border-red-900 rounded-lg text-red-400">
-          {error}
+          {state.error}
         </div>
       )}
 
@@ -185,22 +148,16 @@ const AdminProducts = () => {
               <input
                 type="text"
                 placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setCurrentPage(1);
-                }}
+                value={state.searchQuery}
+                onChange={(e) => dispatch({ type: 'SET_SEARCH_QUERY', payload: e.target.value })}
                 className="input w-full"
                 style={{ paddingLeft: '3rem', paddingRight: '1rem' }}
               />
             </div>
           </div>
           <select
-            value={selectedCategory}
-            onChange={(e) => {
-              setSelectedCategory(e.target.value);
-              setCurrentPage(1);
-            }}
+            value={state.selectedCategory}
+            onChange={(e) => dispatch({ type: 'SET_SELECTED_CATEGORY', payload: e.target.value })}
             className="input"
           >
             {categories.map((cat) => (
@@ -241,20 +198,20 @@ const AdminProducts = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
-              {isLoading ? (
+              {state.isLoading ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-8 text-center text-gray-400">
                     Loading...
                   </td>
                 </tr>
-              ) : products.length === 0 ? (
+              ) : state.products.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-8 text-center text-gray-400">
                     No products found
                   </td>
                 </tr>
               ) : (
-                products.map((product) => (
+                state.products.map((product) => (
                   <tr key={product.id} className="hover:bg-gray-800/50">
                     <td className="px-6 py-4">
                       <img
@@ -322,25 +279,25 @@ const AdminProducts = () => {
           </table>
         </div>
 
-        {totalPages > 1 && (
+        {state.totalPages > 1 && (
           <div className="p-4 border-t border-gray-800">
             <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
+              currentPage={state.currentPage}
+              totalPages={state.totalPages}
+              onPageChange={(page) => dispatch({ type: 'SET_CURRENT_PAGE', payload: page })}
             />
           </div>
         )}
       </div>
 
-      {showModal && (
+      {state.showModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-gray-900 rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold text-white">
-                {editingProduct ? 'Edit Product' : 'Add New Product'}
+                {state.editingProduct ? 'Edit Product' : 'Add New Product'}
               </h3>
-              <button onClick={handleCloseModal} className="text-gray-400 hover:text-white cursor-pointer">
+              <button onClick={() => dispatch({ type: 'CLOSE_MODAL' })} className="text-gray-400 hover:text-white cursor-pointer">
                 <X size={24} />
               </button>
             </div>
@@ -351,9 +308,9 @@ const AdminProducts = () => {
                   Product Image
                 </label>
                 <div className="flex items-center space-x-4">
-                  {formData.imageUrl && (
+                  {state.formData.imageUrl && (
                     <img
-                      src={formData.imageUrl}
+                      src={state.formData.imageUrl}
                       alt="Preview"
                       className="w-24 h-24 object-cover rounded"
                     />
@@ -362,7 +319,7 @@ const AdminProducts = () => {
                     <div className="flex items-center justify-center space-x-2 px-4 py-2 border border-gray-700 rounded-lg hover:border-blue-500 transition-colors">
                       <Upload size={20} className="text-gray-400" />
                       <span className="text-gray-400">
-                        {uploading ? 'Uploading...' : 'Upload Image'}
+                        {state.uploading ? 'Uploading...' : 'Upload Image'}
                       </span>
                     </div>
                     <input
@@ -370,7 +327,7 @@ const AdminProducts = () => {
                       accept="image/*"
                       onChange={handleImageUpload}
                       className="hidden"
-                      disabled={uploading}
+                      disabled={state.uploading}
                     />
                   </label>
                 </div>
@@ -381,8 +338,8 @@ const AdminProducts = () => {
                 </label>
                 <input
                   type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  value={state.formData.name}
+                  onChange={(e) => dispatch({ type: 'UPDATE_FORM_DATA', payload: { name: e.target.value } })}
                   className="input w-full"
                   required
                 />
@@ -393,8 +350,8 @@ const AdminProducts = () => {
                   Description *
                 </label>
                 <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  value={state.formData.description}
+                  onChange={(e) => dispatch({ type: 'UPDATE_FORM_DATA', payload: { description: e.target.value } })}
                   className="input w-full h-24"
                   required
                 />
@@ -405,8 +362,8 @@ const AdminProducts = () => {
                   Category *
                 </label>
                 <select
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  value={state.formData.category}
+                  onChange={(e) => dispatch({ type: 'UPDATE_FORM_DATA', payload: { category: e.target.value } })}
                   className="input w-full"
                   required
                 >
@@ -427,8 +384,8 @@ const AdminProducts = () => {
                   <input
                     type="number"
                     step="0.01"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+                    value={state.formData.price}
+                    onChange={(e) => dispatch({ type: 'UPDATE_FORM_DATA', payload: { price: parseFloat(e.target.value) } })}
                     className="input w-full"
                     required
                   />
@@ -440,9 +397,9 @@ const AdminProducts = () => {
                   <input
                     type="number"
                     step="0.01"
-                    value={formData.originalPrice}
+                    value={state.formData.originalPrice}
                     onChange={(e) =>
-                      setFormData({ ...formData, originalPrice: parseFloat(e.target.value) })
+                      dispatch({ type: 'UPDATE_FORM_DATA', payload: { originalPrice: parseFloat(e.target.value) } })
                     }
                     className="input w-full"
                   />
@@ -455,9 +412,9 @@ const AdminProducts = () => {
                 </label>
                 <input
                   type="number"
-                  value={formData.stockQuantity}
+                  value={state.formData.stockQuantity}
                   onChange={(e) =>
-                    setFormData({ ...formData, stockQuantity: parseInt(e.target.value) || 0 })
+                    dispatch({ type: 'UPDATE_FORM_DATA', payload: { stockQuantity: parseInt(e.target.value) || 0 } })
                   }
                   className="input w-full"
                   required
@@ -468,8 +425,8 @@ const AdminProducts = () => {
                 <input
                   type="checkbox"
                   id="isActive"
-                  checked={formData.isActive}
-                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                  checked={state.formData.isActive}
+                  onChange={(e) => dispatch({ type: 'UPDATE_FORM_DATA', payload: { isActive: e.target.checked } })}
                   className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
                 />
                 <label htmlFor="isActive" className="text-sm font-medium text-gray-400">
@@ -480,13 +437,13 @@ const AdminProducts = () => {
               <div className="flex justify-end space-x-4 pt-4">
                 <button
                   type="button"
-                  onClick={handleCloseModal}
+                  onClick={() => dispatch({ type: 'CLOSE_MODAL' })}
                   className="px-6 py-2 border border-gray-700 text-gray-400 rounded-lg hover:bg-gray-800"
                 >
                   Cancel
                 </button>
                 <button type="submit" className="btn-primary">
-                  {editingProduct ? 'Update Product' : 'Add Product'}
+                  {state.editingProduct ? 'Update Product' : 'Add Product'}
                 </button>
               </div>
             </form>

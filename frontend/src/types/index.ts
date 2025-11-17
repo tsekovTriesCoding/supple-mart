@@ -6,6 +6,8 @@ export * from './productsPage';
 
 export * from './adminOrders';
 
+export * from './adminProducts';
+
 export * from './auth';
 
 export * from './api';
