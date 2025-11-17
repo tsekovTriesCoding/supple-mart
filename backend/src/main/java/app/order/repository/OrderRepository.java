@@ -44,7 +44,7 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
             Pageable pageable
     );
 
-    @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.status IN ('DELIVERED', 'PROCESSING', 'SHIPPED')")
+    @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.status IN ('DELIVERED', 'PROCESSING', 'SHIPPED', 'PAID')")
     BigDecimal calculateTotalRevenue();
 
     @Query("SELECT COUNT(o) FROM Order o WHERE o.status = 'PENDING'")
@@ -62,6 +62,6 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     @Query("SELECT COUNT(o) FROM Order o WHERE o.user.id = :userId AND o.status = :status")
     Long countOrdersByUserAndStatus(@Param("userId") UUID userId, @Param("status") OrderStatus status);
 
-    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.user.id = :userId AND o.status = 'PAID'")
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.user.id = :userId AND o.status IN ('DELIVERED', 'PROCESSING', 'SHIPPED', 'PAID')")
     BigDecimal calculateTotalSpentByUser(@Param("userId") UUID userId);
 }
