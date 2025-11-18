@@ -1,4 +1,4 @@
-import type { AdminOrder } from './admin';
+import type { AdminOrder } from "../admin";
 
 export type AdminOrdersState = {
   orders: AdminOrder[];

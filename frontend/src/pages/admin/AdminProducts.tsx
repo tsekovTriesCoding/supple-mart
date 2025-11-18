@@ -6,15 +6,15 @@ import { adminAPI } from '../../lib/api/admin';
 import type { AdminProduct } from '../../types/admin';
 import type { ApiError } from '../../types/error';
 import { useProductCategories } from '../../hooks/useProducts';
-import { 
-  formatCategoryForDisplay, 
-  formatCategoryForUrl, 
-  urlCategoryToBackend 
+import {
+  formatCategoryForDisplay,
+  formatCategoryForUrl,
+  urlCategoryToBackend,
 } from '../../utils/categoryUtils';
-import { adminProductsReducer, initialState } from '../../reducers/adminProductsReducer';
+import { adminProductsReducer, productsInitialState } from '../../reducers/admin';
 
 const AdminProducts = () => {
-  const [state, dispatch] = useReducer(adminProductsReducer, initialState);
+  const [state, dispatch] = useReducer(adminProductsReducer, productsInitialState);
 
   const { data: categoriesData } = useProductCategories();
   const categories = ['all', ...(categoriesData || [])];

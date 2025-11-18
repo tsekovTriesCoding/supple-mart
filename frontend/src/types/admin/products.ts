@@ -1,4 +1,4 @@
-import type { AdminProduct, CreateProductRequest } from './admin';
+import type { AdminProduct, CreateProductRequest } from '../admin';
 
 export type AdminProductsState = {
   products: AdminProduct[];

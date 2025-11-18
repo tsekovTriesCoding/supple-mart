@@ -1,45 +1,43 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useReducer } from 'react';
 import { Users, Search, Shield, User, Calendar, Mail, UserCheck } from 'lucide-react';
 
 import { Pagination } from '../../components/Pagination';
 import { adminAPI } from '../../lib/api/admin';
-import type { AdminUser } from '../../types/admin';
+import { adminUsersReducer, usersInitialState } from '../../reducers/admin';
 
 const AdminUsers = () => {
-  const [users, setUsers] = useState<AdminUser[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalElements, setTotalElements] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState('all');
+  const [state, dispatch] = useReducer(adminUsersReducer, usersInitialState);
 
   const loadUsers = useCallback(async () => {
     try {
-      setLoading(true);
+      dispatch({ type: 'SET_LOADING', payload: true });
       const response = await adminAPI.getAllUsers({
-        page: currentPage,
+        page: state.currentPage,
         limit: 10,
-        search: searchQuery || undefined,
+        search: state.searchQuery || undefined,
       });
 
-      setUsers(response.content || []);
-      setTotalPages(response.totalPages || 0);
-      setTotalElements(response.totalElements || 0);
+      dispatch({
+        type: 'SET_USERS',
+        payload: {
+          users: response.content || [],
+          totalPages: response.totalPages || 0,
+          totalElements: response.totalElements || 0,
+        },
+      });
     } catch (error) {
       console.error('Failed to load users:', error);
-    } finally {
-      setLoading(false);
+      dispatch({ type: 'SET_LOADING', payload: false });
     }
-  }, [currentPage, searchQuery]);
+  }, [state.currentPage, state.searchQuery]);
 
   useEffect(() => {
     loadUsers();
   }, [loadUsers]);
 
-  const filteredUsers = roleFilter === 'all' 
-    ? users 
-    : users.filter(user => user.role.toLowerCase() === roleFilter.toLowerCase());
+  const filteredUsers = state.roleFilter === 'all' 
+    ? state.users 
+    : state.users.filter(user => user.role.toLowerCase() === state.roleFilter.toLowerCase());
 
   const getRoleBadgeColor = (role: string) => {
     return role === 'ADMIN' 
@@ -62,12 +60,11 @@ const AdminUsers = () => {
   };
 
   const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    setCurrentPage(1);
+    dispatch({ type: 'SET_SEARCH_QUERY', payload: query });
   };
 
-  const totalAdmins = users.filter(u => u.role === 'ADMIN').length;
-  const totalCustomers = users.filter(u => u.role === 'CUSTOMER').length;
+  const totalAdmins = state.users.filter(u => u.role === 'ADMIN').length;
+  const totalCustomers = state.users.filter(u => u.role === 'CUSTOMER').length;
 
   return (
     <div>
@@ -78,7 +75,7 @@ const AdminUsers = () => {
         </div>
         <div className="flex items-center space-x-2 text-gray-400">
           <Users size={20} />
-          <span className="text-sm">Total: {totalElements} users</span>
+          <span className="text-sm">Total: {state.totalElements} users</span>
         </div>
       </div>
 
@@ -87,7 +84,7 @@ const AdminUsers = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-400 text-sm">Total Users</p>
-              <p className="text-2xl font-bold text-white mt-1">{totalElements}</p>
+              <p className="text-2xl font-bold text-white mt-1">{state.totalElements}</p>
             </div>
             <div className="p-3 bg-blue-900/20 rounded-lg">
               <Users className="text-blue-400" size={24} />
@@ -128,7 +125,7 @@ const AdminUsers = () => {
               <input
                 type="text"
                 placeholder="Search by name or email..."
-                value={searchQuery}
+                value={state.searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="input w-full"
                 style={{ paddingLeft: '3rem', paddingRight: '1rem' }}
@@ -137,8 +134,8 @@ const AdminUsers = () => {
           </div>
 
           <select
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
+            value={state.roleFilter}
+            onChange={(e) => dispatch({ type: 'SET_ROLE_FILTER', payload: e.target.value })}
             className="input"
           >
             <option value="all">All Roles</option>
@@ -169,7 +166,7 @@ const AdminUsers = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-700">
-              {loading ? (
+              {state.loading ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center text-gray-400">
                     Loading users...
@@ -227,15 +224,15 @@ const AdminUsers = () => {
           </table>
         </div>
 
-        {totalPages > 1 && (
+        {state.totalPages > 1 && (
           <div className="flex flex-col items-center px-6 py-4 border-t border-gray-700 space-y-4">
             <div className="text-sm text-gray-400">
-              Showing {(currentPage - 1) * 10 + 1} to {Math.min(currentPage * 10, totalElements)} of {totalElements} users
+              Showing {(state.currentPage - 1) * 10 + 1} to {Math.min(state.currentPage * 10, state.totalElements)} of {state.totalElements} users
             </div>
             <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
+              currentPage={state.currentPage}
+              totalPages={state.totalPages}
+              onPageChange={(page) => dispatch({ type: 'SET_CURRENT_PAGE', payload: page })}
             />
           </div>
         )}

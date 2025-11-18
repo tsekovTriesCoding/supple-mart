@@ -1,4 +1,4 @@
-import type { AdminProductsState, AdminProductsAction } from '../types/adminProducts';
+import type { AdminProductsState, AdminProductsAction } from '../../types/admin/products';
 
 const defaultFormData = {
   name: '',

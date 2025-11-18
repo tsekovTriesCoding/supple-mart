@@ -4,10 +4,10 @@ import { Package, Search, Eye, Calendar, DollarSign, User } from 'lucide-react';
 import { Pagination } from '../../components/Pagination';
 import { adminAPI } from '../../lib/api/admin';
 import type { AdminOrder } from '../../types/admin';
-import { adminOrdersReducer, initialState } from '../../reducers/adminOrdersReducer';
+import { adminOrdersReducer, ordersInitialState } from '../../reducers/admin';
 
 const AdminOrders = () => {
-  const [state, dispatch] = useReducer(adminOrdersReducer, initialState);
+  const [state, dispatch] = useReducer(adminOrdersReducer, ordersInitialState);
 
   const statusOptions = ['all', 'pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled'];
 
@@ -269,8 +269,8 @@ const AdminOrders = () => {
             <div className="mb-6">
               <h4 className="text-lg font-semibold text-white mb-4">Order Items</h4>
               <div className="space-y-3">
-                {state.selectedOrder.items.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between bg-gray-800/50 p-4 rounded-lg">
+                {state.selectedOrder.items.map((item: { id: number; productName: string; quantity: number; price: number }, index: number) => (
+                  <div key={index} className="flex items-center justify-between bg-gray-800/50 p-4 rounded-lg">
                     <div className="flex-1">
                       <p className="text-white font-medium">{item.productName}</p>
                       <p className="text-sm text-gray-400">Quantity: {item.quantity}</p>

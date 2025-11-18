@@ -1,4 +1,4 @@
-import type { AdminOrdersState, AdminOrdersAction } from '../types/adminOrders';
+import type { AdminOrdersState, AdminOrdersAction } from '../../types/admin/orders';
 
 export const initialState: AdminOrdersState = {
   orders: [],
