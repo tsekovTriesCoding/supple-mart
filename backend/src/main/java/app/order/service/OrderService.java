@@ -15,6 +15,7 @@ import app.order.model.Order;
 import app.order.model.OrderItem;
 import app.order.model.OrderStatus;
 import app.order.repository.OrderRepository;
+import app.product.service.ProductService;
 import app.user.model.User;
 import app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -27,10 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -41,6 +40,7 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final CartService cartService;
     private final UserService userService;
+    private final ProductService productService;
 
     @Transactional(readOnly = true)
     public OrdersResponse getUserOrders(UUID userId, String statusStr, LocalDateTime startDate,
@@ -63,19 +63,7 @@ public class OrderService {
                 userId, status, startDate, endDate, pageable
         );
 
-        return OrdersResponse.builder()
-                .orders(orderPage.getContent().stream()
-                        .map(orderMapper::toOrderDTO)
-                        .collect(Collectors.toList()))
-                .currentPage(orderPage.getNumber())
-                .totalPages(orderPage.getTotalPages())
-                .totalElements(orderPage.getTotalElements())
-                .size(orderPage.getSize())
-                .first(orderPage.isFirst())
-                .last(orderPage.isLast())
-                .hasNext(orderPage.hasNext())
-                .hasPrevious(orderPage.hasPrevious())
-                .build();
+        return orderMapper.toOrdersResponse(orderPage);
     }
 
     @Transactional(readOnly = true)
@@ -100,38 +88,25 @@ public class OrderService {
             throw new BadRequestException("Cart is empty. Cannot create order with no items");
         }
 
+        for (CartItem cartItem : cart.getItems()) {
+            productService.reserveInventory(cartItem.getProduct().getId(), cartItem.getQuantity());
+        }
+
         BigDecimal totalAmount = cart.getItems().stream()
                 .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         String orderNumber = generateOrderNumber();
 
-        Order order = Order.builder()
-                .user(user)
-                .orderNumber(orderNumber)
-                .totalAmount(totalAmount)
-                .status(OrderStatus.PENDING)
-                .shippingAddress(request.getShippingAddress())
-                .build();
-
-        List<OrderItem> orderItems = new ArrayList<>();
-        for (CartItem cartItem : cart.getItems()) {
-            OrderItem orderItem = OrderItem.builder()
-                    .order(order)
-                    .product(cartItem.getProduct())
-                    .quantity(cartItem.getQuantity())
-                    .price(cartItem.getPrice())
-                    .build();
-            orderItems.add(orderItem);
-        }
-        order.setItems(orderItems);
+        Order order = orderMapper.toOrder(user, orderNumber, totalAmount,
+                request.getShippingAddress(), cart.getItems());
 
         Order savedOrder = orderRepository.save(order);
 
         cartService.clearCartAfterOrder(userId);
         log.info("Cart cleared for user: {} after placing order: {}", userId, orderNumber);
 
-        log.info("Order created with PENDING status: {} for user: {}", orderNumber, userId);
+        log.info("Order created with inventory reserved: {} for user: {}", orderNumber, userId);
 
         return orderMapper.toOrderDTO(savedOrder);
     }
@@ -186,8 +161,14 @@ public class OrderService {
             throw new BadRequestException("Cannot cancel a delivered order");
         }
 
+        for (OrderItem orderItem : order.getItems()) {
+            productService.releaseInventory(orderItem.getProduct().getId(), orderItem.getQuantity());
+        }
+
         order.setStatus(OrderStatus.CANCELLED);
         Order savedOrder = orderRepository.save(order);
+
+        log.info("Order {} cancelled and inventory released for user: {}", orderId, userId);
 
         return orderMapper.toOrderDTO(savedOrder);
     }
@@ -253,16 +234,8 @@ public class OrderService {
         Long cancelledCount = orderRepository.countOrdersByUserAndStatus(userId, OrderStatus.CANCELLED);
         BigDecimal totalSpent = orderRepository.calculateTotalSpentByUser(userId);
 
-        return OrderStatsDTO.builder()
-                .totalOrders(totalOrders)
-                .pendingCount(pendingCount)
-                .paidCount(paidCount)
-                .processingCount(processingCount)
-                .shippedCount(shippedCount)
-                .deliveredCount(deliveredCount)
-                .cancelledCount(cancelledCount)
-                .totalSpent(totalSpent)
-                .build();
+        return orderMapper.toOrderStatsDTO(totalOrders, pendingCount, paidCount, processingCount,
+                shippedCount, deliveredCount, cancelledCount, totalSpent);
     }
 
     private String generateOrderNumber() {
