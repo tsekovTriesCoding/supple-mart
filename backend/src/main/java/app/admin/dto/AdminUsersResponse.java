@@ -13,11 +13,9 @@ import java.util.List;
 @AllArgsConstructor
 public class AdminUsersResponse {
     private List<AdminUserDTO> content;
-    private Integer number;
-    private Integer size;
-    private Integer totalPages;
-    private Long totalElements;
-    private Boolean first;
-    private Boolean last;
+    private int currentPage;
+    private int pageSize;
+    private int totalPages;
+    private long totalElements;
 }
 

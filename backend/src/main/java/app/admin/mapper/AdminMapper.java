@@ -70,10 +70,10 @@ public interface AdminMapper {
         List<AdminProductDTO> productDTOs = toAdminProductDTOList(productPage.getContent(), salesMap);
 
         return AdminProductPageResponse.builder()
-                .products(productDTOs)
+                .content(productDTOs)
                 .currentPage(productPage.getNumber())
                 .totalPages(productPage.getTotalPages())
-                .totalItems(productPage.getTotalElements())
+                .totalElements(productPage.getTotalElements())
                 .pageSize(productPage.getSize())
                 .build();
     }
@@ -98,15 +98,11 @@ public interface AdminMapper {
                 .toList();
 
         return AdminOrdersResponse.builder()
-                .orders(orders)
+                .content(orders)
                 .currentPage(orderPage.getNumber())
+                .pageSize(orderPage.getSize())
                 .totalPages(orderPage.getTotalPages())
                 .totalElements(orderPage.getTotalElements())
-                .size(orderPage.getSize())
-                .first(orderPage.isFirst())
-                .last(orderPage.isLast())
-                .hasNext(orderPage.hasNext())
-                .hasPrevious(orderPage.hasPrevious())
                 .build();
     }
 
@@ -124,12 +120,10 @@ public interface AdminMapper {
 
         return AdminUsersResponse.builder()
                 .content(users)
-                .number(userPage.getNumber())
-                .size(userPage.getSize())
+                .currentPage(userPage.getNumber())
+                .pageSize(userPage.getSize())
                 .totalPages(userPage.getTotalPages())
                 .totalElements(userPage.getTotalElements())
-                .first(userPage.isFirst())
-                .last(userPage.isLast())
                 .build();
     }
 }
