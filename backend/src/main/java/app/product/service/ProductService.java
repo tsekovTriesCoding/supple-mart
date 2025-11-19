@@ -110,4 +110,47 @@ public class ProductService {
 
         productRepository.delete(product);
     }
+
+    /**
+     * Reserves inventory when an order is created
+     */
+    @Transactional
+    public void reserveInventory(UUID productId, Integer quantity) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+        if (product.getStockQuantity() < quantity) {
+            throw new BadRequestException("Insufficient stock for product: " + product.getName()
+                    + ". Available: " + product.getStockQuantity() + ", Requested: " + quantity);
+        }
+
+        product.setStockQuantity(product.getStockQuantity() - quantity);
+
+        if (product.getStockQuantity() == 0) {
+            log.info("Product {} is now out of stock", productId);
+        }
+
+        productRepository.save(product);
+        log.debug("Reserved {} units of product {}. Remaining stock: {}",
+                quantity, productId, product.getStockQuantity());
+    }
+
+    /**
+     * Releases inventory when an order is cancelled
+     */
+    @Transactional
+    public void releaseInventory(UUID productId, Integer quantity) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+        product.setStockQuantity(product.getStockQuantity() + quantity);
+
+        if (product.getStockQuantity() > 0) {
+            log.info("Product {} restocked. Current stock: {}", productId, product.getStockQuantity());
+        }
+
+        productRepository.save(product);
+        log.debug("Released {} units of product {}. Current stock: {}",
+                quantity, productId, product.getStockQuantity());
+    }
 }
