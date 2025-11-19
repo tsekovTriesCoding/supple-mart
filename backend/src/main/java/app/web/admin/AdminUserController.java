@@ -20,11 +20,12 @@ public class AdminUserController {
     @GetMapping
     public ResponseEntity<AdminUsersResponse> getAllUsers(
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) String role,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size
     ) {
-        log.info("Admin: Fetching all users - page: {}, size: {}", page, size);
-        AdminUsersResponse response = adminUserService.getAllUsers(search, page, size);
+        log.info("Admin: Fetching all users - page: {}, size: {}, role: {}", page, size, role);
+        AdminUsersResponse response = adminUserService.getAllUsers(search, role, page, size);
         return ResponseEntity.ok(response);
     }
 }

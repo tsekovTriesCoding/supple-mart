@@ -38,11 +38,11 @@ export interface UpdateProductRequest {
 }
 
 export interface AdminProductsResponse {
-  products: AdminProduct[];
-  totalPages: number;
-  totalElements: number;
+  content: AdminProduct[];
   currentPage: number;
   pageSize: number;
+  totalPages: number;
+  totalElements: number;
 }
 
 export interface DashboardStats {
@@ -79,4 +79,20 @@ export interface AdminUser {
   role: string;
   createdAt: string;
   lastLogin?: string;
+}
+
+export interface AdminOrdersResponse {
+  content: AdminOrder[];
+  currentPage: number;
+  pageSize: number;
+  totalPages: number;
+  totalElements: number;
+}
+
+export interface AdminUsersResponse {
+  content: AdminUser[];
+  currentPage: number;
+  pageSize: number;
+  totalPages: number;
+  totalElements: number;
 }

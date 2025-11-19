@@ -1,5 +1,6 @@
 package app.user.repository;
 
+import app.user.model.Role;
 import app.user.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,9 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             "(:search IS NULL OR :search = '' OR " +
             "LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
             "LOWER(u.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-            "LOWER(u.lastName) LIKE LOWER(CONCAT('%', :search, '%')))")
-    Page<User> findUsersWithSearch(@Param("search") String search, Pageable pageable);
+            "LOWER(u.lastName) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
+            "(:role IS NULL OR u.role = :role)")
+    Page<User> findUsersWithSearch(@Param("search") String search,
+                                     @Param("role") Role role,
+                                     Pageable pageable);
 }

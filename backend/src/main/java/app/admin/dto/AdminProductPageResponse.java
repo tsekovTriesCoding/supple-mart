@@ -12,10 +12,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminProductPageResponse {
-    private List<AdminProductDTO> products;
+    private List<AdminProductDTO> content;
     private int currentPage;
-    private int totalPages;
-    private long totalItems;
     private int pageSize;
+    private int totalPages;
+    private long totalElements;
 }
 

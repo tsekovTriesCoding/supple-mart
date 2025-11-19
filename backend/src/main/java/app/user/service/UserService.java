@@ -4,6 +4,7 @@ import app.exception.ResourceNotFoundException;
 import app.user.dto.RegisterRequest;
 import app.user.dto.UpdateUserProfileRequest;
 import app.user.mapper.UserMapper;
+import app.user.model.Role;
 import app.user.model.User;
 import app.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -70,9 +71,12 @@ public class UserService implements UserDetailsService {
         return userRepository.count();
     }
 
-    public Page<User> getAllUsers(String search, Integer page, Integer size) {
+    public Page<User> getAllUsers(String search, String role, Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        return userRepository.findUsersWithSearch(search, pageable);
+
+        Role roleEnum = (role != null && !role.isEmpty()) ? Role.valueOf(role) : null;
+
+        return userRepository.findUsersWithSearch(search, roleEnum, pageable);
     }
 
     @Transactional

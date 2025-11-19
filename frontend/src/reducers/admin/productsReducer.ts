@@ -19,6 +19,7 @@ export const initialState: AdminProductsState = {
   selectedCategory: 'all',
   currentPage: 1,
   totalPages: 0,
+  totalElements: 0,
   showModal: false,
   editingProduct: null,
   uploading: false,
@@ -37,6 +38,7 @@ export function adminProductsReducer(
         ...state,
         products: action.payload.products,
         totalPages: action.payload.totalPages,
+        totalElements: action.payload.totalElements,
         isLoading: false,
       };
     case 'SET_ERROR':

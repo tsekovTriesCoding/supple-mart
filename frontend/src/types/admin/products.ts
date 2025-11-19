@@ -8,6 +8,7 @@ export type AdminProductsState = {
   selectedCategory: string;
   currentPage: number;
   totalPages: number;
+  totalElements: number;
   showModal: boolean;
   editingProduct: AdminProduct | null;
   uploading: boolean;
@@ -16,7 +17,7 @@ export type AdminProductsState = {
 
 export type AdminProductsAction =
   | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_PRODUCTS'; payload: { products: AdminProduct[]; totalPages: number } }
+  | { type: 'SET_PRODUCTS'; payload: { products: AdminProduct[]; totalPages: number; totalElements: number } }
   | { type: 'SET_ERROR'; payload: string | null }
   | { type: 'SET_SEARCH_QUERY'; payload: string }
   | { type: 'SET_SELECTED_CATEGORY'; payload: string }

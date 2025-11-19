@@ -79,7 +79,7 @@ const AdminDashboard = () => {
 
             <div className="card p-6 hover:border-yellow-500 transition-colors">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-gray-400 text-sm font-medium">Total Customers</h3>
+                <h3 className="text-gray-400 text-sm font-medium">Total Users</h3>
                 <Users className="text-yellow-400" size={24} />
               </div>
               <p className="text-3xl font-bold text-white">{stats.totalCustomers}</p>

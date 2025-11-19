@@ -2,6 +2,8 @@ import { api } from './index';
 import type { 
   AdminProduct, 
   AdminProductsResponse,
+  AdminOrdersResponse,
+  AdminUsersResponse,
   CreateProductRequest, 
   UpdateProductRequest,
   DashboardStats
@@ -40,14 +42,12 @@ class AdminAPI {
 
     const { data } = await api.get(`admin/products?${queryParams.toString()}`);
     
-    console.log('Admin API Response:', data);
-    
     return {
-      products: data.products || data.content || [],
-      totalPages: data.totalPages || 0,
-      totalElements: data.totalElements || 0,
-      currentPage: (data.number !== undefined ? data.number : (data.currentPage || 0)) + 1,
-      pageSize: data.size || data.pageSize || 10
+      content: data.content || data.products || [],
+      totalPages: data.totalPages,
+      totalElements: data.totalElements,
+      currentPage: data.number + 1,
+      pageSize: data.size
     };
   }
 
@@ -82,7 +82,7 @@ class AdminAPI {
     page?: number;
     limit?: number;
     status?: string;
-  }) {
+  }): Promise<AdminOrdersResponse> {
     const queryParams = new URLSearchParams();
     
     if (params?.page !== undefined) queryParams.append('page', (params.page - 1).toString());
@@ -91,11 +91,11 @@ class AdminAPI {
 
     const { data } = await api.get(`admin/orders?${queryParams.toString()}`);
     return {
-      content: data.orders,
+      content: data.orders || data.content || [],
+      currentPage: data.number + 1,
+      pageSize: data.size,
       totalPages: data.totalPages,
-      totalElements: data.totalElements,
-      currentPage: data.currentPage + 1,
-      pageSize: data.size
+      totalElements: data.totalElements
     };
   }
 
@@ -107,20 +107,22 @@ class AdminAPI {
     page?: number;
     limit?: number;
     search?: string;
-  }) {
+    role?: string;
+  }): Promise<AdminUsersResponse> {
     const queryParams = new URLSearchParams();
     
     if (params?.page !== undefined) queryParams.append('page', (params.page - 1).toString());
     if (params?.limit) queryParams.append('size', params.limit.toString());
     if (params?.search) queryParams.append('search', params.search);
+    if (params?.role) queryParams.append('role', params.role);
 
     const { data } = await api.get(`admin/users?${queryParams.toString()}`);
     return {
       content: data.content,
-      totalPages: data.totalPages,
-      totalElements: data.totalElements,
       currentPage: data.number + 1,
-      pageSize: data.size
+      pageSize: data.size,
+      totalPages: data.totalPages,
+      totalElements: data.totalElements
     };
   }
 }

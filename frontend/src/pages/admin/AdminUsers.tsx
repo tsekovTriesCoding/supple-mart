@@ -15,6 +15,7 @@ const AdminUsers = () => {
         page: state.currentPage,
         limit: 10,
         search: state.searchQuery || undefined,
+        role: state.roleFilter === 'all' ? undefined : state.roleFilter,
       });
 
       dispatch({
@@ -29,15 +30,11 @@ const AdminUsers = () => {
       console.error('Failed to load users:', error);
       dispatch({ type: 'SET_LOADING', payload: false });
     }
-  }, [state.currentPage, state.searchQuery]);
+  }, [state.currentPage, state.searchQuery, state.roleFilter]);
 
   useEffect(() => {
     loadUsers();
   }, [loadUsers]);
-
-  const filteredUsers = state.roleFilter === 'all' 
-    ? state.users 
-    : state.users.filter(user => user.role.toLowerCase() === state.roleFilter.toLowerCase());
 
   const getRoleBadgeColor = (role: string) => {
     return role === 'ADMIN' 
@@ -139,8 +136,8 @@ const AdminUsers = () => {
             className="input"
           >
             <option value="all">All Roles</option>
-            <option value="customer">Customers</option>
-            <option value="admin">Administrators</option>
+            <option value="CUSTOMER">Customers</option>
+            <option value="ADMIN">Administrators</option>
           </select>
 
           <button
@@ -172,14 +169,14 @@ const AdminUsers = () => {
                     Loading users...
                   </td>
                 </tr>
-              ) : filteredUsers.length === 0 ? (
+              ) : state.users.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center text-gray-400">
                     No users found
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map((user) => (
+                state.users.map((user) => (
                   <tr key={user.id} className="hover:bg-gray-800/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-3">
@@ -225,7 +222,7 @@ const AdminUsers = () => {
         </div>
 
         {state.totalPages > 1 && (
-          <div className="flex flex-col items-center px-6 py-4 border-t border-gray-700 space-y-4">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-700">
             <div className="text-sm text-gray-400">
               Showing {(state.currentPage - 1) * 10 + 1} to {Math.min(state.currentPage * 10, state.totalElements)} of {state.totalElements} users
             </div>
