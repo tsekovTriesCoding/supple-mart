@@ -164,10 +164,15 @@ const Products = () => {
           <>
             <div className="flex justify-between items-center mb-6">
               <p className="text-gray-400">
-                Showing{' '}
-                {data?.products.length ? (currentPage - 1) * 12 + 1 : 0}-
-                {Math.min(currentPage * 12, data?.totalElements || 0)} of{' '}
-                {data?.totalElements || 0} products
+                {data?.products.length ? (
+                  <>
+                    Showing {data.currentPage * data.size + 1}-
+                    {Math.min((data.currentPage + 1) * data.size, data.totalElements)} of{' '}
+                    {data.totalElements} products
+                  </>
+                ) : (
+                  'No products found'
+                )}
               </p>
             </div>
 
