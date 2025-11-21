@@ -1,85 +1,76 @@
-import { useState, useEffect } from 'react';
+import { useReducer, useEffect, useCallback } from 'react';
 
 import { ordersAPI } from '../lib/api/orders';
-import type { Order, OrderFilters, OrdersResponse, OrderStats } from '../types/order';
+import type { OrderFilters, OrdersResponse } from '../types/order';
+import { ordersReducer, createInitialOrdersState } from '../reducers/ordersReducer';
 
 export const useOrders = (initialFilters?: OrderFilters) => {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [stats, setStats] = useState<OrderStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [statsLoading, setStatsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [totalElements, setTotalElements] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [filters, setFilters] = useState<OrderFilters>(initialFilters || {});
+  const [state, dispatch] = useReducer(ordersReducer, createInitialOrdersState(initialFilters));
 
-  const fetchOrders = async (newFilters?: OrderFilters) => {
+  const fetchOrders = useCallback(async (newFilters?: OrderFilters) => {
     try {
-      setLoading(true);
-      setError(null);
+      dispatch({ type: 'FETCH_START' });
       
-      const filtersToUse = newFilters || filters;
+      const filtersToUse = newFilters || state.filters;
       const response: OrdersResponse = await ordersAPI.getUserOrders(filtersToUse);
       
-      setOrders(response.orders);
-      setTotalElements(response.totalElements);
-      setTotalPages(response.totalPages);
-      setCurrentPage(response.currentPage);
+      dispatch({
+        type: 'FETCH_SUCCESS',
+        payload: {
+          orders: response.orders,
+          totalElements: response.totalElements,
+          totalPages: response.totalPages,
+          currentPage: response.currentPage,
+        },
+      });
     } catch (err) {
       console.error('Error fetching orders:', err);
-      setError('Failed to load orders');
-    } finally {
-      setLoading(false);
+      dispatch({ type: 'FETCH_ERROR', payload: 'Failed to load orders' });
     }
-  };
+  }, [state.filters]);
 
-  const getOrderById = async (orderId: string) => {
+  const getOrderById = useCallback(async (orderId: string) => {
     try {
-      setError(null);
+      dispatch({ type: 'CLEAR_ERROR' });
       const order = await ordersAPI.getOrderById(orderId);
       return order;
     } catch (err) {
       console.error('Error fetching order:', err);
-      setError('Failed to load order details');
+      dispatch({ type: 'FETCH_ERROR', payload: 'Failed to load order details' });
       throw err;
     }
-  };
+  }, []);
 
-  const cancelOrder = async (orderId: string) => {
+  const cancelOrder = useCallback(async (orderId: string) => {
     try {
-      setError(null);
+      dispatch({ type: 'CLEAR_ERROR' });
       const updatedOrder = await ordersAPI.cancelOrder(orderId);
       
-      setOrders(prev => 
-        prev.map(order => 
-          order.id === orderId ? updatedOrder : order
-        )
-      );
+      dispatch({ type: 'UPDATE_ORDER', payload: updatedOrder });
       
       return updatedOrder;
     } catch (err) {
       console.error('Error cancelling order:', err);
-      setError('Failed to cancel order');
+      dispatch({ type: 'FETCH_ERROR', payload: 'Failed to cancel order' });
       throw err;
     }
-  };
+  }, []);
 
-  const trackOrder = async (orderNumber: string) => {
+  const trackOrder = useCallback(async (orderNumber: string) => {
     try {
-      setError(null);
+      dispatch({ type: 'CLEAR_ERROR' });
       const order = await ordersAPI.trackOrder(orderNumber);
       return order;
     } catch (err) {
       console.error('Error tracking order:', err);
-      setError('Failed to track order');
+      dispatch({ type: 'FETCH_ERROR', payload: 'Failed to track order' });
       throw err;
     }
-  };
+  }, []);
 
-  const requestReturn = async (orderId: string, reason: string, items?: string[]) => {
+  const requestReturn = useCallback(async (orderId: string, reason: string, items?: string[]) => {
     try {
-      setError(null);
+      dispatch({ type: 'CLEAR_ERROR' });
       const result = await ordersAPI.requestReturn(orderId, reason, items);
       
       await fetchOrders();
@@ -87,70 +78,49 @@ export const useOrders = (initialFilters?: OrderFilters) => {
       return result;
     } catch (err) {
       console.error('Error requesting return:', err);
-      setError('Failed to request return');
+      dispatch({ type: 'FETCH_ERROR', payload: 'Failed to request return' });
       throw err;
     }
-  };
+  }, [fetchOrders]);
 
-  const updateFilters = (newFilters: OrderFilters) => {
-    const updatedFilters = { ...filters, ...newFilters };
-    setFilters(updatedFilters);
-    fetchOrders(updatedFilters);
-  };
+  const updateFilters = useCallback((newFilters: OrderFilters) => {
+    dispatch({ type: 'SET_FILTERS', payload: newFilters });
+    fetchOrders(newFilters);
+  }, [fetchOrders]);
 
-  const refreshOrders = () => {
+  const refreshOrders = useCallback(() => {
     fetchOrders();
-  };
+  }, [fetchOrders]);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
-      setStatsLoading(true);
+      dispatch({ type: 'STATS_FETCH_START' });
       const statsData = await ordersAPI.getOrderStats();
-      setStats(statsData);
+      dispatch({ type: 'STATS_FETCH_SUCCESS', payload: statsData });
     } catch (err) {
       console.error('Error fetching order stats:', err);
-    } finally {
-      setStatsLoading(false);
+      dispatch({ type: 'STATS_FETCH_ERROR' });
     }
-  };
+  }, []);
 
   useEffect(() => {
-    const loadOrders = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const response: OrdersResponse = await ordersAPI.getUserOrders(filters);
-        
-        setOrders(response.orders);
-        setTotalElements(response.totalElements);
-        setTotalPages(response.totalPages);
-        setCurrentPage(response.currentPage);
-      } catch (err) {
-        console.error('Error fetching orders:', err);
-        setError('Failed to load orders');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadOrders();
-  }, [filters]);
+    fetchOrders();
+  }, [state.filters, fetchOrders]);
 
   useEffect(() => {
     fetchStats();
-  }, []);
+  }, [fetchStats]);
 
   return {
-    orders,
-    stats,
-    loading,
-    statsLoading,
-    error,
-    totalElements,
-    totalPages,
-    currentPage,
-    filters,
+    orders: state.orders,
+    stats: state.stats,
+    loading: state.loading,
+    statsLoading: state.statsLoading,
+    error: state.error,
+    totalElements: state.totalElements,
+    totalPages: state.totalPages,
+    currentPage: state.currentPage,
+    filters: state.filters,
     getOrderById,
     cancelOrder,
     trackOrder,

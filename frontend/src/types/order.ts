@@ -59,3 +59,26 @@ export interface OrderStats {
   cancelledCount: number;
   totalSpent: number;
 }
+
+export interface OrdersState {
+  orders: Order[];
+  stats: OrderStats | null;
+  loading: boolean;
+  statsLoading: boolean;
+  error: string | null;
+  totalElements: number;
+  totalPages: number;
+  currentPage: number;
+  filters: OrderFilters;
+}
+
+export type OrdersAction =
+  | { type: 'FETCH_START' }
+  | { type: 'FETCH_SUCCESS'; payload: { orders: Order[]; totalElements: number; totalPages: number; currentPage: number } }
+  | { type: 'FETCH_ERROR'; payload: string }
+  | { type: 'STATS_FETCH_START' }
+  | { type: 'STATS_FETCH_SUCCESS'; payload: OrderStats }
+  | { type: 'STATS_FETCH_ERROR' }
+  | { type: 'UPDATE_ORDER'; payload: Order }
+  | { type: 'SET_FILTERS'; payload: OrderFilters }
+  | { type: 'CLEAR_ERROR' };
