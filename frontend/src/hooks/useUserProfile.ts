@@ -1,60 +1,52 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { userAPI, type UserProfileResponse, type UpdateUserProfileRequest } from '../lib/api/user';
 import type { ApiError } from '../types/error';
 
+const USER_PROFILE_QUERY_KEY = 'user-profile';
+
 export const useUserProfile = () => {
-  const [user, setUser] = useState<UserProfileResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchProfile = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await userAPI.getProfile();
-      setUser(data);
-      
-    } catch (err) {
-      const apiError = err as ApiError;
-      setError(apiError.response?.data?.message || 'Failed to load profile');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    data: user = null,
+    isLoading: loading,
+    error: queryError,
+  } = useQuery({
+    queryKey: [USER_PROFILE_QUERY_KEY],
+    queryFn: userAPI.getProfile,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    retry: 1,
+  });
 
-  const updateProfile = async (profileData: UpdateUserProfileRequest) => {
-    try {
-      setError(null);
-      const updatedUser = await userAPI.updateProfile(profileData);
-      setUser(updatedUser);
-      
-      localStorage.setItem('user', JSON.stringify({
-        id: updatedUser.id,
-        email: updatedUser.email,
-        firstName: updatedUser.firstName,
-        lastName: updatedUser.lastName,
-        role: updatedUser.role,
-      }));
-      
-      return updatedUser;
-    } catch (err) {
-      const apiError = err as ApiError;
-      const errorMsg = apiError.response?.data?.message || 'Failed to update profile';
-      setError(errorMsg);
-      throw new Error(errorMsg);
-    }
-  };
+  const updateMutation = useMutation({
+    mutationFn: (profileData: UpdateUserProfileRequest) => userAPI.updateProfile(profileData),
+    onSuccess: (updatedUser) => {
+      queryClient.setQueryData<UserProfileResponse>([USER_PROFILE_QUERY_KEY], updatedUser);
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
+      localStorage.setItem(
+        'user',
+        JSON.stringify({
+          id: updatedUser.id,
+          email: updatedUser.email,
+          firstName: updatedUser.firstName,
+          lastName: updatedUser.lastName,
+          role: updatedUser.role,
+        })
+      );
+    },
+  });
+
+  const error = queryError
+    ? ((queryError as ApiError).response?.data?.message || 'Failed to load profile')
+    : null;
 
   return {
     user,
     loading,
     error,
-    updateProfile,
-    refreshProfile: fetchProfile,
+    updateProfile: updateMutation.mutateAsync,
+    refreshProfile: () => queryClient.invalidateQueries({ queryKey: [USER_PROFILE_QUERY_KEY] }),
   };
 };
