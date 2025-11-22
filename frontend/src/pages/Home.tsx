@@ -1,12 +1,12 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 
 import { ArrowRight, Star, ShoppingBag, Truck, Shield, Headphones, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useProducts, type Product } from '../hooks/useProducts';
-import ProductDetail from '../components/Product/ProductDetail';
 import { formatCategoryForDisplay } from '../utils/categoryUtils';
 
 const Home = () => {
+  const navigate = useNavigate();
   const { data: productsData, isLoading, error } = useProducts({
     limit: 8,
     sortBy: 'createdAt',
@@ -18,17 +18,8 @@ const Home = () => {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
-  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
-
-  const handleProductClick = (productId: number) => {
-    setSelectedProductId(productId);
-    setIsProductModalOpen(true);
-  };
-
-  const handleCloseProductModal = () => {
-    setIsProductModalOpen(false);
-    setSelectedProductId(null);
+  const handleProductClick = (productId: string) => {
+    navigate(`/products/${productId}`);
   };
 
   useEffect(() => {
@@ -277,14 +268,6 @@ const Home = () => {
           </Link>
         </div>
       </section>
-
-      {selectedProductId && (
-        <ProductDetail
-          productId={selectedProductId}
-          isOpen={isProductModalOpen}
-          onClose={handleCloseProductModal}
-        />
-      )}
     </div>
   )
 }

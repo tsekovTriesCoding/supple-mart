@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Filter, Grid, List, Search } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 
-import { ProductDetail, ProductCard, ProductFilters, ProductListItem } from '../components/Product';
+import { ProductCard, ProductFilters } from '../components/Product';
 import { Pagination } from '../components/Pagination';
 import { useProducts, useProductCategories, type Product } from '../hooks/useProducts';
-import { useCart } from '../hooks/useCart';
+import { useCart, useWishlist } from '../hooks';
 import type { ApiError } from '../types/error';
 import {
   formatCategoryFromUrl,
@@ -15,7 +15,9 @@ import {
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { addItem } = useCart();
+  const { checkIsInWishlist, toggleWishlist: toggleWishlistHook } = useWishlist();
   
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -25,9 +27,7 @@ const Products = () => {
   const [priceRange, setPriceRange] = useState({ min: '', max: '' });
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [addingToCartId, setAddingToCartId] = useState<number | null>(null);
+  const [addingToCartId, setAddingToCartId] = useState<string | null>(null);
 
   useEffect(() => {
     const categoryFromUrl = searchParams.get('category');
@@ -92,14 +92,8 @@ const Products = () => {
     setSearchParams(newSearchParams);
   };
 
-  const handleProductClick = (productId: number) => {
-    setSelectedProductId(productId);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedProductId(null);
+  const handleProductClick = (productId: string) => {
+    navigate(`/products/${productId}`);
   };
 
   const addToCart = async (product: Product) => {
@@ -107,7 +101,7 @@ const Products = () => {
 
     setAddingToCartId(product.id);
     try {
-      await addItem(product.id.toString(), 1);
+      await addItem(product.id, 1);
       console.log(`Added ${product.name} to cart`);
     } catch (error) {
       console.error('Failed to add item to cart:', error);
@@ -116,8 +110,8 @@ const Products = () => {
     }
   };
 
-  const toggleWishlist = (product: Product) => {
-    console.log('Toggle wishlist for product:', product.id);
+  const toggleWishlist = async (product: Product) => {
+    await toggleWishlistHook(product.id);
   };
 
   const sortOptions = [
@@ -259,37 +253,25 @@ const Products = () => {
               </p>
             </div>
 
-            {viewMode === 'grid' ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-                {data?.products.map((product: Product, index: number) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    onProductClick={handleProductClick}
-                    onAddToCart={addToCart}
-                    onToggleWishlist={toggleWishlist}
-                    isLoading={false}
-                    isAddingToCart={addingToCartId === product.id}
-                    animationDelay={index * 0.05}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-4 mb-8">
-                {data?.products.map((product: Product, index: number) => (
-                  <ProductListItem
-                    key={product.id}
-                    product={product}
-                    onProductClick={handleProductClick}
-                    onAddToCart={addToCart}
-                    onToggleWishlist={toggleWishlist}
-                    isLoading={false}
-                    isAddingToCart={addingToCartId === product.id}
-                    animationDelay={index * 0.05}
-                  />
-                ))}
-              </div>
-            )}
+            <div className={viewMode === 'grid' 
+              ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8'
+              : 'space-y-4 mb-8'
+            }>
+              {data?.products.map((product: Product, index: number) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  variant={viewMode === 'grid' ? 'card' : 'list'}
+                  onProductClick={handleProductClick}
+                  onAddToCart={addToCart}
+                  onToggleWishlist={toggleWishlist}
+                  isLoading={false}
+                  isAddingToCart={addingToCartId === product.id}
+                  isInWishlist={checkIsInWishlist(product.id)}
+                  animationDelay={index * 0.05}
+                />
+              ))}
+            </div>
 
             {data && (
               <Pagination
@@ -301,14 +283,6 @@ const Products = () => {
           </>
         )}
       </section>
-
-      {selectedProductId && (
-        <ProductDetail
-          productId={selectedProductId}
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-        />
-      )}
     </div>
   );
 };

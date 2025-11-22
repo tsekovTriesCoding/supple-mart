@@ -1,17 +1,17 @@
 import { Star, Edit3, Trash2, Calendar, Package } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+
 import { reviewsAPI } from '../lib/api/reviews';
 import ReviewModal from '../components/ReviewModal';
-import ProductDetail from '../components/Product/ProductDetail';
 import type { ReviewResponseDTO } from '../types/review';
 
 const Reviews = () => {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingReview, setEditingReview] = useState<ReviewResponseDTO | null>(null);
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
-  const [isProductDetailOpen, setIsProductDetailOpen] = useState(false);
 
   const { data: reviews = [], isLoading: loading, error } = useQuery({
     queryKey: ['user-reviews'],
@@ -82,13 +82,7 @@ const Reviews = () => {
   };
 
   const handleViewProduct = (productId: string) => {
-    setSelectedProductId(productId);
-    setIsProductDetailOpen(true);
-  };
-
-  const handleCloseProductDetail = () => {
-    setIsProductDetailOpen(false);
-    setSelectedProductId(null);
+    navigate(`/products/${productId}`);
   };
 
   const handleDeleteReview = async (reviewId: string) => {
@@ -292,14 +286,6 @@ const Reviews = () => {
           reviewId={editingReview.id}
           initialRating={editingReview.rating}
           initialComment={editingReview.comment}
-        />
-      )}
-
-      {selectedProductId && (
-        <ProductDetail
-          productId={selectedProductId}
-          isOpen={isProductDetailOpen}
-          onClose={handleCloseProductDetail}
         />
       )}
     </div>
