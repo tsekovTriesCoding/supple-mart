@@ -2,22 +2,18 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Elements } from '@stripe/react-stripe-js';
 import { ArrowLeft, Package, MapPin, AlertCircle, CheckCircle, ShoppingBag } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
 
-import { useCart, formatCartPrice, usePaymentIntent } from '../hooks';
+import { useCart, formatCartPrice } from '../hooks';
 import { ordersAPI } from '../lib/api/orders';
+import { paymentsAPI } from '../lib/api/payments';
+import type { PaymentIntentRequest } from '../types/payment';
 import PaymentForm from '../components/PaymentForm';
 import { getStripe } from '../lib/stripe';
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { items, totalPrice, refreshCart } = useCart();
-  const {
-    clientSecret,
-    isCreatingIntent,
-    error: paymentError,
-    createPaymentIntent,
-    reset
-  } = usePaymentIntent();
 
   const [error, setError] = useState<string | null>(null);
   const [orderSuccess, setOrderSuccess] = useState(false);
@@ -32,14 +28,28 @@ const Checkout = () => {
     phone: ''
   });
 
+  const createPaymentMutation = useMutation({
+    mutationFn: (request: PaymentIntentRequest) => 
+      paymentsAPI.createPaymentIntent(request),
+    onError: (err) => {
+      const error = err as { response?: { data?: { message?: string } } };
+      const errorMessage = error.response?.data?.message || 'Failed to initialize payment';
+      setError(errorMessage);
+    },
+  });
+
   const isLoggedIn = !!localStorage.getItem('token');
   const stripePromise = getStripe();
+  const clientSecret = createPaymentMutation.data?.clientSecret || null;
+  const isCreatingIntent = createPaymentMutation.isPending;
+  const paymentError = createPaymentMutation.error ? 
+    ((createPaymentMutation.error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Payment error') : null;
 
   useEffect(() => {
     return () => {
-      reset();
+      createPaymentMutation.reset();
     };
-  }, [reset]);
+  }, [createPaymentMutation]);
 
   if (items.length === 0 && !orderSuccess) {
     return (
@@ -97,7 +107,7 @@ const Checkout = () => {
       console.log('Order created:', order.id);
 
       console.log('Creating payment intent for order:', order.id);
-      await createPaymentIntent({
+      await createPaymentMutation.mutateAsync({
         orderId: order.id,
         currency: 'usd'
       });

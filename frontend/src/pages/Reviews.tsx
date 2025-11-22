@@ -1,16 +1,64 @@
 import { Star, Edit3, Trash2, Calendar, Package } from 'lucide-react';
-import { useState } from 'react';
-import { useReviews } from '../hooks/useReviews';
+import { useState, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { reviewsAPI } from '../lib/api/reviews';
 import ReviewModal from '../components/ReviewModal';
 import ProductDetail from '../components/Product/ProductDetail';
 import type { ReviewResponseDTO } from '../types/review';
 
 const Reviews = () => {
-  const { reviews, loading, error, getReviewStats, deleteReview, refreshReviews } = useReviews();
+  const queryClient = useQueryClient();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingReview, setEditingReview] = useState<ReviewResponseDTO | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [isProductDetailOpen, setIsProductDetailOpen] = useState(false);
+
+  const { data: reviews = [], isLoading: loading, error } = useQuery({
+    queryKey: ['user-reviews'],
+    queryFn: reviewsAPI.getUserReviews,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (reviewId: string) => reviewsAPI.deleteReview(reviewId),
+    onSuccess: (_, reviewId) => {
+      queryClient.setQueryData<ReviewResponseDTO[]>(['user-reviews'], (old = []) =>
+        old.filter((review) => review.id !== reviewId)
+      );
+    },
+  });
+
+  const reviewStats = useMemo(() => {
+    if (reviews.length === 0) {
+      return {
+        totalReviews: 0,
+        averageRating: 0,
+        ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+      };
+    }
+
+    const ratingDistribution = reviews.reduce(
+      (acc, review) => {
+        acc[review.rating as keyof typeof acc]++;
+        return acc;
+      },
+      { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+    );
+
+    const averageRating =
+      reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
+
+    return {
+      totalReviews: reviews.length,
+      averageRating: Number(averageRating.toFixed(1)),
+      ratingDistribution,
+    };
+  }, [reviews]);
+
+  const getReviewStats = () => reviewStats;
+  const deleteReview = (reviewId: string) => deleteMutation.mutateAsync(reviewId);
+  const refreshReviews = () => queryClient.invalidateQueries({ queryKey: ['user-reviews'] });
 
   const renderStars = (rating: number) => {
     return (
@@ -88,7 +136,7 @@ const Reviews = () => {
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0a0a' }}>
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white mb-4">Error Loading Reviews</h1>
-          <p className="text-red-400">{error}</p>
+          <p className="text-red-400">{error?.message || 'Failed to load reviews'}</p>
         </div>
       </div>
     );
@@ -216,7 +264,7 @@ const Reviews = () => {
 
                   <div className="text-center">
                     <div className="text-2xl font-bold text-white">
-                      {stats.ratingDistribution.reduce((sum, count) => sum + count, 0)}
+                      {Object.values(stats.ratingDistribution).reduce((sum, count) => sum + count, 0)}
                     </div>
                     <div className="text-gray-400 text-sm">All Reviews</div>
                   </div>
