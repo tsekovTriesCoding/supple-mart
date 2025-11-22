@@ -11,6 +11,8 @@ import Contact from './pages/Contact';
 import Account from './pages/Account';
 import Orders from './pages/Orders';
 import Reviews from './pages/Reviews';
+import Wishlist from './pages/Wishlist';
+import ProductDetail from './pages/ProductDetail';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
@@ -45,6 +47,7 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/products" element={<Products />} />
+                  <Route path="/products/:productId" element={<ProductDetail />} />
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/about" element={<About />} />
@@ -52,6 +55,7 @@ function App() {
                   <Route path="/account" element={<Account />} />
                   <Route path="/orders" element={<Orders />} />
                   <Route path="/reviews" element={<Reviews />} />
+                  <Route path="/wishlist" element={<Wishlist />} />
                 </Routes>
               </main>
             </div>

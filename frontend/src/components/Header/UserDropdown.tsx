@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, ChevronDown, Settings, Package, Star, LogOut, UserCircle, Shield } from 'lucide-react';
+import { User, ChevronDown, Settings, Package, Star, LogOut, UserCircle, Shield, Heart } from 'lucide-react';
 
 import { authAPI } from '../../lib/api';
 import { useCart } from '../../hooks/useCart';
@@ -139,6 +139,15 @@ export const UserDropdown = ({ isLoggedIn, user, onAuthModalOpen }: UserDropdown
               >
                 <Star className="w-5 h-5" />
                 <span>Reviews</span>
+              </Link>
+
+              <Link
+                to="/wishlist"
+                className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                onClick={() => setIsUserDropdownOpen(false)}
+              >
+                <Heart className="w-5 h-5" />
+                <span>Wishlist</span>
               </Link>
             </div>
 
