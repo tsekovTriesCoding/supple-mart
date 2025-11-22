@@ -1,50 +1,90 @@
-import { useReducer, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { User, Mail, Loader, Calendar, AlertCircle } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { useUserProfile } from '../hooks/useUserProfile';
+import { userAPI, type UpdateUserProfileRequest } from '../lib/api/user';
+import type { ApiError } from '../types/error';
 import { PasswordChangeModal } from '../components/PasswordChangeModal';
-import { accountReducer, initialAccountState } from '../reducers/accountReducer';
 
 const Account = () => {
-  const { user, loading, error, updateProfile } = useUserProfile();
-  const [state, dispatch] = useReducer(accountReducer, initialAccountState);
+  const queryClient = useQueryClient();
+  
+  const {
+    data: user = null,
+    isLoading: loading,
+    error: queryError,
+  } = useQuery({
+    queryKey: ['user-profile'],
+    queryFn: userAPI.getProfile,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    retry: 1,
+  });
+
+  const updateProfileMutation = useMutation({
+    mutationFn: (profileData: UpdateUserProfileRequest) => userAPI.updateProfile(profileData),
+    onSuccess: (updatedUser) => {
+      queryClient.setQueryData(['user-profile'], updatedUser);
+      
+      localStorage.setItem(
+        'user',
+        JSON.stringify({
+          id: updatedUser.id,
+          email: updatedUser.email,
+          firstName: updatedUser.firstName,
+          lastName: updatedUser.lastName,
+          role: updatedUser.role,
+        })
+      );
+      
+      setIsEditing(false);
+      setUpdateSuccess(true);
+    },
+    onError: (err) => {
+      const error = err as ApiError;
+      setUpdateError(error.response?.data?.message || 'Failed to update profile');
+    },
+  });
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({ firstName: '', lastName: '' });
+  const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+
+  const error = queryError
+    ? ((queryError as ApiError).response?.data?.message || 'Failed to load profile')
+    : null;
 
   useEffect(() => {
-    if (state.updateSuccess) {
+    if (updateSuccess) {
       const timer = setTimeout(() => {
-        dispatch({ type: 'CLEAR_SUCCESS' });
+        setUpdateSuccess(false);
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [state.updateSuccess]);
+  }, [updateSuccess]);
 
   const handleEdit = () => {
     if (user) {
-      dispatch({
-        type: 'START_EDITING',
-        payload: {
-          firstName: user.firstName,
-          lastName: user.lastName,
-        },
+      setFormData({
+        firstName: user.firstName,
+        lastName: user.lastName,
       });
+      setIsEditing(true);
+      setUpdateError(null);
     }
   };
 
   const handleCancel = () => {
-    dispatch({ type: 'CANCEL_EDITING' });
+    setIsEditing(false);
+    setUpdateError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch({ type: 'UPDATE_START' });
-
-    try {
-      await updateProfile(state.formData);
-      dispatch({ type: 'UPDATE_SUCCESS' });
-    } catch (err) {
-      const error = err as Error;
-      dispatch({ type: 'UPDATE_ERROR', payload: error.message });
-    }
+    setUpdateError(null);
+    updateProfileMutation.mutate(formData);
   };
 
   if (loading) {
@@ -94,17 +134,17 @@ const Account = () => {
             )}
           </div>
 
-          {state.updateSuccess && (
+          {updateSuccess && (
             <div className="mb-6 p-4 bg-green-900/20 border border-green-900 rounded-lg text-green-400 flex items-center">
               <AlertCircle className="w-5 h-5 mr-2" />
               Profile updated successfully!
             </div>
           )}
 
-          {state.updateError && (
+          {updateError && (
             <div className="mb-6 p-4 bg-red-900/20 border border-red-900 rounded-lg text-red-400 flex items-center">
               <AlertCircle className="w-5 h-5 mr-2" />
-              {state.updateError}
+              {updateError}
             </div>
           )}
           
@@ -115,7 +155,7 @@ const Account = () => {
                 Profile Information
               </h2>
 
-              {!state.isEditing ? (
+              {!isEditing ? (
                 <>
                   <div className="space-y-4">
                     <div className="flex items-center space-x-3">
@@ -166,8 +206,8 @@ const Account = () => {
                     <label className="block text-sm text-gray-400 mb-2">First Name</label>
                     <input
                       type="text"
-                      value={state.formData.firstName}
-                      onChange={(e) => dispatch({ type: 'UPDATE_FORM', payload: { firstName: e.target.value } })}
+                      value={formData.firstName}
+                      onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                       className="input w-full"
                       required
                     />
@@ -177,8 +217,8 @@ const Account = () => {
                     <label className="block text-sm text-gray-400 mb-2">Last Name</label>
                     <input
                       type="text"
-                      value={state.formData.lastName}
-                      onChange={(e) => dispatch({ type: 'UPDATE_FORM', payload: { lastName: e.target.value } })}
+                      value={formData.lastName}
+                      onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                       className="input w-full"
                       required
                     />
@@ -201,15 +241,15 @@ const Account = () => {
                   <div className="flex space-x-3">
                     <button
                       type="submit"
-                      disabled={state.isUpdating}
+                      disabled={updateProfileMutation.isPending}
                       className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                     >
-                      {state.isUpdating ? 'Saving...' : 'Save Changes'}
+                      {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
                     </button>
                     <button
                       type="button"
                       onClick={handleCancel}
-                      disabled={state.isUpdating}
+                      disabled={updateProfileMutation.isPending}
                       className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                     >
                       Cancel
@@ -224,7 +264,7 @@ const Account = () => {
               
               <div className="space-y-3">
                 <button 
-                  onClick={() => dispatch({ type: 'OPEN_PASSWORD_MODAL' })}
+                  onClick={() => setShowPasswordModal(true)}
                   className="w-full text-left p-3 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer"
                 >
                   <h3 className="text-white font-medium">Change Password</h3>
@@ -247,8 +287,8 @@ const Account = () => {
       </div>
 
       <PasswordChangeModal 
-        isOpen={state.showPasswordModal} 
-        onClose={() => dispatch({ type: 'CLOSE_PASSWORD_MODAL' })} 
+        isOpen={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
       />
     </div>
   );

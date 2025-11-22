@@ -1,27 +1,58 @@
 import { useState } from 'react';
 import { Package, Clock, CheckCircle, XCircle, Eye, Truck, Search } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { useOrders } from '../hooks/useOrders';
+import { ordersAPI } from '../lib/api/orders';
 import { Pagination } from '../components/Pagination';
-import type { Order } from '../types/order';
+import type { Order, OrderFilters } from '../types/order';
 
 const Orders = () => {
-  const { 
-    orders, 
-    stats,
-    loading, 
-    error, 
-    totalElements, 
-    currentPage, 
-    totalPages,
-    updateFilters, 
-    cancelOrder
-  } = useOrders();
-  
+  const queryClient = useQueryClient();
+  const [filters, setFilters] = useState<OrderFilters>({});
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isOrderDetailOpen, setIsOrderDetailOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const {
+    data: ordersData,
+    isLoading: loading,
+    error: queryError,
+  } = useQuery({
+    queryKey: ['orders', filters],
+    queryFn: () => ordersAPI.getUserOrders(filters),
+    staleTime: 30000,
+  });
+
+  const {
+    data: stats = null,
+  } = useQuery({
+    queryKey: ['order-stats'],
+    queryFn: ordersAPI.getOrderStats,
+    staleTime: 60000,
+  });
+
+  const cancelOrderMutation = useMutation({
+    mutationFn: (orderId: string) => ordersAPI.cancelOrder(orderId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['order-stats'] });
+    },
+  });
+
+  const orders = ordersData?.orders || [];
+  const totalElements = ordersData?.totalElements || 0;
+  const totalPages = ordersData?.totalPages || 0;
+  const currentPage = ordersData?.currentPage || 1;
+  const error = queryError ? 'Failed to load orders' : null;
+  
+  const updateFilters = (newFilters: OrderFilters) => {
+    setFilters({ ...filters, ...newFilters });
+  };
+  
+  const cancelOrder = (orderId: string) => {
+    return cancelOrderMutation.mutateAsync(orderId);
+  };
 
   const getStatusIcon = (status: string) => {
     const upperStatus = status.toUpperCase();
