@@ -71,23 +71,19 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   const error = loginMutation.error || registerMutation.error;
 
   useEffect(() => {
-    if (isOpen) {
+    if (!isOpen) {
       setAuthMode('login');
       setShowPassword(false);
       setShowConfirmPassword(false);
       loginForm.reset();
       registerForm.reset();
-      loginMutation.reset();
-      registerMutation.reset();
     }
-  }, [isOpen, loginForm, registerForm, loginMutation, registerMutation]);
+  }, [isOpen, loginForm, registerForm]);
 
   const switchMode = () => {
     setAuthMode(authMode === 'login' ? 'register' : 'login');
     setShowPassword(false);
     setShowConfirmPassword(false);
-    loginMutation.reset();
-    registerMutation.reset();
   };
 
   useEffect(() => {

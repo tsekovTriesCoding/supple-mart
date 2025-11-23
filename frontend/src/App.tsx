@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 
 import Header from './components/Header';
-import AdminRoute from './components/AdminRoute';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import Home from './pages/Home';
 import Products from './pages/Products';
 import Cart from './pages/Cart';
@@ -27,9 +27,9 @@ function App() {
         <Route
           path="/admin"
           element={
-            <AdminRoute>
+            <ProtectedRoute requiredRole="ADMIN">
               <AdminLayout />
-            </AdminRoute>
+            </ProtectedRoute>
           }
         >
           <Route index element={<AdminDashboard />} />
@@ -49,12 +49,12 @@ function App() {
                   <Route path="/products" element={<Products />} />
                   <Route path="/products/:productId" element={<ProductDetail />} />
                   <Route path="/cart" element={<Cart />} />
-                  <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
                   <Route path="/about" element={<About />} />
                   <Route path="/contact" element={<Contact />} />
-                  <Route path="/account" element={<Account />} />
-                  <Route path="/orders" element={<Orders />} />
-                  <Route path="/reviews" element={<Reviews />} />
+                  <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+                  <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+                  <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
                   <Route path="/wishlist" element={<Wishlist />} />
                 </Routes>
               </main>

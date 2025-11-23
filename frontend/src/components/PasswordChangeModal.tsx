@@ -33,8 +33,8 @@ export const PasswordChangeModal = ({ isOpen, onClose }: PasswordChangeModalProp
 
   const isLoading = changePasswordMutation.isPending;
   const success = changePasswordMutation.isSuccess;
-  const mutationError = changePasswordMutation.error as Error | null;
-  const error = validationError || (mutationError ? (mutationError.message || 'Failed to change password') : null);
+  const mutationError = changePasswordMutation.error as { response?: { data?: { message?: string } } } | null;
+  const error = validationError || (mutationError?.response?.data?.message || (mutationError ? 'Failed to change password' : null));
 
   const validatePassword = () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {

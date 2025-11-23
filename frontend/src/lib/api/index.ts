@@ -39,11 +39,18 @@ api.interceptors.response.use(
       method: error.config?.method
     });
     
+    // Don't logout on validation errors like wrong password
     if (error.response?.status === 401 || error.response?.status === 403) {
-      console.log('Authentication failed, clearing tokens');
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('user');
+      const errorMessage = error.response?.data?.message || '';
+      const isValidationError = errorMessage.toLowerCase().includes('password') || 
+                                errorMessage.toLowerCase().includes('incorrect');
+      
+      if (!isValidationError) {
+        console.log('Authentication failed, clearing tokens');
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+      }
     }
     return Promise.reject(error);
   }
