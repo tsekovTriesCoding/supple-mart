@@ -329,16 +329,18 @@ const AdminProducts = () => {
           </table>
         </div>
 
-        {totalPages > 1 && (
+        {totalElements > 0 && (
           <div className="flex items-center justify-between px-6 py-4 border-t border-gray-800">
             <div className="text-sm text-gray-400">
               Showing {(currentPage - 1) * 10 + 1} to {Math.min(currentPage * 10, totalElements)} of {totalElements} products
             </div>
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
+            {totalPages > 1 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            )}
           </div>
         )}
       </div>
