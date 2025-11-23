@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { User, Mail, Loader, Calendar, AlertCircle } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -38,7 +38,6 @@ const Account = () => {
       );
       
       setIsEditing(false);
-      setUpdateSuccess(true);
     },
     onError: (err) => {
       const error = err as ApiError;
@@ -48,22 +47,12 @@ const Account = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({ firstName: '', lastName: '' });
-  const [updateSuccess, setUpdateSuccess] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   const error = queryError
     ? ((queryError as ApiError).response?.data?.message || 'Failed to load profile')
     : null;
-
-  useEffect(() => {
-    if (updateSuccess) {
-      const timer = setTimeout(() => {
-        setUpdateSuccess(false);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [updateSuccess]);
 
   const handleEdit = () => {
     if (user) {
@@ -134,7 +123,7 @@ const Account = () => {
             )}
           </div>
 
-          {updateSuccess && (
+          {updateProfileMutation.isSuccess && !isEditing && (
             <div className="mb-6 p-4 bg-green-900/20 border border-green-900 rounded-lg text-green-400 flex items-center">
               <AlertCircle className="w-5 h-5 mr-2" />
               Profile updated successfully!

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { CreditCard, Lock } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
 
 interface PaymentFormProps {
   onPaymentSuccess: () => Promise<void>;
@@ -9,24 +10,13 @@ interface PaymentFormProps {
 export const PaymentForm = ({ onPaymentSuccess }: PaymentFormProps) => {
   const stripe = useStripe();
   const elements = useElements();
-  const [error, setError] = useState<string | null>(null);
-  const [processing, setProcessing] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('🔘 Form submitted!');
-
-    if (!stripe || !elements) {
-      console.error('Stripe not ready:', { stripe: !!stripe, elements: !!elements });
-      setError('Stripe has not loaded yet. Please wait.');
-      return;
-    }
-
-    setProcessing(true);
-    setError(null);
-
-    try {
-      console.log('Confirming payment with Stripe...');
+  const confirmPaymentMutation = useMutation({
+    mutationFn: async () => {
+      if (!stripe || !elements) {
+        throw new Error('Stripe has not loaded yet. Please wait.');
+      }
 
       const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
         elements,
@@ -37,25 +27,34 @@ export const PaymentForm = ({ onPaymentSuccess }: PaymentFormProps) => {
       });
 
       if (stripeError) {
-        console.error('Stripe payment error:', stripeError);
         throw new Error(stripeError.message || 'Payment failed');
       }
 
       if (paymentIntent && paymentIntent.status === 'succeeded') {
-        console.log('Payment succeeded with Stripe:', paymentIntent.id);
-        
-        await onPaymentSuccess();
+        return paymentIntent;
       } else {
-        console.error('Unexpected payment status:', paymentIntent?.status);
         throw new Error('Payment was not completed successfully.');
       }
-
-    } catch (err) {
-      console.error('Payment error:', err);
-      const error = err as Error;
-      setError(error.message || 'Payment failed');
-      setProcessing(false);
+    },
+    onSuccess: async () => {
+      await onPaymentSuccess();
     }
+  });
+
+  const processing = confirmPaymentMutation.isPending;
+  const mutationError = confirmPaymentMutation.error as Error | null;
+  const error = validationError || (mutationError ? mutationError.message : null);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!stripe || !elements) {
+      setValidationError('Stripe has not loaded yet. Please wait.');
+      return;
+    }
+
+    setValidationError(null);
+    confirmPaymentMutation.mutate();
   };
 
   const isDisabled = !stripe || !elements || processing;

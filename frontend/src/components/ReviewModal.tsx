@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Star, X, Send, AlertCircle } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
 
 import { reviewsAPI } from '../lib/api/reviews';
 import type { CreateReviewRequest, UpdateReviewRequest } from '../types/review';
@@ -32,8 +33,35 @@ const ReviewModal = ({
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  const createReviewMutation = useMutation({
+    mutationFn: (data: CreateReviewRequest) => reviewsAPI.createReview(data),
+    onSuccess: () => {
+      setRating(0);
+      setComment('');
+      setValidationError(null);
+      onReviewSubmitted?.();
+      onClose();
+    }
+  });
+
+  const updateReviewMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateReviewRequest }) => 
+      reviewsAPI.updateReview(id, data),
+    onSuccess: () => {
+      setRating(0);
+      setComment('');
+      setValidationError(null);
+      onReviewSubmitted?.();
+      onClose();
+    }
+  });
+
+  const isSubmitting = createReviewMutation.isPending || updateReviewMutation.isPending;
+  const mutationError = createReviewMutation.error || updateReviewMutation.error;
+  const error = validationError || (mutationError ? 
+    `Failed to ${editMode ? 'update' : 'submit'} review. Please try again.` : null);
 
   useEffect(() => {
     if (editMode && isOpen) {
@@ -43,57 +71,45 @@ const ReviewModal = ({
       setRating(0);
       setComment('');
     }
-    setError(null);
-  }, [editMode, isOpen, initialRating, initialComment]);
+    setValidationError(null);
+    createReviewMutation.reset();
+    updateReviewMutation.reset();
+  }, [editMode, isOpen, initialRating, initialComment, createReviewMutation, updateReviewMutation]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (rating === 0) {
-      setError('Please select a rating');
+      setValidationError('Please select a rating');
       return;
     }
 
     if (comment.trim().length < 10) {
-      setError('Please write at least 10 characters in your review');
+      setValidationError('Please write at least 10 characters in your review');
       return;
     }
 
     if (comment.trim().length > 500) {
-      setError('Review must be 500 characters or less');
+      setValidationError('Review must be 500 characters or less');
       return;
     }
 
-    setIsSubmitting(true);
-    setError(null);
+    setValidationError(null);
 
-    try {
-      if (editMode && reviewId) {
-        const updateData: UpdateReviewRequest = {
+    if (editMode && reviewId) {
+      updateReviewMutation.mutate({
+        id: reviewId,
+        data: {
           rating,
           comment: comment.trim()
-        };
-        await reviewsAPI.updateReview(reviewId, updateData);
-      } else {
-        const createData: CreateReviewRequest = {
-          productId,
-          rating,
-          comment: comment.trim()
-        };
-        await reviewsAPI.createReview(createData);
-      }
-      
-      setRating(0);
-      setComment('');
-      setError(null);
-      
-      onReviewSubmitted?.();
-      onClose();
-    } catch (err) {
-      console.error('Error submitting review:', err);
-      setError(`Failed to ${editMode ? 'update' : 'submit'} review. Please try again.`);
-    } finally {
-      setIsSubmitting(false);
+        }
+      });
+    } else {
+      createReviewMutation.mutate({
+        productId,
+        rating,
+        comment: comment.trim()
+      });
     }
   };
 
@@ -101,7 +117,7 @@ const ReviewModal = ({
     if (!isSubmitting) {
       setRating(0);
       setComment('');
-      setError(null);
+      setValidationError(null);
       onClose();
     }
   };

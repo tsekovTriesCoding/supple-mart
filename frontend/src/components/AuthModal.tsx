@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useMutation } from '@tanstack/react-query';
 import { X, Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 
 import { authAPI } from '../lib/api';
@@ -17,8 +18,6 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const loginForm = useForm<LoginForm>({
     defaultValues: {
@@ -37,22 +36,58 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
     },
   });
 
+  const loginMutation = useMutation({
+    mutationFn: (data: LoginForm) => authAPI.login(data.email, data.password),
+    onSuccess: (response) => {
+      localStorage.setItem('token', response.accessToken);
+      localStorage.setItem('refreshToken', response.refreshToken);
+      localStorage.setItem('user', JSON.stringify(response.user));
+      
+      onSuccess?.();
+      onClose();
+      window.location.reload();
+    },
+  });
+
+  const registerMutation = useMutation({
+    mutationFn: (data: RegisterForm) => authAPI.register({
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      password: data.password,
+    }),
+    onSuccess: (response) => {
+      localStorage.setItem('token', response.accessToken);
+      localStorage.setItem('refreshToken', response.refreshToken);
+      localStorage.setItem('user', JSON.stringify(response.user));
+      
+      onSuccess?.();
+      onClose();
+      window.location.reload();
+    },
+  });
+
+  const isLoading = loginMutation.isPending || registerMutation.isPending;
+  const error = loginMutation.error || registerMutation.error;
+
   useEffect(() => {
     if (isOpen) {
       setAuthMode('login');
-      setError(null);
       setShowPassword(false);
       setShowConfirmPassword(false);
       loginForm.reset();
       registerForm.reset();
+      loginMutation.reset();
+      registerMutation.reset();
     }
-  }, [isOpen, loginForm, registerForm]);
+  }, [isOpen, loginForm, registerForm, loginMutation, registerMutation]);
 
   const switchMode = () => {
     setAuthMode(authMode === 'login' ? 'register' : 'login');
-    setError(null);
     setShowPassword(false);
     setShowConfirmPassword(false);
+    loginMutation.reset();
+    registerMutation.reset();
   };
 
   useEffect(() => {
@@ -72,91 +107,37 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   }, [isOpen, onClose]);
 
   const handleLogin = async (data: LoginForm) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await authAPI.login(data.email, data.password);
-      
-      localStorage.setItem('token', response.accessToken);
-      localStorage.setItem('refreshToken', response.refreshToken);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      
-      onSuccess?.();
-      onClose();
-      window.location.reload();
-    } catch (err: unknown) {
-      const axiosError = err as {
-        response?: { 
-          status?: number; 
-          data?: { 
-            message?: string;
-            errors?: Record<string, string>;
-          } 
-        };
-      };
-
-      if (axiosError.response?.data?.errors) {
-        const validationErrors = axiosError.response.data.errors;
-        const errorMessages = Object.values(validationErrors).join('\n');
-        setError(errorMessages);
-      } else if (axiosError.response?.data?.message) {
-        setError(axiosError.response.data.message);
-      } else {
-        setError('Login failed. Please try again.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    loginMutation.mutate(data);
   };
 
   const handleRegister = async (data: RegisterForm) => {
     if (data.password !== data.confirmPassword) {
-      setError('Passwords do not match');
+      registerForm.setError('confirmPassword', {
+        type: 'manual',
+        message: 'Passwords do not match',
+      });
       return;
     }
+    registerMutation.mutate(data);
+  };
 
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await authAPI.register({
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        password: data.password,
-      });
-
-      localStorage.setItem('token', response.accessToken);
-      localStorage.setItem('refreshToken', response.refreshToken);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      
-      onSuccess?.();
-      onClose();
-      window.location.reload();
-    } catch (err: unknown) {
-      const axiosError = err as {
-        response?: { 
-          status?: number; 
-          data?: { 
-            message?: string;
-            errors?: Record<string, string>;
-          } 
-        };
+  const getErrorMessage = (err: unknown): string => {
+    const axiosError = err as {
+      response?: { 
+        data?: { 
+          message?: string;
+          errors?: Record<string, string>;
+        } 
       };
+    };
 
-      if (axiosError.response?.data?.errors) {
-        const validationErrors = axiosError.response.data.errors;
-        const errorMessages = Object.values(validationErrors).join('\n');
-        setError(errorMessages);
-      } else if (axiosError.response?.data?.message) {
-        setError(axiosError.response.data.message);
-      } else {
-        setError('Registration failed. Please try again.');
-      }
-    } finally {
-      setIsLoading(false);
+    if (axiosError.response?.data?.errors) {
+      const validationErrors = axiosError.response.data.errors;
+      return Object.values(validationErrors).join('\n');
+    } else if (axiosError.response?.data?.message) {
+      return axiosError.response.data.message;
     }
+    return authMode === 'login' ? 'Login failed. Please try again.' : 'Registration failed. Please try again.';
   };
 
   if (!isOpen) return null;
@@ -184,7 +165,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
           </div>
           {error && (
             <div className="mb-4 p-3 bg-red-900/50 border border-red-600 rounded-lg">
-              <p className="text-red-400 text-sm whitespace-pre-line">{error}</p>
+              <p className="text-red-400 text-sm whitespace-pre-line">{getErrorMessage(error)}</p>
             </div>
           )}
           {authMode === 'login' && (

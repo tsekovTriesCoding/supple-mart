@@ -1,32 +1,21 @@
 import { BarChart3, Package, ShoppingBag, Users, AlertTriangle } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 
-import { adminAPI, type DashboardStats } from '../../lib/api/admin';
+import { adminAPI } from '../../lib/api/admin';
 import type { ApiError } from '../../types/error';
 
 const AdminDashboard = () => {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: stats, isLoading, error } = useQuery({
+    queryKey: ['admin-dashboard-stats'],
+    queryFn: () => adminAPI.getDashboardStats(),
+    staleTime: 30 * 1000,
+    refetchOnWindowFocus: true,
+  });
 
-  useEffect(() => {
-    loadStats();
-  }, []);
-
-  const loadStats = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const data = await adminAPI.getDashboardStats();
-      setStats(data);
-    } catch (err) {
-      const apiError = err as ApiError;
-      setError(apiError.response?.data?.message || 'Failed to load dashboard stats');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const errorMessage = error 
+    ? ((error as ApiError).response?.data?.message || 'Failed to load dashboard stats')
+    : null;
 
   return (
     <>
@@ -35,9 +24,9 @@ const AdminDashboard = () => {
         <p className="text-gray-400">Welcome to your admin panel</p>
       </div>
 
-      {error && (
+      {errorMessage && (
         <div className="mb-6 p-4 bg-red-900/20 border border-red-900 rounded-lg text-red-400">
-          {error}
+          {errorMessage}
         </div>
       )}
 

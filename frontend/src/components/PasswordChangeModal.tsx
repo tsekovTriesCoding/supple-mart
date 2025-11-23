@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Lock, Eye, EyeOff, X, AlertCircle, CheckCircle } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
 
 import { userAPI } from '../lib/api/user';
 
@@ -17,61 +18,59 @@ export const PasswordChangeModal = ({ isOpen, onClose }: PasswordChangeModalProp
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  const changePasswordMutation = useMutation({
+    mutationFn: (data: { currentPassword: string; newPassword: string }) =>
+      userAPI.changePassword(data),
+    onSuccess: () => {
+      setTimeout(() => {
+        onClose();
+        resetForm();
+      }, 2000);
+    }
+  });
+
+  const isLoading = changePasswordMutation.isPending;
+  const success = changePasswordMutation.isSuccess;
+  const mutationError = changePasswordMutation.error as Error | null;
+  const error = validationError || (mutationError ? (mutationError.message || 'Failed to change password') : null);
 
   const validatePassword = () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setError('New passwords do not match');
+      setValidationError('New passwords do not match');
       return false;
     }
 
     if (passwordData.newPassword.length < 6) {
-      setError('Password must be at least 6 characters long');
+      setValidationError('Password must be at least 6 characters long');
       return false;
     }
 
     if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(passwordData.newPassword)) {
-      setError('Password must contain uppercase, lowercase, and number');
+      setValidationError('Password must contain uppercase, lowercase, and number');
       return false;
     }
 
     return true;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(false);
+    setValidationError(null);
 
     if (!validatePassword()) return;
 
-    setIsLoading(true);
-
-    try {
-      await userAPI.changePassword({
-        currentPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword,
-      });
-
-      setSuccess(true);
-      setTimeout(() => {
-        onClose();
-        resetForm();
-      }, 2000);
-    } catch (err) {
-      const error = err as Error;
-      setError(error.message || 'Failed to change password');
-    } finally {
-      setIsLoading(false);
-    }
+    changePasswordMutation.mutate({
+      currentPassword: passwordData.currentPassword,
+      newPassword: passwordData.newPassword,
+    });
   };
 
   const resetForm = () => {
     setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    setError(null);
-    setSuccess(false);
+    setValidationError(null);
+    changePasswordMutation.reset();
     setShowCurrentPassword(false);
     setShowNewPassword(false);
     setShowConfirmPassword(false);

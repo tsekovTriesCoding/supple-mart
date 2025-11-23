@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+﻿import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Elements } from '@stripe/react-stripe-js';
 import { ArrowLeft, Package, MapPin, AlertCircle, CheckCircle, ShoppingBag } from 'lucide-react';
@@ -7,7 +7,6 @@ import { useMutation } from '@tanstack/react-query';
 import { useCart, formatCartPrice } from '../hooks';
 import { ordersAPI } from '../lib/api/orders';
 import { paymentsAPI } from '../lib/api/payments';
-import type { PaymentIntentRequest } from '../types/payment';
 import PaymentForm from '../components/PaymentForm';
 import { getStripe } from '../lib/stripe';
 
@@ -15,9 +14,7 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { items, totalPrice, refreshCart } = useCart();
 
-  const [error, setError] = useState<string | null>(null);
   const [orderSuccess, setOrderSuccess] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [shippingAddress, setShippingAddress] = useState({
     fullName: '',
     street: '',
@@ -29,27 +26,22 @@ const Checkout = () => {
   });
 
   const createPaymentMutation = useMutation({
-    mutationFn: (request: PaymentIntentRequest) => 
-      paymentsAPI.createPaymentIntent(request),
-    onError: (err) => {
-      const error = err as { response?: { data?: { message?: string } } };
-      const errorMessage = error.response?.data?.message || 'Failed to initialize payment';
-      setError(errorMessage);
-    },
+    mutationFn: async (currency: string) => {
+      const order = await ordersAPI.createOrder({
+        shippingAddress: formatAddressString()
+      });
+      return paymentsAPI.createPaymentIntent({
+        orderId: order.id,
+        currency
+      });
+    }
   });
 
   const isLoggedIn = !!localStorage.getItem('token');
   const stripePromise = getStripe();
   const clientSecret = createPaymentMutation.data?.clientSecret || null;
-  const isCreatingIntent = createPaymentMutation.isPending;
-  const paymentError = createPaymentMutation.error ? 
-    ((createPaymentMutation.error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Payment error') : null;
-
-  useEffect(() => {
-    return () => {
-      createPaymentMutation.reset();
-    };
-  }, [createPaymentMutation]);
+  const error = createPaymentMutation.error ? 
+    ((createPaymentMutation.error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to initialize payment') : null;
 
   if (items.length === 0 && !orderSuccess) {
     return (
@@ -88,48 +80,20 @@ const Checkout = () => {
   const handleCreatePaymentIntent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isLoggedIn) {
-      setError('You must be logged in to place an order');
       return;
     }
     const validationError = validateForm();
     if (validationError) {
-      setError(validationError);
       return;
     }
-    setError(null);
-    setIsProcessing(true);
     
-    try {
-      console.log('Creating order...');
-      const order = await ordersAPI.createOrder({
-        shippingAddress: formatAddressString()
-      });
-      console.log('Order created:', order.id);
-
-      console.log('Creating payment intent for order:', order.id);
-      await createPaymentMutation.mutateAsync({
-        orderId: order.id,
-        currency: 'usd'
-      });
-      console.log('Payment intent created successfully');
-    } catch (err) {
-      const error = err as Error;
-      console.error('Failed to create order/payment intent:', error);
-      setError(error.message);
-    } finally {
-      setIsProcessing(false);
-    }
+    createPaymentMutation.mutate('usd');
   };
 
   const handlePaymentSuccess = async () => {
-    try {
-      await refreshCart();
-      setOrderSuccess(true);
-      setTimeout(() => { navigate('/orders'); }, 3000);
-    } catch (err) {
-      const error = err as Error;
-      setError(error.message);
-    }
+    await refreshCart();
+    setOrderSuccess(true);
+    setTimeout(() => { navigate('/orders'); }, 3000);
   };
 
   if (orderSuccess) {
@@ -179,13 +143,13 @@ const Checkout = () => {
             </div>
           )}
 
-          {(error || paymentError) && (
+          {error && (
             <div className="card p-4 mb-6 border-l-4 border-red-500">
               <div className="flex items-start space-x-3">
                 <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
                 <div>
                   <p className="text-white font-medium">Error</p>
-                  <p className="text-gray-400 text-sm">{error || paymentError}</p>
+                  <p className="text-gray-400 text-sm">{error}</p>
                 </div>
               </div>
             </div>
@@ -240,8 +204,8 @@ const Checkout = () => {
                   </div>
 
                   {!clientSecret && (
-                    <button type="submit" disabled={isProcessing || isCreatingIntent || !isLoggedIn} className="w-full mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed font-medium cursor-pointer">
-                      {(isProcessing || isCreatingIntent) ? 'Processing...' : 'Continue to Payment'}
+                    <button type="submit" disabled={createPaymentMutation.isPending || !isLoggedIn} className="w-full mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed font-medium cursor-pointer">
+                      {createPaymentMutation.isPending ? 'Processing...' : 'Continue to Payment'}
                     </button>
                   )}
                 </div>
