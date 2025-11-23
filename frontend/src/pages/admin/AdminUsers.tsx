@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Users, Search, Shield, User, Calendar, Mail, UserCheck } from 'lucide-react';
 
 import { Pagination } from '../../components/Pagination';
+import { LoadingSpinner } from '../../components/LoadingSpinner';
 import { adminAPI } from '../../lib/api/admin';
 
 const AdminUsers = () => {
@@ -176,8 +177,8 @@ const AdminUsers = () => {
             <tbody className="divide-y divide-gray-700">
               {isLoading ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-gray-400">
-                    Loading users...
+                  <td colSpan={5} className="px-6 py-12">
+                    <LoadingSpinner size="md" message="Loading users..." />
                   </td>
                 </tr>
               ) : users.length === 0 ? (

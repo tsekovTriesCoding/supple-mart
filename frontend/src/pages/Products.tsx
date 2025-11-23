@@ -4,6 +4,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 
 import { ProductCard, ProductFilters } from '../components/Product';
 import { Pagination } from '../components/Pagination';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useProducts, useProductCategories, type Product } from '../hooks/useProducts';
 import { useCart, useWishlist } from '../hooks';
 import type { ApiError } from '../types/error';
@@ -233,10 +234,7 @@ const Products = () => {
 
       <section>
         {isLoading ? (
-          <div className="text-center py-16">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mb-4"></div>
-            <p className="text-gray-400">Loading products...</p>
-          </div>
+          <LoadingSpinner size="lg" message="Loading products..." className="py-16" />
         ) : (
           <>
             <div className="flex justify-between items-center mb-6">

@@ -1,7 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 
-import { ArrowRight, Star, ShoppingBag, Truck, Shield, Headphones, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, Star, ShoppingBag, Truck, Shield, Headphones, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useProducts, type Product } from '../hooks/useProducts';
 import { formatCategoryForDisplay } from '../utils/categoryUtils';
 
@@ -148,10 +149,7 @@ const Home = () => {
         </div>
 
         {isLoading && (
-          <div className="flex justify-center items-center py-16">
-            <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
-            <span className="ml-3 text-gray-400">Loading products...</span>
-          </div>
+          <LoadingSpinner size="md" message="Loading products..." className="py-16" />
         )}
 
         {error && (

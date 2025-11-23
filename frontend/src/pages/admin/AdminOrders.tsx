@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Package, Search, Eye, Calendar, DollarSign, User } from 'lucide-react';
 
 import { Pagination } from '../../components/Pagination';
+import { LoadingSpinner } from '../../components/LoadingSpinner';
 import { adminAPI } from '../../lib/api/admin';
 import type { AdminOrder } from '../../types/admin';
 
@@ -142,8 +143,8 @@ const AdminOrders = () => {
             <tbody className="divide-y divide-gray-700">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
-                    Loading orders...
+                  <td colSpan={6} className="px-6 py-12">
+                    <LoadingSpinner size="md" message="Loading orders..." />
                   </td>
                 </tr>
               ) : orders.length === 0 ? (

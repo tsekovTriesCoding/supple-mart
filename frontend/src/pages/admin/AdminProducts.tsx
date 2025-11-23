@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { Pagination } from '../../components/Pagination';
+import { LoadingSpinner } from '../../components/LoadingSpinner';
 import { adminAPI } from '../../lib/api/admin';
 import type { AdminProduct } from '../../types/admin';
 import type { ApiError } from '../../types/error';
@@ -250,8 +251,8 @@ const AdminProducts = () => {
             <tbody className="divide-y divide-gray-800">
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-gray-400">
-                    Loading...
+                  <td colSpan={8} className="px-6 py-12">
+                    <LoadingSpinner size="md" message="Loading products..." />
                   </td>
                 </tr>
               ) : products.length === 0 ? (

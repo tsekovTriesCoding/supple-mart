@@ -1,4 +1,4 @@
-import { Heart, Minus, Plus, Share2, Shield, ShoppingCart, Star, Truck, ArrowLeft, MessageSquarePlus, Loader } from 'lucide-react';
+import { Heart, Minus, Plus, Share2, Shield, ShoppingCart, Star, Truck, ArrowLeft, MessageSquarePlus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
@@ -6,6 +6,7 @@ import { calculateDiscountPercentage, formatPrice, isProductOnSale, useProduct }
 import { useCart, useWishlist } from '../hooks';
 import { ProductReviews } from '../components/Product';
 import ReviewModal from '../components/ReviewModal';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 import { formatCategoryForDisplay } from '../utils/categoryUtils';
 import type { ApiError } from '../types/error';
 
@@ -76,14 +77,7 @@ const ProductDetail = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0a0a' }}>
-        <div className="text-center">
-          <Loader className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">Loading product...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner size="lg" message="Loading product..." fullScreen />;
   }
 
   if (isError) {
