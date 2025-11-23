@@ -1,17 +1,18 @@
 import { useState } from 'react';
-import { User, Mail, Loader, Calendar, AlertCircle } from 'lucide-react';
+import { User, Mail, Calendar, AlertCircle } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { userAPI, type UpdateUserProfileRequest } from '../lib/api/user';
 import type { ApiError } from '../types/error';
 import { PasswordChangeModal } from '../components/PasswordChangeModal';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 const Account = () => {
   const queryClient = useQueryClient();
   
   const {
     data: user = null,
-    isLoading: loading,
+    isLoading,
     error: queryError,
   } = useQuery({
     queryKey: ['user-profile'],
@@ -38,20 +39,18 @@ const Account = () => {
       );
       
       setIsEditing(false);
-    },
-    onError: (err) => {
-      const error = err as ApiError;
-      setUpdateError(error.response?.data?.message || 'Failed to update profile');
-    },
+    }
   });
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({ firstName: '', lastName: '' });
-  const [updateError, setUpdateError] = useState<string | null>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   const error = queryError
     ? ((queryError as ApiError).response?.data?.message || 'Failed to load profile')
+    : null;
+  const updateError = updateProfileMutation.error
+    ? ((updateProfileMutation.error as ApiError).response?.data?.message || 'Failed to update profile')
     : null;
 
   const handleEdit = () => {
@@ -61,28 +60,24 @@ const Account = () => {
         lastName: user.lastName,
       });
       setIsEditing(true);
-      setUpdateError(null);
+      updateProfileMutation.reset();
     }
   };
 
   const handleCancel = () => {
     setIsEditing(false);
-    setUpdateError(null);
+    updateProfileMutation.reset();
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setUpdateError(null);
     updateProfileMutation.mutate(formData);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0a0a' }}>
-        <div className="text-center">
-          <Loader className="w-12 h-12 text-blue-400 animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">Loading your profile...</p>
-        </div>
+        <LoadingSpinner size="lg" message="Loading your profile..." />
       </div>
     );
   }
