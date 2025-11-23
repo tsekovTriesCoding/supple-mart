@@ -1,7 +1,10 @@
 package app.wishlist.mapper;
 
 import app.product.model.Product;
+import app.wishlist.dto.WishlistCheckResponse;
+import app.wishlist.dto.WishlistCountResponse;
 import app.wishlist.dto.WishlistItemDTO;
+import app.wishlist.dto.WishlistMessageResponse;
 import app.wishlist.dto.WishlistResponse;
 import app.wishlist.model.Wishlist;
 import org.mapstruct.Mapper;
@@ -52,5 +55,17 @@ public interface WishlistMapper {
                 .totalPages(wishlistPage.getTotalPages())
                 .totalElements(wishlistPage.getTotalElements())
                 .build();
+    }
+
+    default WishlistMessageResponse toMessageResponse(String message) {
+        return new WishlistMessageResponse(message);
+    }
+
+    default WishlistCheckResponse toCheckResponse(boolean isInWishlist) {
+        return new WishlistCheckResponse(isInWishlist);
+    }
+
+    default WishlistCountResponse toCountResponse(long count) {
+        return new WishlistCountResponse(count);
     }
 }
