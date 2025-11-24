@@ -255,7 +255,10 @@ const Account = () => {
                   <p className="text-gray-400 text-sm">Update your account password</p>
                 </button>
                 
-                <button className="w-full text-left p-3 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer">
+                <button 
+                  onClick={() => window.location.href = '/account/notifications'}
+                  className="w-full text-left p-3 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer"
+                >
                   <h3 className="text-white font-medium">Notification Preferences</h3>
                   <p className="text-gray-400 text-sm">Manage email and push notifications</p>
                 </button>
