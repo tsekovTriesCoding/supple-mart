@@ -1,37 +1,37 @@
 package app.contact.service;
 
 import app.contact.dto.ContactRequest;
+import app.notification.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ContactService {
     
-    private final JavaMailSender mailSender;
-    
+    private final EmailService emailService;
+    private final MessageSource messageSource;
+
     @Value("${app.email.admin}")
     private String adminEmail;
     
-    @Value("${app.email.from}")
-    private String fromEmail;
-    
     @Value("${app.name}")
     private String appName;
-    
+
     public void processContactRequest(ContactRequest request) {
         try {
-            sendAdminNotification(request);
-            sendUserConfirmation(request);
-            
+            LocalDateTime timestamp = LocalDateTime.now();
+
+            sendAdminNotification(request, timestamp);
+            sendUserConfirmation(request, timestamp);
+
             log.info("Contact request processed successfully for: {}", request.getEmail());
         } catch (Exception e) {
             log.error("Error processing contact request: ", e);
@@ -39,72 +39,57 @@ public class ContactService {
         }
     }
     
-    private void sendAdminNotification(ContactRequest request) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(fromEmail);
-        message.setTo(adminEmail);
-        message.setSubject("New Contact Form Submission: " + request.getSubject());
-        
-        String body = String.format("""
-            New contact form submission received:
-            
-            From: %s
-            Email: %s
-            Subject: %s
-            Date: %s
-            
-            Message:
-            %s
-            
-            ---
-            This is an automated message from %s Contact Form.
-            """,
+    private void sendAdminNotification(ContactRequest request, LocalDateTime timestamp) {
+        String readableSubject = getDisplaySubject(request.getSubject());
+
+        String htmlContent = emailService.buildContactAdminNotificationEmail(
             request.getName(),
             request.getEmail(),
-            request.getSubject(),
-            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+            readableSubject,
             request.getMessage(),
-            appName
+            appName,
+            timestamp
         );
         
-        message.setText(body);
-        mailSender.send(message);
-        
+        emailService.sendEmail(
+            adminEmail,
+            "New Contact Form Submission: " + readableSubject,
+            htmlContent
+        );
+
         log.info("Admin notification sent to: {}", adminEmail);
     }
     
-    private void sendUserConfirmation(ContactRequest request) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(fromEmail);
-        message.setTo(request.getEmail());
-        message.setSubject("Thank you for contacting " + appName);
-        
-        String body = String.format("""
-            Dear %s,
-            
-            Thank you for reaching out to us. We have received your message and will get back to you as soon as possible.
-            
-            Your message details:
-            Subject: %s
-            Date: %s
-            
-            We typically respond within 24-48 hours. If your inquiry is urgent, please feel free to reach out to us directly.
-            
-            Best regards,
-            The %s Team
-            
-            ---
-            This is an automated confirmation email. Please do not reply to this email.
-            """,
+    private void sendUserConfirmation(ContactRequest request, LocalDateTime timestamp) {
+        String readableSubject = getDisplaySubject(request.getSubject());
+
+        String htmlContent = emailService.buildContactConfirmationEmail(
             request.getName(),
-            request.getSubject(),
-            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
-            appName
+            readableSubject,
+            appName,
+            timestamp
         );
-        
-        message.setText(body);
-        mailSender.send(message);
-        
+
+        emailService.sendEmail(
+            request.getEmail(),
+            "Thank you for contacting " + appName,
+            htmlContent
+        );
+
         log.info("Confirmation email sent to: {}", request.getEmail());
+    }
+
+    private String getDisplaySubject(String subject) {
+        try {
+            return messageSource.getMessage(
+                "contact.subject." + subject,
+                null,
+                subject,
+                Locale.getDefault()
+            );
+        } catch (Exception e) {
+            log.warn("No display name found for subject: {}, using original value", subject);
+            return subject;
+        }
     }
 }

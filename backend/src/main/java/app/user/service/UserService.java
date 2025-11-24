@@ -1,6 +1,7 @@
 package app.user.service;
 
 import app.exception.ResourceNotFoundException;
+import app.notification.event.AccountSecurityEvent;
 import app.user.dto.RegisterRequest;
 import app.user.dto.UpdateUserProfileRequest;
 import app.user.mapper.UserMapper;
@@ -8,6 +9,7 @@ import app.user.model.Role;
 import app.user.model.User;
 import app.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +32,7 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -114,5 +117,14 @@ public class UserService implements UserDetailsService {
         user.setUpdatedAt(LocalDateTime.now());
 
         userRepository.save(user);
+
+        eventPublisher.publishEvent(new AccountSecurityEvent(
+                this,
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                "Password Changed",
+                "Your password was successfully changed on " + LocalDateTime.now()
+        ));
     }
 }

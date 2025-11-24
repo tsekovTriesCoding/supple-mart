@@ -47,7 +47,7 @@ public class NotificationPreferences {
 
     @Column(name = "password_reset_emails", nullable = false)
     private Boolean passwordResetEmails = true;
-    
+
     @Column(name = "review_reminders", nullable = false)
     private Boolean reviewReminders = true;
 

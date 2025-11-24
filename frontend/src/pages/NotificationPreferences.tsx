@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { Bell, ShoppingBag, Mail, AlertCircle, CheckCircle, Package, DollarSign, Star, Shield, ArrowLeft } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Bell, ShoppingBag, Mail, AlertCircle, Package, DollarSign, Star, Shield, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { notificationAPI } from '../lib/api/notification';
 import type { UpdateNotificationPreferencesRequest } from '../types/notification';
@@ -57,23 +57,27 @@ const NotificationSetting = ({ icon, title, description, enabled, onChange, disa
     </div>
   );
 };
-
 const NotificationPreferences = () => {
   const navigate = useNavigate();
-  const [localPreferences, setLocalPreferences] = useState<UpdateNotificationPreferencesRequest | null>(null);
+  const queryClient = useQueryClient();
 
-  const {
-    data: preferences,
-    isLoading,
-    error: queryError,
-  } = useQuery({
+  const { data: preferences, isLoading, error: queryError } = useQuery({
     queryKey: ['notification-preferences'],
     queryFn: notificationAPI.getPreferences,
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
   });
 
-  const mutation = useMutation({
-    mutationFn: (data: UpdateNotificationPreferencesRequest) => notificationAPI.updatePreferences(data),
+  const updateMutation = useMutation({
+    mutationFn: (updates: UpdateNotificationPreferencesRequest) =>
+      notificationAPI.updatePreferences(updates),
+    onSuccess: (data) => {
+      queryClient.setQueryData(['notification-preferences'], data);
+    },
   });
+
+  const [localPreferences, setLocalPreferences] = useState<UpdateNotificationPreferencesRequest | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     if (preferences && !localPreferences) {
@@ -92,15 +96,15 @@ const NotificationPreferences = () => {
     }
   }, [preferences, localPreferences]);
 
-  // Auto-reset success message after 3 seconds
   useEffect(() => {
-    if (mutation.isSuccess) {
+    if (updateMutation.isSuccess) {
+      setShowSuccess(true);
       const timer = setTimeout(() => {
-        mutation.reset();
+        setShowSuccess(false);
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [mutation]);
+  }, [updateMutation.isSuccess]);
 
   const handleToggle = (key: keyof UpdateNotificationPreferencesRequest, value: boolean) => {
     if (!localPreferences) return;
@@ -110,7 +114,7 @@ const NotificationPreferences = () => {
       [key]: value,
     };
     setLocalPreferences(updatedPreferences);
-    mutation.mutate(updatedPreferences);
+    updateMutation.mutate(updatedPreferences);
   };
 
   if (isLoading) {
@@ -140,7 +144,6 @@ const NotificationPreferences = () => {
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#0a0a0a' }}>
       <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Header */}
         <div className="mb-8">
           <button
             onClick={() => navigate('/account')}
@@ -157,29 +160,26 @@ const NotificationPreferences = () => {
           <p className="text-gray-400">Manage how you receive updates and notifications from SuppleMart</p>
         </div>
 
-        {/* Success Message */}
-        {mutation.isSuccess && (
+        {showSuccess && (
           <div className="mb-6 p-4 bg-green-900/20 border border-green-700 rounded-lg animate-fade-in">
             <div className="flex items-center space-x-2">
-              <CheckCircle className="w-5 h-5 text-green-400" />
+              <AlertCircle className="w-5 h-5 text-green-400" />
               <p className="text-green-400 font-medium">Preferences saved successfully!</p>
             </div>
           </div>
         )}
 
-        {/* Error Message */}
-        {mutation.isError && (
+        {updateMutation.isError && (
           <div className="mb-6 p-4 bg-red-900/20 border border-red-700 rounded-lg animate-fade-in">
             <div className="flex items-center space-x-2">
               <AlertCircle className="w-5 h-5 text-red-400" />
               <p className="text-red-400 font-medium">
-                {mutation.error instanceof Error ? mutation.error.message : 'Failed to save preferences'}
+                {updateMutation.error instanceof Error ? updateMutation.error.message : 'Failed to save preferences'}
               </p>
             </div>
           </div>
         )}
 
-        {/* Order & Shipping Notifications */}
         <div className="card p-6 mb-6">
           <div className="flex items-center space-x-2 mb-4">
             <ShoppingBag className="w-5 h-5 text-blue-400" />
@@ -192,7 +192,7 @@ const NotificationPreferences = () => {
               description="Get notified about order confirmations, updates, and delivery status"
               enabled={localPreferences.orderUpdates}
               onChange={(value) => handleToggle('orderUpdates', value)}
-              disabled={mutation.isPending}
+              disabled={updateMutation.isPending}
             />
             <NotificationSetting
               icon={<Package className="w-5 h-5" />}
@@ -200,12 +200,11 @@ const NotificationPreferences = () => {
               description="Receive updates when your orders are shipped and out for delivery"
               enabled={localPreferences.shippingNotifications}
               onChange={(value) => handleToggle('shippingNotifications', value)}
-              disabled={mutation.isPending}
+              disabled={updateMutation.isPending}
             />
           </div>
         </div>
 
-        {/* Marketing & Promotions */}
         <div className="card p-6 mb-6">
           <div className="flex items-center space-x-2 mb-4">
             <Mail className="w-5 h-5 text-blue-400" />
@@ -218,7 +217,7 @@ const NotificationPreferences = () => {
               description="Receive emails about sales, special offers, and exclusive deals"
               enabled={localPreferences.promotionalEmails}
               onChange={(value) => handleToggle('promotionalEmails', value)}
-              disabled={mutation.isPending}
+              disabled={updateMutation.isPending}
             />
             <NotificationSetting
               icon={<Mail className="w-5 h-5" />}
@@ -226,12 +225,11 @@ const NotificationPreferences = () => {
               description="Get our weekly newsletter with tips, guides, and new product announcements"
               enabled={localPreferences.newsletter}
               onChange={(value) => handleToggle('newsletter', value)}
-              disabled={mutation.isPending}
+              disabled={updateMutation.isPending}
             />
           </div>
         </div>
 
-        {/* Product Notifications */}
         <div className="card p-6 mb-6">
           <div className="flex items-center space-x-2 mb-4">
             <Bell className="w-5 h-5 text-blue-400" />
@@ -244,7 +242,7 @@ const NotificationPreferences = () => {
               description="Get personalized product recommendations based on your preferences"
               enabled={localPreferences.productRecommendations}
               onChange={(value) => handleToggle('productRecommendations', value)}
-              disabled={mutation.isPending}
+              disabled={updateMutation.isPending}
             />
             <NotificationSetting
               icon={<DollarSign className="w-5 h-5" />}
@@ -252,7 +250,7 @@ const NotificationPreferences = () => {
               description="Be notified when items in your wishlist go on sale"
               enabled={localPreferences.priceDropAlerts}
               onChange={(value) => handleToggle('priceDropAlerts', value)}
-              disabled={mutation.isPending}
+              disabled={updateMutation.isPending}
             />
             <NotificationSetting
               icon={<Package className="w-5 h-5" />}
@@ -260,12 +258,11 @@ const NotificationPreferences = () => {
               description="Get alerts when out-of-stock items become available again"
               enabled={localPreferences.backInStockAlerts}
               onChange={(value) => handleToggle('backInStockAlerts', value)}
-              disabled={mutation.isPending}
+              disabled={updateMutation.isPending}
             />
           </div>
         </div>
 
-        {/* Account & Security */}
         <div className="card p-6 mb-6">
           <div className="flex items-center space-x-2 mb-4">
             <Shield className="w-5 h-5 text-blue-400" />
@@ -278,7 +275,7 @@ const NotificationPreferences = () => {
               description="Important notifications about account security and login activity"
               enabled={localPreferences.accountSecurityAlerts}
               onChange={(value) => handleToggle('accountSecurityAlerts', value)}
-              disabled={mutation.isPending}
+              disabled={updateMutation.isPending}
             />
             <NotificationSetting
               icon={<AlertCircle className="w-5 h-5" />}
@@ -286,12 +283,11 @@ const NotificationPreferences = () => {
               description="Receive confirmation emails when you reset your password"
               enabled={localPreferences.passwordResetEmails}
               onChange={(value) => handleToggle('passwordResetEmails', value)}
-              disabled={mutation.isPending}
+              disabled={updateMutation.isPending}
             />
           </div>
         </div>
 
-        {/* Reviews & Feedback */}
         <div className="card p-6">
           <div className="flex items-center space-x-2 mb-4">
             <Star className="w-5 h-5 text-blue-400" />
@@ -304,7 +300,7 @@ const NotificationPreferences = () => {
               description="Get reminders to review products you've purchased"
               enabled={localPreferences.reviewReminders}
               onChange={(value) => handleToggle('reviewReminders', value)}
-              disabled={mutation.isPending}
+              disabled={updateMutation.isPending}
             />
           </div>
         </div>
