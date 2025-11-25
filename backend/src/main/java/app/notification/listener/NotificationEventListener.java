@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@Async
 public class NotificationEventListener {
 
     private final EmailService emailService;
     private final NotificationPreferencesService notificationPreferencesService;
 
-    @Async
     @EventListener
     public void handleOrderPlacedEvent(OrderPlacedEvent event) {
         log.info("Handling OrderPlacedEvent for order: {} and user: {}", event.getOrderNumber(), event.getUserEmail());
@@ -49,7 +49,6 @@ public class NotificationEventListener {
         }
     }
 
-    @Async
     @EventListener
     public void handleOrderShippedEvent(OrderShippedEvent event) {
         log.info("Handling OrderShippedEvent for order: {} and user: {}", event.getOrderNumber(), event.getUserEmail());
@@ -80,7 +79,6 @@ public class NotificationEventListener {
         }
     }
 
-    @Async
     @EventListener
     public void handleOrderDeliveredEvent(OrderDeliveredEvent event) {
         log.info("Handling OrderDeliveredEvent for order: {} and user: {}", event.getOrderNumber(), event.getUserEmail());
@@ -110,7 +108,6 @@ public class NotificationEventListener {
         }
     }
 
-    @Async
     @EventListener
     public void handlePriceDropEvent(PriceDropEvent event) {
         log.info("Handling PriceDropEvent for product: {}", event.getProductName());
@@ -144,7 +141,6 @@ public class NotificationEventListener {
         }
     }
 
-    @Async
     @EventListener
     public void handleProductRestockedEvent(ProductRestockedEvent event) {
         log.info("Handling ProductRestockedEvent for product: {}", event.getProductName());
@@ -176,7 +172,6 @@ public class NotificationEventListener {
         }
     }
 
-    @Async
     @EventListener
     public void handleReviewReminderEvent(ReviewReminderEvent event) {
         log.info("Handling ReviewReminderEvent for order: {} and user: {}", event.getOrderNumber(), event.getUserEmail());
@@ -206,7 +201,6 @@ public class NotificationEventListener {
         }
     }
 
-    @Async
     @EventListener
     public void handleAccountSecurityEvent(AccountSecurityEvent event) {
         log.info("Handling AccountSecurityEvent for user: {} - Alert: {}", event.getUserEmail(), event.getAlertType());
@@ -237,7 +231,6 @@ public class NotificationEventListener {
         }
     }
 
-    @Async
     @EventListener
     public void handlePasswordResetEvent(PasswordResetEvent event) {
         log.info("Handling PasswordResetEvent for user: {}", event.getUserEmail());
