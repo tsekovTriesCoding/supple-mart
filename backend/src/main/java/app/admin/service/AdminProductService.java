@@ -123,9 +123,8 @@ public class AdminProductService {
     public ImageUploadResponse uploadProductImage(MultipartFile file) {
         log.info("Uploading product image to Cloudinary: {}", file.getOriginalFilename());
 
-        String imageUrl = cloudinaryService.uploadImage(file, CLOUDINARY_FOLDER);
-
-        log.info("Image uploaded successfully to Cloudinary: {}", imageUrl);
+        //.join() waits for result -> Response
+        String imageUrl = cloudinaryService.uploadImage(file, CLOUDINARY_FOLDER).join();
 
         return ImageUploadResponse.builder()
                 .imageUrl(imageUrl)

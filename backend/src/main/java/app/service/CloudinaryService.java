@@ -5,11 +5,13 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +23,8 @@ public class CloudinaryService {
     private static final String[] ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"};
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
 
-    public String uploadImage(MultipartFile file, String folder) {
+    @Async
+    public CompletableFuture<String> uploadImage(MultipartFile file, String folder) {
         validateFile(file);
 
         try {
@@ -37,7 +40,7 @@ public class CloudinaryService {
             String imageUrl = (String) uploadResult.get("secure_url");
 
             log.info("Image uploaded successfully to Cloudinary: {}", imageUrl);
-            return imageUrl;
+            return CompletableFuture.completedFuture(imageUrl);
 
         } catch (IOException e) {
             log.error("Failed to upload image to Cloudinary", e);
@@ -45,13 +48,14 @@ public class CloudinaryService {
         }
     }
 
+    @Async
     public void deleteImage(String publicId) {
         try {
             Map<?, ?> result = cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
             log.info("Image deleted from Cloudinary: {}", publicId);
         } catch (IOException e) {
             log.error("Failed to delete image from Cloudinary: {}", publicId, e);
-            throw new BadRequestException("Failed to delete image: " + e.getMessage());
+            // Don't throw exception in async fire-and-forget operation, just log it
         }
     }
 
