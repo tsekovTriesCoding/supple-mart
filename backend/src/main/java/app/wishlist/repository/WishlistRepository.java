@@ -23,4 +23,7 @@ public interface WishlistRepository extends JpaRepository<Wishlist, UUID> {
     
     @Query("SELECT COUNT(w) FROM Wishlist w WHERE w.user.id = :userId")
     long countByUserId(UUID userId);
+    
+    @Query("SELECT w.user FROM Wishlist w WHERE w.product.id = :productId")
+    java.util.List<app.user.model.User> findUsersByProductId(UUID productId);
 }

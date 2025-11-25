@@ -6,6 +6,9 @@ import app.cartitem.model.CartItem;
 import app.exception.BadRequestException;
 import app.exception.ResourceNotFoundException;
 import app.exception.UnauthorizedException;
+import app.notification.event.OrderDeliveredEvent;
+import app.notification.event.OrderPlacedEvent;
+import app.notification.event.OrderShippedEvent;
 import app.order.dto.CreateOrderRequest;
 import app.order.dto.OrderDTO;
 import app.order.dto.OrderStatsDTO;
@@ -20,6 +23,7 @@ import app.user.model.User;
 import app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -41,6 +44,7 @@ public class OrderService {
     private final CartService cartService;
     private final UserService userService;
     private final ProductService productService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public OrdersResponse getUserOrders(UUID userId, String statusStr, LocalDateTime startDate,
@@ -107,6 +111,17 @@ public class OrderService {
         log.info("Cart cleared for user: {} after placing order: {}", userId, orderNumber);
 
         log.info("Order created with inventory reserved: {} for user: {}", orderNumber, userId);
+        
+        // Publish order placed event for email notification
+        eventPublisher.publishEvent(new OrderPlacedEvent(
+                this,
+                savedOrder.getOrderNumber(),
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                savedOrder.getTotalAmount()
+        ));
+        log.info("OrderPlacedEvent published for order: {}", savedOrder.getOrderNumber());
 
         return orderMapper.toOrderDTO(savedOrder);
     }
@@ -219,6 +234,32 @@ public class OrderService {
 
         order.setStatus(newStatus);
         Order savedOrder = orderRepository.save(order);
+        
+        // Fetch user data for events
+        User user = savedOrder.getUser();
+
+        // Publish appropriate events based on new status
+        if (newStatus == OrderStatus.SHIPPED) {
+            String trackingNumber = "TRK" + System.currentTimeMillis(); // Generate or retrieve tracking number
+            eventPublisher.publishEvent(new OrderShippedEvent(
+                    this,
+                    savedOrder.getOrderNumber(),
+                    user.getId(),
+                    user.getEmail(),
+                    user.getFirstName(),
+                    trackingNumber
+            ));
+            log.info("OrderShippedEvent published for order: {}", savedOrder.getOrderNumber());
+        } else if (newStatus == OrderStatus.DELIVERED) {
+            eventPublisher.publishEvent(new OrderDeliveredEvent(
+                    this,
+                    savedOrder.getOrderNumber(),
+                    user.getId(),
+                    user.getEmail(),
+                    user.getFirstName()
+            ));
+            log.info("OrderDeliveredEvent published for order: {}", savedOrder.getOrderNumber());
+        }
 
         return orderMapper.toOrderDTO(savedOrder);
     }
