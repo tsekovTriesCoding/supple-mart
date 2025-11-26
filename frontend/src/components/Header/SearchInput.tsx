@@ -51,6 +51,16 @@ export const SearchInput = ({ className = 'w-64' }: SearchInputProps) => {
     setIsOpen(false);
   };
 
+  const handleDropdownScroll = (e: React.WheelEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const atTop = target.scrollTop === 0;
+    const atBottom = target.scrollHeight - target.scrollTop === target.clientHeight;
+    
+    if ((atTop && e.deltaY < 0) || (atBottom && e.deltaY > 0)) {
+      e.preventDefault();
+    }
+  };
+
   return (
     <div className="relative" ref={dropdownRef}>
       <div className="relative">
@@ -77,7 +87,11 @@ export const SearchInput = ({ className = 'w-64' }: SearchInputProps) => {
       </div>
 
       {isOpen && productsData?.products && productsData.products.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto">
+        <div 
+          className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto"
+          style={{ overscrollBehavior: 'contain' }}
+          onWheel={handleDropdownScroll}
+        >
           <div className="p-2">
             {productsData.products.map((product: Product) => (
               <button
