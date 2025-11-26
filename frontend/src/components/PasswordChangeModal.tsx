@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { Lock, Eye, EyeOff, X, AlertCircle, CheckCircle } from 'lucide-react';
+import { Lock, Eye, EyeOff, X, AlertCircle } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+import { AxiosError } from 'axios';
 
 import { userAPI } from '../lib/api/user';
 
@@ -24,17 +26,19 @@ export const PasswordChangeModal = ({ isOpen, onClose }: PasswordChangeModalProp
     mutationFn: (data: { currentPassword: string; newPassword: string }) =>
       userAPI.changePassword(data),
     onSuccess: () => {
-      setTimeout(() => {
-        onClose();
-        resetForm();
-      }, 2000);
-    }
+      toast.success('Password changed successfully');
+      onClose();
+      resetForm();
+    },
+    onError: (error) => {
+      const message = error instanceof AxiosError
+        ? error.response?.data?.message || 'Failed to change password'
+        : 'Failed to change password';
+      toast.error(message);
+    },
   });
 
   const isLoading = changePasswordMutation.isPending;
-  const success = changePasswordMutation.isSuccess;
-  const mutationError = changePasswordMutation.error as { response?: { data?: { message?: string } } } | null;
-  const error = validationError || (mutationError?.response?.data?.message || (mutationError ? 'Failed to change password' : null));
 
   const validatePassword = () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
@@ -169,20 +173,11 @@ export const PasswordChangeModal = ({ isOpen, onClose }: PasswordChangeModalProp
             </div>
           </div>
 
-          {error && (
+          {validationError && (
             <div className="p-3 bg-red-500/10 border border-red-500/50 rounded-lg">
               <p className="text-red-400 text-sm flex items-center">
                 <AlertCircle className="w-4 h-4 mr-2" />
-                {error}
-              </p>
-            </div>
-          )}
-
-          {success && (
-            <div className="p-3 bg-green-500/10 border border-green-500/50 rounded-lg">
-              <p className="text-green-400 text-sm flex items-center">
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Password changed successfully!
+                {validationError}
               </p>
             </div>
           )}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation } from '@tanstack/react-query';
 import { X, Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 import { authAPI } from '../lib/api';
 import type { LoginForm, RegisterForm } from '../types/auth';
@@ -43,9 +44,13 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
       localStorage.setItem('refreshToken', response.refreshToken);
       localStorage.setItem('user', JSON.stringify(response.user));
       
+      toast.success(`Welcome back, ${response.user.firstName}!`);
       onSuccess?.();
       onClose();
       window.location.reload();
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
     },
   });
 
@@ -61,14 +66,17 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
       localStorage.setItem('refreshToken', response.refreshToken);
       localStorage.setItem('user', JSON.stringify(response.user));
       
+      toast.success(`Welcome, ${response.user.firstName}! Account created successfully.`);
       onSuccess?.();
       onClose();
       window.location.reload();
     },
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
+    },
   });
 
   const isLoading = loginMutation.isPending || registerMutation.isPending;
-  const error = loginMutation.error || registerMutation.error;
 
   useEffect(() => {
     if (!isOpen) {
@@ -159,11 +167,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
               <X className="w-5 h-5 text-gray-400" />
             </button>
           </div>
-          {error && (
-            <div className="mb-4 p-3 bg-red-900/50 border border-red-600 rounded-lg">
-              <p className="text-red-400 text-sm whitespace-pre-line">{getErrorMessage(error)}</p>
-            </div>
-          )}
+
           {authMode === 'login' && (
             <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
               <div>
