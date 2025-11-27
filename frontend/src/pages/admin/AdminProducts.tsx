@@ -1,12 +1,13 @@
 import { Edit, Plus, Search, Trash2, Upload, X } from 'lucide-react';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+import { AxiosError } from 'axios';
 
 import { Pagination } from '../../components/Pagination';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
 import { adminAPI } from '../../lib/api/admin';
 import type { AdminProduct } from '../../types/admin';
-import type { ApiError } from '../../types/error';
 import { useProductCategories } from '../../hooks/useProducts';
 import {
   formatCategoryForDisplay,
@@ -33,7 +34,6 @@ const AdminProducts = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<AdminProduct | null>(null);
   const [formData, setFormData] = useState(defaultFormData);
-  const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
   const { data: categoriesData } = useProductCategories();
@@ -58,10 +58,13 @@ const AdminProducts = () => {
     mutationFn: (file: File) => adminAPI.uploadProductImage(file),
     onSuccess: (imageUrl) => {
       setFormData((prev) => ({ ...prev, imageUrl }));
+      toast.success('Image uploaded successfully');
     },
-    onError: (err) => {
-      const apiError = err as ApiError;
-      setError(apiError.response?.data?.message || 'Failed to upload image');
+    onError: (error) => {
+      const message = error instanceof AxiosError
+        ? error.response?.data?.message || 'Failed to upload image'
+        : 'Failed to upload image';
+      toast.error(message);
     },
   });
 
@@ -72,11 +75,13 @@ const AdminProducts = () => {
       setShowModal(false);
       setEditingProduct(null);
       setFormData(defaultFormData);
-      setError(null);
+      toast.success('Product created successfully');
     },
-    onError: (err) => {
-      const apiError = err as ApiError;
-      setError(apiError.response?.data?.message || 'Failed to create product');
+    onError: (error) => {
+      const message = error instanceof AxiosError
+        ? error.response?.data?.message || 'Failed to create product'
+        : 'Failed to create product';
+      toast.error(message);
     },
   });
 
@@ -88,11 +93,13 @@ const AdminProducts = () => {
       setShowModal(false);
       setEditingProduct(null);
       setFormData(defaultFormData);
-      setError(null);
+      toast.success('Product updated successfully');
     },
-    onError: (err) => {
-      const apiError = err as ApiError;
-      setError(apiError.response?.data?.message || 'Failed to update product');
+    onError: (error) => {
+      const message = error instanceof AxiosError
+        ? error.response?.data?.message || 'Failed to update product'
+        : 'Failed to update product';
+      toast.error(message);
     },
   });
 
@@ -100,10 +107,13 @@ const AdminProducts = () => {
     mutationFn: (id: number) => adminAPI.deleteProduct(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      toast.success('Product deleted successfully');
     },
-    onError: (err) => {
-      const apiError = err as ApiError;
-      setError(apiError.response?.data?.message || 'Failed to delete product');
+    onError: (error) => {
+      const message = error instanceof AxiosError
+        ? error.response?.data?.message || 'Failed to delete product'
+        : 'Failed to delete product';
+      toast.error(message);
     },
   });
 
@@ -112,16 +122,14 @@ const AdminProducts = () => {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      setError('Please select an image file');
+      toast.error('Please select an image file');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setError('Image size should be less than 5MB');
+      toast.error('Image size should be less than 5MB');
       return;
     }
-
-    setError(null);
     setUploading(true);
     try {
       await uploadImageMutation.mutateAsync(file);
@@ -132,7 +140,6 @@ const AdminProducts = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     
     if (editingProduct) {
       updateProductMutation.mutate({ id: editingProduct.id, data: formData });
@@ -158,7 +165,6 @@ const AdminProducts = () => {
 
   const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to delete this product?')) return;
-    setError(null);
     deleteProductMutation.mutate(id);
   };
 
@@ -178,12 +184,6 @@ const AdminProducts = () => {
           <span>Add Product</span>
         </button>
       </div>
-
-      {error && (
-        <div className="mb-4 p-4 bg-red-900/20 border border-red-900 rounded-lg text-red-400">
-          {error}
-        </div>
-      )}
 
       <div className="card p-4 mb-6">
         <div className="flex flex-col md:flex-row gap-4">
@@ -357,7 +357,6 @@ const AdminProducts = () => {
                 setShowModal(false);
                 setEditingProduct(null);
                 setFormData(defaultFormData);
-                setError(null);
               }} className="text-gray-400 hover:text-white cursor-pointer">
                 <X size={24} />
               </button>
@@ -502,7 +501,6 @@ const AdminProducts = () => {
                     setShowModal(false);
                     setEditingProduct(null);
                     setFormData(defaultFormData);
-                    setError(null);
                   }}
                   className="px-6 py-2 border border-gray-700 text-gray-400 rounded-lg hover:bg-gray-800"
                 >

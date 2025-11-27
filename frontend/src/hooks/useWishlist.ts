@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+import { AxiosError } from 'axios';
 
 import { wishlistAPI } from '../lib/api/wishlist';
 
@@ -35,26 +37,54 @@ export const useWishlist = (options: UseWishlistOptions = {}) => {
   });
 
   const addToWishlistMutation = useMutation({
-    mutationFn: (prodId: string) => wishlistAPI.addToWishlist(prodId),
-    onSuccess: () => {
+    mutationFn: async (data: { prodId: string; productName?: string }) => {
+      await wishlistAPI.addToWishlist(data.prodId);
+      return data.productName;
+    },
+    onSuccess: (productName) => {
       queryClient.invalidateQueries({ queryKey: ['wishlist'] });
       queryClient.invalidateQueries({ queryKey: ['wishlist-check'] });
       queryClient.invalidateQueries({ queryKey: ['wishlist-count'] });
       if (productId) {
         setIsWishlisted(true);
       }
+      
+      const message = productName 
+        ? `${productName} added to wishlist`
+        : 'Added to wishlist';
+      toast.success(message);
+    },
+    onError: (error) => {
+      const message = error instanceof AxiosError
+        ? error.response?.data?.message || 'Failed to add to wishlist'
+        : 'Failed to add to wishlist';
+      toast.error(message);
     },
   });
 
   const removeFromWishlistMutation = useMutation({
-    mutationFn: (prodId: string) => wishlistAPI.removeFromWishlist(prodId),
-    onSuccess: () => {
+    mutationFn: async (data: { prodId: string; productName?: string }) => {
+      await wishlistAPI.removeFromWishlist(data.prodId);
+      return data.productName;
+    },
+    onSuccess: (productName) => {
       queryClient.invalidateQueries({ queryKey: ['wishlist'] });
       queryClient.invalidateQueries({ queryKey: ['wishlist-check'] });
       queryClient.invalidateQueries({ queryKey: ['wishlist-count'] });
       if (productId) {
         setIsWishlisted(false);
       }
+      
+      const message = productName
+        ? `${productName} removed from wishlist`
+        : 'Removed from wishlist';
+      toast.success(message);
+    },
+    onError: (error) => {
+      const message = error instanceof AxiosError
+        ? error.response?.data?.message || 'Failed to remove from wishlist'
+        : 'Failed to remove from wishlist';
+      toast.error(message);
     },
   });
 
@@ -64,57 +94,47 @@ export const useWishlist = (options: UseWishlistOptions = {}) => {
     }
   }, [isInWishlist, productId]);
 
-  const toggleWishlist = async (prodId: string) => {
+  const checkIsInWishlist = (prodId: string): boolean => {
+    if (!wishlistData?.content) return false;
+    return wishlistData.content.some(item => item.productId === prodId);
+  };
+
+  const toggleWishlist = async (prodId: string, productNameFromCaller?: string) => {
     if (!localStorage.getItem('token')) {
-      console.log('Please log in to add items to your wishlist');
+      toast.error('Please log in to add items to your wishlist');
       return;
     }
 
-    try {
-      const isCurrentlyWishlisted = prodId === productId ? isWishlisted : false;
-      
-      if (isCurrentlyWishlisted) {
-        await removeFromWishlistMutation.mutateAsync(prodId);
-      } else {
-        await addToWishlistMutation.mutateAsync(prodId);
-      }
-    } catch (error) {
-      console.error('Failed to toggle wishlist:', error);
-      throw error;
+    const isCurrentlyWishlisted = checkIsInWishlist(prodId);
+    const item = wishlistData?.content.find(w => w.productId === prodId);
+    const productName = productNameFromCaller ?? item?.productName;
+
+    if (isCurrentlyWishlisted) {
+      await removeFromWishlistMutation.mutateAsync({ prodId, productName });
+    } else {
+      await addToWishlistMutation.mutateAsync({ prodId, productName });
     }
   };
 
-  const addToWishlist = async (prodId: string) => {
+  const addToWishlist = async (prodId: string, productName?: string) => {
     if (!localStorage.getItem('token')) {
-      console.log('Please log in to add items to your wishlist');
+      toast.error('Please log in to add items to your wishlist');
       return;
     }
 
-    try {
-      await addToWishlistMutation.mutateAsync(prodId);
-    } catch (error) {
-      console.error('Failed to add to wishlist:', error);
-      throw error;
-    }
+    await addToWishlistMutation.mutateAsync({ prodId, productName });
   };
 
   const removeFromWishlist = async (prodId: string) => {
     if (!localStorage.getItem('token')) {
-      console.log('Please log in to manage your wishlist');
+      toast.error('Please log in to manage your wishlist');
       return;
     }
 
-    try {
-      await removeFromWishlistMutation.mutateAsync(prodId);
-    } catch (error) {
-      console.error('Failed to remove from wishlist:', error);
-      throw error;
-    }
-  };
+    const item = wishlistData?.content.find(w => w.productId === prodId);
+    const productName = item?.productName;
 
-  const checkIsInWishlist = (prodId: string): boolean => {
-    if (!wishlistData?.content) return false;
-    return wishlistData.content.some(item => item.productId === prodId);
+    await removeFromWishlistMutation.mutateAsync({ prodId, productName });
   };
 
   return {

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Package, Clock, CheckCircle, XCircle, Eye, Truck, Search } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+import { AxiosError } from 'axios';
 
 import { ordersAPI } from '../lib/api/orders';
 import { Pagination } from '../components/Pagination';
@@ -38,6 +40,13 @@ const Orders = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['order-stats'] });
+      toast.success('Order cancelled successfully');
+    },
+    onError: (error) => {
+      const message = error instanceof AxiosError
+        ? error.response?.data?.message || 'Failed to cancel order'
+        : 'Failed to cancel order';
+      toast.error(message);
     },
   });
 
@@ -110,11 +119,7 @@ const Orders = () => {
 
   const handleCancelOrder = async (orderId: string) => {
     if (window.confirm('Are you sure you want to cancel this order?')) {
-      try {
-        await cancelOrder(orderId);
-      } catch (error) {
-        console.error('Failed to cancel order:', error);
-      }
+      await cancelOrder(orderId);
     }
   };
 

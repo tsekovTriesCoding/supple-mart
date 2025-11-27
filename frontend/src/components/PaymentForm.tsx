@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { CreditCard, Lock } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 
 interface PaymentFormProps {
   onPaymentSuccess: () => Promise<void>;
@@ -10,7 +10,6 @@ interface PaymentFormProps {
 export const PaymentForm = ({ onPaymentSuccess }: PaymentFormProps) => {
   const stripe = useStripe();
   const elements = useElements();
-  const [validationError, setValidationError] = useState<string | null>(null);
 
   const confirmPaymentMutation = useMutation({
     mutationFn: async () => {
@@ -38,22 +37,22 @@ export const PaymentForm = ({ onPaymentSuccess }: PaymentFormProps) => {
     },
     onSuccess: async () => {
       await onPaymentSuccess();
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Payment failed');
     }
   });
 
   const processing = confirmPaymentMutation.isPending;
-  const mutationError = confirmPaymentMutation.error as Error | null;
-  const error = validationError || (mutationError ? mutationError.message : null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!stripe || !elements) {
-      setValidationError('Stripe has not loaded yet. Please wait.');
+      toast.error('Stripe has not loaded yet. Please wait.');
       return;
     }
 
-    setValidationError(null);
     confirmPaymentMutation.mutate();
   };
 
@@ -80,12 +79,6 @@ export const PaymentForm = ({ onPaymentSuccess }: PaymentFormProps) => {
           />
         </div>
       </div>
-
-      {error && (
-        <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
-          <p className="text-red-400 text-sm">{error}</p>
-        </div>
-      )}
 
       <button
         type="submit"

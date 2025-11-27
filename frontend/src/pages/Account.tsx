@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { User, Mail, Calendar, AlertCircle } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+import { AxiosError } from 'axios';
 
 import { userAPI, type UpdateUserProfileRequest } from '../lib/api/user';
-import type { ApiError } from '../types/error';
 import { PasswordChangeModal } from '../components/PasswordChangeModal';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 
@@ -39,18 +40,24 @@ const Account = () => {
       );
       
       setIsEditing(false);
-    }
+      toast.success(`Welcome back, ${updatedUser.firstName}! Your profile has been updated.`);
+    },
+    onError: (error) => {
+      const message = error instanceof AxiosError
+        ? error.response?.data?.message || 'Failed to update profile'
+        : 'Failed to update profile';
+      toast.error(message);
+    },
   });
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({ firstName: '', lastName: '' });
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
-  const error = queryError
-    ? ((queryError as ApiError).response?.data?.message || 'Failed to load profile')
-    : null;
-  const updateError = updateProfileMutation.error
-    ? ((updateProfileMutation.error as ApiError).response?.data?.message || 'Failed to update profile')
+  const error = queryError instanceof AxiosError
+    ? queryError.response?.data?.message || 'Failed to load profile'
+    : queryError
+    ? 'Failed to load profile'
     : null;
 
   const handleEdit = () => {
@@ -118,20 +125,6 @@ const Account = () => {
             )}
           </div>
 
-          {updateProfileMutation.isSuccess && !isEditing && (
-            <div className="mb-6 p-4 bg-green-900/20 border border-green-900 rounded-lg text-green-400 flex items-center">
-              <AlertCircle className="w-5 h-5 mr-2" />
-              Profile updated successfully!
-            </div>
-          )}
-
-          {updateError && (
-            <div className="mb-6 p-4 bg-red-900/20 border border-red-900 rounded-lg text-red-400 flex items-center">
-              <AlertCircle className="w-5 h-5 mr-2" />
-              {updateError}
-            </div>
-          )}
-          
           <div className="grid gap-6 md:grid-cols-2">
             <div className="card p-6">
               <h2 className="text-xl font-semibold text-white mb-4 flex items-center">

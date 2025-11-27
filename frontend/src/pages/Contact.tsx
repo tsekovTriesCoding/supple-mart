@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation } from '@tanstack/react-query';
-import { Mail, Phone, MapPin, Clock, Send, CheckCircle, AlertCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, Send } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { AxiosError } from 'axios';
 
 import { contactAPI } from '../lib/api/contact';
 import type { ContactFormData } from '../types/contact';
@@ -19,17 +20,15 @@ const Contact = () => {
     mutationFn: (formData: ContactFormData) => contactAPI.submitContactForm(formData),
     onSuccess: () => {
       reset();
+      toast.success("Message sent successfully! We'll get back to you within 24 hours.");
+    },
+    onError: (error) => {
+      const message = error instanceof AxiosError
+        ? error.response?.data?.message || 'Failed to send message'
+        : 'Failed to send message';
+      toast.error(message);
     },
   });
-
-  useEffect(() => {
-    if (mutation.isSuccess) {
-      const timer = setTimeout(() => {
-        mutation.reset();
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [mutation]);
 
   const contactInfo = [
     {
@@ -97,28 +96,6 @@ const Contact = () => {
         <div className="animate-slide-in" style={{ animationDelay: '0.2s' }}>
           <div className="card p-8">
             <h2 className="text-2xl font-bold text-white mb-6">Send us a Message</h2>
-
-            {mutation.isSuccess && (
-              <div className="mb-6 p-4 bg-green-900/20 border border-green-700 rounded-lg animate-fade-in">
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="w-5 h-5 text-green-400" />
-                  <p className="text-green-400 font-medium">Message sent successfully!</p>
-                </div>
-                <p className="text-green-300 text-sm mt-1">We'll get back to you within 24 hours.</p>
-              </div>
-            )}
-
-            {mutation.isError && (
-              <div className="mb-6 p-4 bg-red-900/20 border border-red-700 rounded-lg animate-fade-in">
-                <div className="flex items-center space-x-2">
-                  <AlertCircle className="w-5 h-5 text-red-400" />
-                  <p className="text-red-400 font-medium">Failed to send message</p>
-                </div>
-                <p className="text-red-300 text-sm mt-1">
-                  {mutation.error instanceof Error ? mutation.error.message : 'Please try again later or contact us directly.'}
-                </p>
-              </div>
-            )}
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div>

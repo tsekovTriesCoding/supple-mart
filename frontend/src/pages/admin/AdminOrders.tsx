@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Package, Search, Eye, Calendar, DollarSign, User } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { AxiosError } from 'axios';
 
 import { Pagination } from '../../components/Pagination';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
@@ -29,19 +31,24 @@ const AdminOrders = () => {
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: ({ orderId, newStatus }: { orderId: number; newStatus: string }) =>
+    mutationFn: ({ orderId, newStatus }: { orderId: number; newStatus: string; orderNumber?: string; customerName?: string }) =>
       adminAPI.updateOrderStatus(orderId, newStatus),
-    onSuccess: () => {
+    onSuccess: (_, { newStatus, orderNumber, customerName }) => {
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+      const formattedStatus = newStatus.toLowerCase();
+      toast.success(`Order ${orderNumber} for ${customerName} updated to ${formattedStatus}`);
     },
     onError: (error) => {
       console.error('Failed to update order status:', error);
-      alert('Failed to update order status');
+      const message = error instanceof AxiosError
+        ? error.response?.data?.message || 'Failed to update order status'
+        : 'Failed to update order status';
+      toast.error(message);
     },
   });
 
-  const handleStatusChange = (orderId: number, newStatus: string) => {
-    updateStatusMutation.mutate({ orderId, newStatus });
+  const handleStatusChange = (orderId: number, newStatus: string, orderNumber: string, customerName: string) => {
+    updateStatusMutation.mutate({ orderId, newStatus, orderNumber, customerName });
   };
 
   const handleViewDetails = (order: AdminOrder) => {
@@ -174,7 +181,7 @@ const AdminOrders = () => {
                     <td className="px-6 py-4">
                       <select
                         value={order.status}
-                        onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                        onChange={(e) => handleStatusChange(order.id, e.target.value, order.orderNumber, order.customerName)}
                         className={`px-3 py-1 text-xs rounded-full cursor-pointer ${getStatusColor(order.status)}`}
                         style={{ 
                           backgroundColor: 'transparent',

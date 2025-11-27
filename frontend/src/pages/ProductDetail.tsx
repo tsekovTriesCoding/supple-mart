@@ -1,6 +1,7 @@
 import { Heart, Minus, Plus, Share2, Shield, ShoppingCart, Star, Truck, ArrowLeft, MessageSquarePlus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 import { calculateDiscountPercentage, formatPrice, isProductOnSale, useProduct } from '../hooks/useProducts';
 import { useCart, useWishlist } from '../hooks';
@@ -45,21 +46,23 @@ const ProductDetail = () => {
 
   const handleAddToCart = async () => {
     if (product) {
+      if (!product.inStock) {
+        toast.error('Product is out of stock');
+        return;
+      }
+
       try {
         await addItem(product.id, quantity);
         setQuantity(1);
-        console.log(`Added ${quantity} x ${product.name} to cart`);
-        // TODO: Show success message
       } catch (error) {
         console.error('Failed to add item to cart:', error);
-        // TODO: Show error message
       }
     }
   };
 
   const handleWishlistToggle = async () => {
     if (!product) return;
-    await toggleWishlist(product.id);
+    await toggleWishlist(product.id, product.name);
   };
 
   const handleShare = () => {
