@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Elements } from '@stripe/react-stripe-js';
 import { ArrowLeft, Package, MapPin, AlertCircle, CheckCircle, ShoppingBag } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+import { AxiosError } from 'axios';
 
 import { useCart, formatCartPrice } from '../hooks';
 import { ordersAPI } from '../lib/api/orders';
@@ -34,7 +36,13 @@ const Checkout = () => {
         orderId: order.id,
         currency
       });
-    }
+    },
+    onError: (error) => {
+      const message = error instanceof AxiosError
+        ? error.response?.data?.message || 'Failed to initialize payment'
+        : 'Failed to initialize payment';
+      toast.error(message);
+    },
   });
 
   const isLoggedIn = !!localStorage.getItem('token');
@@ -80,10 +88,12 @@ const Checkout = () => {
   const handleCreatePaymentIntent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isLoggedIn) {
+      toast.error('Please login to place an order');
       return;
     }
     const validationError = validateForm();
     if (validationError) {
+      toast.error(validationError);
       return;
     }
     

@@ -1,9 +1,11 @@
 import { BarChart3, Package, ShoppingBag, Users, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import toast from 'react-hot-toast';
+import { AxiosError } from 'axios';
 
 import { adminAPI } from '../../lib/api/admin';
-import type { ApiError } from '../../types/error';
 
 const AdminDashboard = () => {
   const { data: stats, isLoading, error } = useQuery({
@@ -13,9 +15,14 @@ const AdminDashboard = () => {
     refetchOnWindowFocus: true,
   });
 
-  const errorMessage = error 
-    ? ((error as ApiError).response?.data?.message || 'Failed to load dashboard stats')
-    : null;
+  useEffect(() => {
+    if (error) {
+      const message = error instanceof AxiosError
+        ? error.response?.data?.message || 'Failed to load dashboard stats'
+        : 'Failed to load dashboard stats';
+      toast.error(message);
+    }
+  }, [error]);
 
   return (
     <>
@@ -23,12 +30,6 @@ const AdminDashboard = () => {
         <h2 className="text-3xl font-bold text-white mb-2">Dashboard</h2>
         <p className="text-gray-400">Welcome to your admin panel</p>
       </div>
-
-      {errorMessage && (
-        <div className="mb-6 p-4 bg-red-900/20 border border-red-900 rounded-lg text-red-400">
-          {errorMessage}
-        </div>
-      )}
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

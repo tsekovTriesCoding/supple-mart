@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Bell, ShoppingBag, Mail, AlertCircle, Package, DollarSign, Star, Shield, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { AxiosError } from 'axios';
 import { notificationAPI } from '../lib/api/notification';
 import type { UpdateNotificationPreferencesRequest } from '../types/notification';
 import { LoadingSpinner } from '../components/LoadingSpinner';
@@ -71,13 +73,15 @@ const NotificationPreferences = () => {
   const updateMutation = useMutation({
     mutationFn: (updates: UpdateNotificationPreferencesRequest) =>
       notificationAPI.updatePreferences(updates),
-    onSuccess: (data) => {
-      queryClient.setQueryData(['notification-preferences'], data);
+    onError: (error) => {
+      const message = error instanceof AxiosError
+        ? error.response?.data?.message || 'Failed to save preferences'
+        : 'Failed to save preferences';
+      toast.error(message);
     },
   });
 
   const [localPreferences, setLocalPreferences] = useState<UpdateNotificationPreferencesRequest | null>(null);
-  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     if (preferences && !localPreferences) {
@@ -96,15 +100,21 @@ const NotificationPreferences = () => {
     }
   }, [preferences, localPreferences]);
 
-  useEffect(() => {
-    if (updateMutation.isSuccess) {
-      setShowSuccess(true);
-      const timer = setTimeout(() => {
-        setShowSuccess(false);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [updateMutation.isSuccess]);
+  const getPreferenceLabel = (key: keyof UpdateNotificationPreferencesRequest): string => {
+    const labels: Record<keyof UpdateNotificationPreferencesRequest, string> = {
+      orderUpdates: 'Order Updates',
+      shippingNotifications: 'Shipping Notifications',
+      promotionalEmails: 'Promotional Emails',
+      newsletter: 'Newsletter',
+      productRecommendations: 'Product Recommendations',
+      priceDropAlerts: 'Price Drop Alerts',
+      backInStockAlerts: 'Back in Stock Alerts',
+      accountSecurityAlerts: 'Account Security Alerts',
+      passwordResetEmails: 'Password Reset Emails',
+      reviewReminders: 'Review Reminders',
+    };
+    return labels[key];
+  };
 
   const handleToggle = (key: keyof UpdateNotificationPreferencesRequest, value: boolean) => {
     if (!localPreferences) return;
@@ -114,7 +124,16 @@ const NotificationPreferences = () => {
       [key]: value,
     };
     setLocalPreferences(updatedPreferences);
-    updateMutation.mutate(updatedPreferences);
+    
+    const preferenceLabel = getPreferenceLabel(key);
+    const action = value ? 'enabled' : 'disabled';
+    
+    updateMutation.mutate(updatedPreferences, {
+      onSuccess: (data) => {
+        queryClient.setQueryData(['notification-preferences'], data);
+        toast.success(`${preferenceLabel} ${action}`);
+      },
+    });
   };
 
   if (isLoading) {
@@ -159,26 +178,6 @@ const NotificationPreferences = () => {
           </div>
           <p className="text-gray-400">Manage how you receive updates and notifications from SuppleMart</p>
         </div>
-
-        {showSuccess && (
-          <div className="mb-6 p-4 bg-green-900/20 border border-green-700 rounded-lg animate-fade-in">
-            <div className="flex items-center space-x-2">
-              <AlertCircle className="w-5 h-5 text-green-400" />
-              <p className="text-green-400 font-medium">Preferences saved successfully!</p>
-            </div>
-          </div>
-        )}
-
-        {updateMutation.isError && (
-          <div className="mb-6 p-4 bg-red-900/20 border border-red-700 rounded-lg animate-fade-in">
-            <div className="flex items-center space-x-2">
-              <AlertCircle className="w-5 h-5 text-red-400" />
-              <p className="text-red-400 font-medium">
-                {updateMutation.error instanceof Error ? updateMutation.error.message : 'Failed to save preferences'}
-              </p>
-            </div>
-          </div>
-        )}
 
         <div className="card p-6 mb-6">
           <div className="flex items-center space-x-2 mb-4">

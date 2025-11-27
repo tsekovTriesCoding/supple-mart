@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Filter, Grid, List, Search } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 import { ProductCard, ProductFilters } from '../components/Product';
 import { Pagination } from '../components/Pagination';
@@ -98,12 +99,14 @@ const Products = () => {
   };
 
   const addToCart = async (product: Product) => {
-    if (!product.inStock) return;
+    if (!product.inStock) {
+      toast.error('Product is out of stock');
+      return;
+    }
 
     setAddingToCartId(product.id);
     try {
       await addItem(product.id, 1);
-      console.log(`Added ${product.name} to cart`);
     } catch (error) {
       console.error('Failed to add item to cart:', error);
     } finally {
@@ -112,7 +115,7 @@ const Products = () => {
   };
 
   const toggleWishlist = async (product: Product) => {
-    await toggleWishlistHook(product.id);
+    await toggleWishlistHook(product.id, product.name);
   };
 
   const sortOptions = [

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Star, X, Send, AlertCircle } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+import { AxiosError } from 'axios';
 
 import { reviewsAPI } from '../lib/api/reviews';
 import type { CreateReviewRequest, UpdateReviewRequest } from '../types/review';
@@ -41,8 +43,15 @@ const ReviewModal = ({
       setRating(0);
       setComment('');
       setValidationError(null);
+      toast.success('Review submitted successfully');
       onReviewSubmitted?.();
       onClose();
+    },
+    onError: (error) => {
+      const message = error instanceof AxiosError
+        ? error.response?.data?.message || 'Failed to submit review'
+        : 'Failed to submit review';
+      toast.error(message);
     }
   });
 
@@ -53,28 +62,32 @@ const ReviewModal = ({
       setRating(0);
       setComment('');
       setValidationError(null);
+      toast.success('Review updated successfully');
       onReviewSubmitted?.();
       onClose();
+    },
+    onError: (error) => {
+      const message = error instanceof AxiosError
+        ? error.response?.data?.message || 'Failed to update review'
+        : 'Failed to update review';
+      toast.error(message);
     }
   });
 
   const isSubmitting = createReviewMutation.isPending || updateReviewMutation.isPending;
-  const mutationError = createReviewMutation.error || updateReviewMutation.error;
-  const error = validationError || (mutationError ? 
-    `Failed to ${editMode ? 'update' : 'submit'} review. Please try again.` : null);
 
   useEffect(() => {
-    if (editMode && isOpen) {
-      setRating(initialRating);
-      setComment(initialComment);
-    } else if (!editMode && isOpen) {
-      setRating(0);
-      setComment('');
+    if (isOpen) {
+      if (editMode) {
+        setRating(initialRating);
+        setComment(initialComment);
+      } else {
+        setRating(0);
+        setComment('');
+      }
+      setValidationError(null);
     }
-    setValidationError(null);
-    createReviewMutation.reset();
-    updateReviewMutation.reset();
-  }, [editMode, isOpen, initialRating, initialComment, createReviewMutation, updateReviewMutation]);
+  }, [isOpen, editMode, initialRating, initialComment]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -236,10 +249,10 @@ const ReviewModal = ({
               </div>
             </div>
 
-            {error && (
+            {validationError && (
               <div className="flex items-center space-x-2 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
                 <AlertCircle className="w-5 h-5 text-red-400" />
-                <span className="text-red-400 text-sm">{error}</span>
+                <span className="text-red-400 text-sm">{validationError}</span>
               </div>
             )}
 
