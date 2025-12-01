@@ -79,7 +79,7 @@ export const SearchInput = ({ className = 'w-64' }: SearchInputProps) => {
           <button
             type="button"
             onClick={handleClearSearch}
-            className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-white transition-colors"
+            className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-white transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -97,7 +97,7 @@ export const SearchInput = ({ className = 'w-64' }: SearchInputProps) => {
               <button
                 key={product.id}
                 onClick={() => handleProductClick(product.id)}
-                className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-700 transition-colors text-left"
+                className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-700 transition-colors text-left cursor-pointer"
               >
                 <img
                   src={product.imageUrl}

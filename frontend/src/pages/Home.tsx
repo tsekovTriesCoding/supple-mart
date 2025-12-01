@@ -168,7 +168,7 @@ const Home = () => {
                 onClick={scrollLeft}
                 disabled={!canScrollLeft}
                 className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-gray-800 border border-gray-700 transition-all duration-200 ${canScrollLeft
-                    ? 'hover:bg-gray-700 text-white'
+                    ? 'hover:bg-gray-700 text-white cursor-pointer'
                     : 'opacity-50 cursor-not-allowed text-gray-500'
                   }`}
                 aria-label="Previous products"
@@ -180,7 +180,7 @@ const Home = () => {
                 onClick={scrollRight}
                 disabled={!canScrollRight}
                 className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-gray-800 border border-gray-700 transition-all duration-200 ${canScrollRight
-                    ? 'hover:bg-gray-700 text-white'
+                    ? 'hover:bg-gray-700 text-white cursor-pointer'
                     : 'opacity-50 cursor-not-allowed text-gray-500'
                   }`}
                 aria-label="Next products"

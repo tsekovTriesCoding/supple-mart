@@ -119,7 +119,7 @@ const ProductDetail = () => {
       <div className="container mx-auto px-4 py-8">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors mb-6"
+          className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors mb-6 cursor-pointer"
         >
           <ArrowLeft className="w-5 h-5" />
           <span>Back</span>
@@ -190,14 +190,14 @@ const ProductDetail = () => {
                     <button
                       onClick={() => handleQuantityChange(-1)}
                       disabled={quantity <= 1}
-                      className="p-2 bg-gray-700 hover:bg-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="p-2 bg-gray-700 hover:bg-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
                     >
                       <Minus className="w-5 h-5 text-white" />
                     </button>
                     <span className="text-white font-semibold text-xl w-12 text-center">{quantity}</span>
                     <button
                       onClick={() => handleQuantityChange(1)}
-                      className="p-2 bg-gray-700 hover:bg-gray-600 rounded transition-colors"
+                      className="p-2 bg-gray-700 hover:bg-gray-600 rounded transition-colors cursor-pointer"
                     >
                       <Plus className="w-5 h-5 text-white" />
                     </button>
@@ -216,7 +216,7 @@ const ProductDetail = () => {
                   <button
                     onClick={handleWishlistToggle}
                     disabled={isTogglingWishlist}
-                    className={`p-3 rounded-lg transition-colors ${
+                    className={`p-3 rounded-lg transition-colors cursor-pointer ${
                       isWishlisted
                         ? 'bg-red-500 hover:bg-red-600 text-white'
                         : 'bg-gray-700 hover:bg-gray-600 text-white'
@@ -227,7 +227,7 @@ const ProductDetail = () => {
 
                   <button
                     onClick={handleShare}
-                    className="p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                    className="p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors cursor-pointer"
                   >
                     <Share2 className="w-6 h-6 text-white" />
                   </button>
@@ -266,7 +266,7 @@ const ProductDetail = () => {
               <button
                 key={tab}
                 onClick={() => setSelectedTab(tab as typeof selectedTab)}
-                className={`px-6 py-3 font-medium capitalize transition-colors ${
+                className={`px-6 py-3 font-medium capitalize transition-colors cursor-pointer ${
                   selectedTab === tab
                     ? 'text-blue-400 border-b-2 border-blue-400'
                     : 'text-gray-400 hover:text-white'

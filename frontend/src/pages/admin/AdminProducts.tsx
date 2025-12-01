@@ -311,13 +311,13 @@ const AdminProducts = () => {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => handleEdit(product)}
-                          className="p-2 text-blue-400 hover:bg-blue-900/20 rounded"
+                          className="p-2 text-blue-400 hover:bg-blue-900/20 rounded cursor-pointer"
                         >
                           <Edit size={18} />
                         </button>
                         <button
                           onClick={() => handleDelete(product.id)}
-                          className="p-2 text-red-400 hover:bg-red-900/20 rounded"
+                          className="p-2 text-red-400 hover:bg-red-900/20 rounded cursor-pointer"
                         >
                           <Trash2 size={18} />
                         </button>

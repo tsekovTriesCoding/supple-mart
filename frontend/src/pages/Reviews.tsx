@@ -194,14 +194,14 @@ const Reviews = () => {
                         <div className="flex items-center space-x-2">
                           <button
                             onClick={() => handleUpdateReview(review.id)}
-                            className="p-2 text-gray-400 hover:text-blue-400 transition-colors"
+                            className="p-2 text-gray-400 hover:text-blue-400 transition-colors cursor-pointer"
                             title="Edit Review"
                           >
                             <Edit3 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDeleteReview(review.id)}
-                            className="p-2 text-gray-400 hover:text-red-400 transition-colors"
+                            className="p-2 text-gray-400 hover:text-red-400 transition-colors cursor-pointer"
                             title="Delete Review"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -221,7 +221,7 @@ const Reviews = () => {
                         </div>
                         <button 
                           onClick={() => handleViewProduct(review.product.id)}
-                          className="text-blue-400 hover:text-blue-300 transition-colors"
+                          className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                         >
                           View Product
                         </button>

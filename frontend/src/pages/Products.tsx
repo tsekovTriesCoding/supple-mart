@@ -195,7 +195,7 @@ const Products = () => {
             <div className="flex space-x-2">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg transition-colors ${
+                className={`p-2 rounded-lg transition-colors cursor-pointer ${
                   viewMode === 'grid'
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-800 text-gray-400 hover:text-white'
@@ -205,7 +205,7 @@ const Products = () => {
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg transition-colors ${
+                className={`p-2 rounded-lg transition-colors cursor-pointer ${
                   viewMode === 'list'
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-800 text-gray-400 hover:text-white'

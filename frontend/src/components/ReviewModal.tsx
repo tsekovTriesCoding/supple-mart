@@ -154,7 +154,7 @@ const ReviewModal = ({
           <button
             onClick={handleClose}
             disabled={isSubmitting}
-            className="p-2 hover:bg-gray-800 rounded-lg transition-colors disabled:opacity-50"
+            className="p-2 hover:bg-gray-800 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
           >
             <X className="w-5 h-5 text-gray-400" />
           </button>
@@ -190,7 +190,7 @@ const ReviewModal = ({
                     onClick={() => setRating(star)}
                     onMouseEnter={() => setHoveredRating(star)}
                     onMouseLeave={() => setHoveredRating(0)}
-                    className="p-1 transition-transform hover:scale-110"
+                    className="p-1 transition-transform hover:scale-110 cursor-pointer"
                   >
                     <Star
                       className={`w-8 h-8 ${
@@ -261,7 +261,7 @@ const ReviewModal = ({
                 type="button"
                 onClick={handleClose}
                 disabled={isSubmitting}
-                className="flex-1 px-4 py-3 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+                className="flex-1 px-4 py-3 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 Cancel
               </button>

@@ -308,7 +308,7 @@ const Orders = () => {
                   <div className="flex flex-col sm:flex-row gap-3">
                     <button
                       onClick={() => handleViewOrder(order)}
-                      className="flex items-center justify-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      className="flex items-center justify-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
                     >
                       <Eye className="w-4 h-4" />
                       <span>View Details</span>
@@ -317,7 +317,7 @@ const Orders = () => {
                     {(order.status.toUpperCase() === 'PENDING' || order.status.toUpperCase() === 'PAID') && (
                       <button
                         onClick={() => handleCancelOrder(order.id)}
-                        className="flex items-center justify-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                        className="flex items-center justify-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors cursor-pointer"
                       >
                         <XCircle className="w-4 h-4" />
                         <span>Cancel Order</span>
@@ -348,7 +348,7 @@ const Orders = () => {
               <h2 className="text-2xl font-bold text-white">Order Details</h2>
               <button
                 onClick={() => setIsOrderDetailOpen(false)}
-                className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
               >
                 <XCircle className="w-6 h-6 text-gray-400" />
               </button>
