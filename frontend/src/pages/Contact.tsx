@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
 
 import { contactAPI } from '../lib/api/contact';
+import { FormInput, FormTextarea, FormSelect } from '../components/Form';
 import type { ContactFormData } from '../types/contact';
 
 const Contact = () => {
@@ -29,6 +30,15 @@ const Contact = () => {
       toast.error(message);
     },
   });
+
+  const subjectOptions = [
+    { value: 'product-inquiry', label: 'Product Inquiry' },
+    { value: 'order-support', label: 'Order Support' },
+    { value: 'general-question', label: 'General Question' },
+    { value: 'partnership', label: 'Partnership' },
+    { value: 'feedback', label: 'Feedback' },
+    { value: 'other', label: 'Other' },
+  ];
 
   const contactInfo = [
     {
@@ -98,107 +108,72 @@ const Contact = () => {
             <h2 className="text-2xl font-bold text-white mb-6">Send us a Message</h2>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-white mb-2">
-                  Full Name
-                </label>
-                <input
-                  {...register('name', {
-                    required: 'Name is required',
-                    minLength: {
-                      value: 2,
-                      message: 'Name must be at least 2 characters'
-                    },
-                    maxLength: {
-                      value: 100,
-                      message: 'Name must not exceed 100 characters'
-                    }
-                  })}
-                  type="text"
-                  className="input w-full"
-                  placeholder="Enter your full name"
-                />
-                {errors.name && (
-                  <p className="mt-1 text-sm text-red-400">{errors.name.message}</p>
-                )}
-              </div>
+              <FormInput
+                {...register('name', {
+                  required: 'Name is required',
+                  minLength: {
+                    value: 2,
+                    message: 'Name must be at least 2 characters'
+                  },
+                  maxLength: {
+                    value: 100,
+                    message: 'Name must not exceed 100 characters'
+                  }
+                })}
+                label="Full Name"
+                placeholder="Enter your full name"
+                error={errors.name?.message}
+              />
 
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
-                  Email Address
-                </label>
-                <input
-                  {...register('email', {
-                    required: 'Email is required',
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: 'Invalid email address'
-                    }
-                  })}
-                  type="email"
-                  className="input w-full"
-                  placeholder="Enter your email address"
-                />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-400">{errors.email.message}</p>
-                )}
-              </div>
+              <FormInput
+                {...register('email', {
+                  required: 'Email is required',
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: 'Invalid email address'
+                  }
+                })}
+                type="email"
+                label="Email Address"
+                placeholder="Enter your email address"
+                error={errors.email?.message}
+              />
 
-              <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-white mb-2">
-                  Subject
-                </label>
-                <select
-                  {...register('subject', {
-                    required: 'Subject is required',
-                    minLength: {
-                      value: 5,
-                      message: 'Subject must be at least 5 characters'
-                    },
-                    maxLength: {
-                      value: 200,
-                      message: 'Subject must not exceed 200 characters'
-                    }
-                  })}
-                  className="input w-full"
-                >
-                  <option value="">Select a subject</option>
-                  <option value="product-inquiry">Product Inquiry</option>
-                  <option value="order-support">Order Support</option>
-                  <option value="general-question">General Question</option>
-                  <option value="partnership">Partnership</option>
-                  <option value="feedback">Feedback</option>
-                  <option value="other">Other</option>
-                </select>
-                {errors.subject && (
-                  <p className="mt-1 text-sm text-red-400">{errors.subject.message}</p>
-                )}
-              </div>
+              <FormSelect
+                {...register('subject', {
+                  required: 'Subject is required',
+                  minLength: {
+                    value: 5,
+                    message: 'Subject must be at least 5 characters'
+                  },
+                  maxLength: {
+                    value: 200,
+                    message: 'Subject must not exceed 200 characters'
+                  }
+                })}
+                label="Subject"
+                placeholder="Select a subject"
+                options={subjectOptions}
+                error={errors.subject?.message}
+              />
 
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-white mb-2">
-                  Message
-                </label>
-                <textarea
-                  {...register('message', {
-                    required: 'Message is required',
-                    minLength: {
-                      value: 10,
-                      message: 'Message must be at least 10 characters'
-                    },
-                    maxLength: {
-                      value: 2000,
-                      message: 'Message must not exceed 2000 characters'
-                    }
-                  })}
-                  rows={5}
-                  className="input w-full resize-none"
-                  placeholder="Tell us how we can help you..."
-                />
-                {errors.message && (
-                  <p className="mt-1 text-sm text-red-400">{errors.message.message}</p>
-                )}
-              </div>
+              <FormTextarea
+                {...register('message', {
+                  required: 'Message is required',
+                  minLength: {
+                    value: 10,
+                    message: 'Message must be at least 10 characters'
+                  },
+                  maxLength: {
+                    value: 2000,
+                    message: 'Message must not exceed 2000 characters'
+                  }
+                })}
+                label="Message"
+                rows={5}
+                placeholder="Tell us how we can help you..."
+                error={errors.message?.message}
+              />
 
               <button
                 type="submit"

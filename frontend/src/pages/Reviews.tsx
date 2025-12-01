@@ -1,13 +1,15 @@
 import { Star, Edit3, Trash2, Calendar, Package } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
 
 import { reviewsAPI } from '../lib/api/reviews';
+import { useIsAuthenticated } from '../hooks';
 import ReviewModal from '../components/ReviewModal';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { StarRating } from '../components/StarRating';
 import type { ReviewResponseDTO } from '../types/review';
 
 const Reviews = () => {
@@ -15,6 +17,7 @@ const Reviews = () => {
   const queryClient = useQueryClient();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingReview, setEditingReview] = useState<ReviewResponseDTO | null>(null);
+  const isAuthenticated = useIsAuthenticated();
 
   const { data: reviews = [], isLoading: loading, error } = useQuery({
     queryKey: ['user-reviews'],
@@ -67,49 +70,37 @@ const Reviews = () => {
   }, [reviews]);
 
   const getReviewStats = () => reviewStats;
-  const deleteReview = (reviewId: string) => deleteMutation.mutateAsync(reviewId);
-  const refreshReviews = () => queryClient.invalidateQueries({ queryKey: ['user-reviews'] });
+  const refreshReviews = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['user-reviews'] });
+  }, [queryClient]);
 
-  const renderStars = (rating: number) => {
-    return (
-      <div className="flex items-center space-x-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            className={`w-4 h-4 ${star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-400'}`}
-          />
-        ))}
-      </div>
-    );
-  };
-
-  const handleUpdateReview = (reviewId: string) => {
+  const handleUpdateReview = useCallback((reviewId: string) => {
     const review = reviews.find(r => r.id === reviewId);
     if (review) {
       setEditingReview(review);
       setIsEditModalOpen(true);
     }
-  };
+  }, [reviews]);
 
-  const handleViewProduct = (productId: string) => {
+  const handleViewProduct = useCallback((productId: string) => {
     navigate(`/products/${productId}`);
-  };
+  }, [navigate]);
 
-  const handleDeleteReview = async (reviewId: string) => {
+  const handleDeleteReview = useCallback(async (reviewId: string) => {
     if (window.confirm('Are you sure you want to delete this review?')) {
-      await deleteReview(reviewId);
+      await deleteMutation.mutateAsync(reviewId);
     }
-  };
+  }, [deleteMutation]);
 
-  const formatDate = (dateString: string) => {
+  const formatDate = useCallback((dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
-  };
+  }, []);
 
-  if (!localStorage.getItem('token')) {
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0a0a' }}>
         <div className="text-center">
@@ -184,7 +175,7 @@ const Reviews = () => {
                           <h3 className="text-lg font-semibold text-white mb-1">{review.product.name}</h3>
                           <p className="text-gray-400 text-sm mb-2">${review.product.price.toFixed(2)}</p>
                           <div className="flex items-center space-x-3 mb-2">
-                            {renderStars(review.rating)}
+                            <StarRating rating={review.rating} size="md" />
                             <span className="text-xs bg-green-900 text-green-300 px-2 py-1 rounded-full">
                               Verified Purchase
                             </span>

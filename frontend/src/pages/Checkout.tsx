@@ -6,7 +6,7 @@ import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
 
-import { useCart, formatCartPrice } from '../hooks';
+import { useCart, formatCartPrice, useIsAuthenticated } from '../hooks';
 import { ordersAPI } from '../lib/api/orders';
 import { paymentsAPI } from '../lib/api/payments';
 import PaymentForm from '../components/PaymentForm';
@@ -45,7 +45,7 @@ const Checkout = () => {
     },
   });
 
-  const isLoggedIn = !!localStorage.getItem('token');
+  const isLoggedIn = useIsAuthenticated();
   const stripePromise = getStripe();
   const clientSecret = createPaymentMutation.data?.clientSecret || null;
   const error = createPaymentMutation.error ? 

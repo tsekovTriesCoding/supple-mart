@@ -1,9 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { User, ChevronDown, Settings, Package, Star, LogOut, UserCircle, Shield, Heart } from 'lucide-react';
 
-import { authAPI } from '../../lib/api';
-import { useCart } from '../../hooks/useCart';
+import { useAuth } from '../../hooks';
 import type { UserData, UserRole } from '../../types/auth';
 
 interface UserDropdownProps {
@@ -13,26 +12,24 @@ interface UserDropdownProps {
 }
 
 export const UserDropdown = ({ isLoggedIn, user, onAuthModalOpen }: UserDropdownProps) => {
-  const navigate = useNavigate();
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const userRef = useRef<HTMLDivElement>(null);
   const userTimeoutRef = useRef<number | null>(null);
-  const { refreshCart } = useCart();
+  const { logout, isLoggingOut } = useAuth();
 
-  const handleUserMouseEnter = () => {
+  const handleUserMouseEnter = useCallback(() => {
     if (userTimeoutRef.current) {
       clearTimeout(userTimeoutRef.current);
       userTimeoutRef.current = null;
     }
     setIsUserDropdownOpen(true);
-  };
+  }, []);
 
-  const handleUserMouseLeave = () => {
+  const handleUserMouseLeave = useCallback(() => {
     userTimeoutRef.current = setTimeout(() => {
       setIsUserDropdownOpen(false);
     }, 100);
-  };
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -42,33 +39,10 @@ export const UserDropdown = ({ isLoggedIn, user, onAuthModalOpen }: UserDropdown
     };
   }, []);
 
-  const handleLogout = async () => {
-    if (isLoggingOut) return;
-
-    setIsLoggingOut(true);
-    try {
-      await authAPI.logout();
-
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-
-      await refreshCart();
-      navigate('/');
-      window.location.reload();
-    } catch (error) {
-      console.error('Logout failed:', error);
-
-      // Even if logout API fails, clear local data
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-
-      await refreshCart();
-      navigate('/');
-      window.location.reload();
-    } finally {
-      setIsLoggingOut(false);
-    }
-  };
+  const handleLogout = useCallback(async () => {
+    setIsUserDropdownOpen(false);
+    await logout();
+  }, [logout]);
 
   if (isLoggedIn) {
     return (
@@ -153,10 +127,7 @@ export const UserDropdown = ({ isLoggedIn, user, onAuthModalOpen }: UserDropdown
 
             <div className="border-t border-gray-700 py-2">
               <button
-                onClick={() => {
-                  handleLogout();
-                  setIsUserDropdownOpen(false);
-                }}
+                onClick={handleLogout}
                 disabled={isLoggingOut}
                 className={`flex items-center space-x-3 px-4 py-3 w-full text-left transition-colors cursor-pointer ${
                   isLoggingOut ? 'opacity-50 cursor-not-allowed text-gray-500' : 'text-gray-300 hover:text-red-400 hover:bg-gray-700'

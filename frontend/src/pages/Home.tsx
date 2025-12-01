@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
 import { ArrowRight, Star, ShoppingBag, Truck, Shield, Headphones, ChevronLeft, ChevronRight } from 'lucide-react';
 import { LoadingSpinner } from '../components/LoadingSpinner';
@@ -19,9 +19,9 @@ const Home = () => {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  const handleProductClick = (productId: string) => {
+  const handleProductClick = useCallback((productId: string) => {
     navigate(`/products/${productId}`);
-  };
+  }, [navigate]);
 
   useEffect(() => {
     if (!isAutoScrolling || !scrollContainerRef.current || !productsData?.products) return;
@@ -55,26 +55,27 @@ const Home = () => {
     };
   }, [isAutoScrolling, productsData?.products]);
 
-  const updateScrollButtons = () => {
+  const updateScrollButtons = useCallback(() => {
     if (!scrollContainerRef.current) return;
 
     const container = scrollContainerRef.current;
     setCanScrollLeft(container.scrollLeft > 0);
     setCanScrollRight(container.scrollLeft < container.scrollWidth - container.clientWidth);
-  };
-  const scrollLeft = () => {
+  }, []);
+
+  const scrollLeft = useCallback(() => {
     if (!scrollContainerRef.current) return;
     const cardWidth = 320 + 24;
     scrollContainerRef.current.scrollBy({ left: -cardWidth, behavior: 'smooth' });
     setIsAutoScrolling(false);
-  };
+  }, []);
 
-  const scrollRight = () => {
+  const scrollRight = useCallback(() => {
     if (!scrollContainerRef.current) return;
     const cardWidth = 320 + 24;
     scrollContainerRef.current.scrollBy({ left: cardWidth, behavior: 'smooth' });
     setIsAutoScrolling(false);
-  };
+  }, []);
 
   useEffect(() => {
     if (!isAutoScrolling) {
@@ -86,7 +87,7 @@ const Home = () => {
     }
   }, [isAutoScrolling]);
 
-  const features = [
+  const features = useMemo(() => [
     {
       icon: <Truck className="w-8 h-8 text-blue-400" />,
       title: "Free Shipping",
@@ -102,7 +103,7 @@ const Home = () => {
       title: "24/7 Support",
       description: "Expert customer service"
     }
-  ]
+  ], []);
 
   return (
     <div className="animate-fade-in">

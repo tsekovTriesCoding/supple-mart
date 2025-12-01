@@ -1,9 +1,8 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { User, Settings, Package, Star, LogOut } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback } from 'react';
 
-import { authAPI } from '../../lib/api';
-import { useCart } from '../../hooks/useCart';
+import { useAuth } from '../../hooks';
 import { useProductCategories } from '../../hooks/useProducts';
 import { SearchInput } from './SearchInput';
 import { formatCategoryForDisplay, formatCategoryForUrl } from '../../utils/categoryUtils';
@@ -26,42 +25,15 @@ const navLinks = [
 
 export const MobileNav = ({ isOpen, onClose, isLoggedIn, user, onAuthModalOpen }: MobileNavProps) => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { data: categoriesData } = useProductCategories();
-  const { refreshCart } = useCart();
+  const { logout, isLoggingOut } = useAuth();
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = useCallback((path: string) => location.pathname === path, [location.pathname]);
 
-  const handleLogout = async () => {
-    if (isLoggingOut) return;
-
-    setIsLoggingOut(true);
-    try {
-      await authAPI.logout();
-
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-
-      await refreshCart();
-      onClose();
-      navigate('/');
-      window.location.reload();
-    } catch (error) {
-      console.error('Logout failed:', error);
-
-      // Even if logout API fails, clear local data
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-
-      await refreshCart();
-      onClose();
-      navigate('/');
-      window.location.reload();
-    } finally {
-      setIsLoggingOut(false);
-    }
-  };
+  const handleLogout = useCallback(async () => {
+    onClose();
+    await logout();
+  }, [logout, onClose]);
 
   if (!isOpen) return null;
 
@@ -139,9 +111,7 @@ export const MobileNav = ({ isOpen, onClose, isLoggedIn, user, onAuthModalOpen }
             </div>
 
             <button
-              onClick={() => {
-                handleLogout();
-              }}
+              onClick={handleLogout}
               disabled={isLoggingOut}
               className={`nav-link font-medium py-2 inline-flex items-center space-x-2 w-full text-left cursor-pointer ${
                 isLoggingOut ? 'opacity-50 cursor-not-allowed' : 'hover:text-red-400'

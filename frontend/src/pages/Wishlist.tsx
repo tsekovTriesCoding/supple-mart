@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Heart} from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { useCart, useWishlist } from '../hooks';
+import { useCart, useWishlist, useIsAuthenticated } from '../hooks';
 import { ProductCard } from '../components/Product';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import type { WishlistItem } from '../types/wishlist';
@@ -13,6 +13,7 @@ const Wishlist = () => {
   const { addItem } = useCart();
   const { wishlistItems, wishlistCount, isLoadingWishlist, removeFromWishlist } = useWishlist();
   const [addingToCartId, setAddingToCartId] = useState<string | null>(null);
+  const isAuthenticated = useIsAuthenticated();
 
   const convertToProduct = (item: WishlistItem): Product => ({
     id: item.productId,
@@ -47,7 +48,7 @@ const Wishlist = () => {
     await removeFromWishlist(product.id);
   };
 
-  if (!localStorage.getItem('token')) {
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0a0a' }}>
         <div className="text-center">

@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { Star, User, Calendar } from 'lucide-react';
+import { useState, useMemo, useCallback } from 'react';
+import { User, Calendar } from 'lucide-react';
 
+import { StarRating } from '../StarRating';
 import type { Review } from '../../types/review';
 
 interface ProductReviewsProps {
@@ -20,48 +21,34 @@ const ProductReviews = ({ reviews, averageRating, totalReviews }: ProductReviews
     { value: 'rating-asc', label: 'Lowest Rating' },
   ];
 
-  const handleSortChange = (sortValue: string) => {
+  const handleSortChange = useCallback((sortValue: string) => {
     const [field, order] = sortValue.split('-');
     setSortBy(field as 'createdAt' | 'rating');
     setSortOrder(order as 'asc' | 'desc');
-  };
+  }, []);
 
-  const sortedReviews = [...reviews].sort((a, b) => {
-    if (sortBy === 'createdAt') {
-      const dateA = new Date(a.createdAt).getTime();
-      const dateB = new Date(b.createdAt).getTime();
-      return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
-    } else if (sortBy === 'rating') {
-      return sortOrder === 'desc' ? b.rating - a.rating : a.rating - b.rating;
-    }
-    return 0;
-  });
+  const sortedReviews = useMemo(() => {
+    return [...reviews].sort((a, b) => {
+      if (sortBy === 'createdAt') {
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+      } else if (sortBy === 'rating') {
+        return sortOrder === 'desc' ? b.rating - a.rating : a.rating - b.rating;
+      }
+      return 0;
+    });
+  }, [reviews, sortBy, sortOrder]);
 
-  const renderStars = (rating: number, size: 'sm' | 'md' | 'lg' = 'md') => {
-    const starSize = size === 'sm' ? 'w-4 h-4' : size === 'md' ? 'w-5 h-5' : 'w-6 h-6';
-
-    return (
-      <div className="flex">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            className={`${starSize} ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-600'
-              }`}
-          />
-        ))}
-      </div>
-    );
-  };
-
-  const formatDate = (dateString: string) => {
+  const formatDate = useCallback((dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
     });
-  };
+  }, []);
 
-  const getRatingDistribution = () => {
+  const ratingDistribution = useMemo(() => {
     const distribution = [0, 0, 0, 0, 0];
     reviews.forEach((review: Review) => {
       if (review.rating >= 1 && review.rating <= 5) {
@@ -69,7 +56,7 @@ const ProductReviews = ({ reviews, averageRating, totalReviews }: ProductReviews
       }
     });
     return distribution.reverse();
-  };
+  }, [reviews]);
 
   return (
     <div className="space-y-6">
@@ -77,12 +64,12 @@ const ProductReviews = ({ reviews, averageRating, totalReviews }: ProductReviews
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="text-center">
             <div className="text-4xl font-bold text-white mb-2">{averageRating}</div>
-            {renderStars(averageRating, 'lg')}
+            <StarRating rating={averageRating} size="xl" />
             <p className="text-gray-400 mt-2">Based on {totalReviews === 1 ? '1 review' : `${totalReviews} reviews`}</p>
           </div>
 
           <div className="space-y-2">
-            {getRatingDistribution().map((count, index) => {
+            {ratingDistribution.map((count, index) => {
               const starCount = 5 - index;
               const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
 
@@ -146,7 +133,7 @@ const ProductReviews = ({ reviews, averageRating, totalReviews }: ProductReviews
                   </div>
                 </div>
 
-                {renderStars(review.rating)}
+                <StarRating rating={review.rating} size="lg" />
               </div>
 
               <div className="mb-4">
