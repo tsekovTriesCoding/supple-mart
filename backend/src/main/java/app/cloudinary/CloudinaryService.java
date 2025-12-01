@@ -1,4 +1,4 @@
-package app.service;
+package app.cloudinary;
 
 import app.exception.BadRequestException;
 import com.cloudinary.Cloudinary;

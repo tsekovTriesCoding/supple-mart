@@ -11,7 +11,7 @@ import app.product.mapper.ProductMapper;
 import app.product.model.Category;
 import app.product.model.Product;
 import app.product.service.ProductService;
-import app.service.CloudinaryService;
+import app.cloudinary.CloudinaryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
