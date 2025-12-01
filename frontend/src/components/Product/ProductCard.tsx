@@ -65,7 +65,7 @@ export const ProductCard = ({
                 e.stopPropagation();
                 onToggleWishlist(product);
               }}
-              className={`absolute top-2 right-2 p-2 rounded-full transition-colors ${
+              className={`absolute top-2 right-2 p-2 rounded-full transition-colors cursor-pointer ${
                 isInWishlist ? 'bg-red-500/80 hover:bg-red-600/80' : 'bg-black/50 hover:bg-black/70'
               }`}
             >
@@ -91,7 +91,7 @@ export const ProductCard = ({
                   e.stopPropagation();
                   onToggleWishlist(product);
                 }}
-                className={`p-2 rounded-full transition-colors ${
+                className={`p-2 rounded-full transition-colors cursor-pointer ${
                   isInWishlist ? 'bg-red-500/20 hover:bg-red-500/30' : 'hover:bg-gray-700'
                 }`}
               >

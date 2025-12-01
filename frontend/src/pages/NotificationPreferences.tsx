@@ -166,7 +166,7 @@ const NotificationPreferences = () => {
         <div className="mb-8">
           <button
             onClick={() => navigate('/account')}
-            className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors mb-4"
+            className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors mb-4 cursor-pointer"
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Back to Account</span>

@@ -143,7 +143,7 @@ export const MobileNav = ({ isOpen, onClose, isLoggedIn, user, onAuthModalOpen }
                 handleLogout();
               }}
               disabled={isLoggingOut}
-              className={`nav-link font-medium py-2 inline-flex items-center space-x-2 w-full text-left ${
+              className={`nav-link font-medium py-2 inline-flex items-center space-x-2 w-full text-left cursor-pointer ${
                 isLoggingOut ? 'opacity-50 cursor-not-allowed' : 'hover:text-red-400'
               }`}
             >
@@ -164,7 +164,7 @@ export const MobileNav = ({ isOpen, onClose, isLoggedIn, user, onAuthModalOpen }
               onAuthModalOpen();
               onClose();
             }}
-            className="nav-link font-medium py-2 inline-flex items-center space-x-2 w-full text-left hover:text-blue-400"
+            className="nav-link font-medium py-2 inline-flex items-center space-x-2 w-full text-left hover:text-blue-400 cursor-pointer"
           >
             <User className="w-5 h-5" />
             <span>Sign In</span>

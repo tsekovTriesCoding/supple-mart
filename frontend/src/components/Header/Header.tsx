@@ -57,7 +57,7 @@ const Header = () => {
             />
 
             <button
-              className="md:hidden p-2 transition-colors hover:text-blue-400"
+              className="md:hidden p-2 transition-colors hover:text-blue-400 cursor-pointer"
               style={{ color: '#d1d5db' }}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >

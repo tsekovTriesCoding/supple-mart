@@ -25,7 +25,7 @@ const CartDropdown = ({ isOpen, onClose, onMouseEnter, onMouseLeave }: CartDropd
           <h3 className="text-lg font-semibold text-white">Shopping Cart</h3>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-gray-800 rounded-lg transition-colors"
+            className="p-1 hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
           >
             <X className="w-5 h-5 text-gray-400" />
           </button>
@@ -75,7 +75,7 @@ const CartDropdown = ({ isOpen, onClose, onMouseEnter, onMouseLeave }: CartDropd
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      className="p-1 hover:bg-gray-700 rounded-full transition-colors"
+                      className="p-1 hover:bg-gray-700 rounded-full transition-colors cursor-pointer"
                     >
                       <Minus className="w-3 h-3 text-gray-400" />
                     </button>
@@ -84,14 +84,14 @@ const CartDropdown = ({ isOpen, onClose, onMouseEnter, onMouseLeave }: CartDropd
                     
                     <button
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      className="p-1 hover:bg-gray-700 rounded-full transition-colors"
+                      className="p-1 hover:bg-gray-700 rounded-full transition-colors cursor-pointer"
                     >
                       <Plus className="w-3 h-3 text-gray-400" />
                     </button>
                   </div>
                   <button
                     onClick={() => removeItem(item.id)}
-                    className="p-1 hover:bg-red-900 rounded-full transition-colors"
+                    className="p-1 hover:bg-red-900 rounded-full transition-colors cursor-pointer"
                   >
                     <X className="w-4 h-4 text-red-400" />
                   </button>

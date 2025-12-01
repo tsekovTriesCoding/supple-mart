@@ -24,7 +24,7 @@ const CategoryNavigation = () => {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`nav-link flex items-center space-x-1 font-medium ${isOpen ? 'text-blue-300' : ''}`}
+        className={`nav-link flex items-center space-x-1 font-medium cursor-pointer ${isOpen ? 'text-blue-300' : ''}`}
       >
         <span>Categories</span>
         <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />

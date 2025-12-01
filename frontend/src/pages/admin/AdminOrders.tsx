@@ -200,7 +200,7 @@ const AdminOrders = () => {
                     <td className="px-6 py-4">
                       <button
                         onClick={() => handleViewDetails(order)}
-                        className="p-2 text-blue-400 hover:bg-blue-900/20 rounded"
+                        className="p-2 text-blue-400 hover:bg-blue-900/20 rounded cursor-pointer"
                         title="View Details"
                       >
                         <Eye size={18} />
@@ -236,7 +236,7 @@ const AdminOrders = () => {
               <h3 className="text-xl font-bold text-white">Order Details</h3>
               <button
                 onClick={() => setShowDetailsModal(false)}
-                className="text-gray-400 hover:text-white"
+                className="text-gray-400 hover:text-white cursor-pointer"
               >
                 ×
               </button>

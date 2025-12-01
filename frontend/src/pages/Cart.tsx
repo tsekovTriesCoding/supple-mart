@@ -45,7 +45,7 @@ const Cart = () => {
           <div className="flex justify-end">
             <button
               onClick={clearCart}
-              className="text-red-400 hover:text-red-300 text-sm transition-colors"
+              className="text-red-400 hover:text-red-300 text-sm transition-colors cursor-pointer"
             >
               Clear All Items
             </button>
@@ -69,7 +69,7 @@ const Cart = () => {
                     <div className="flex items-center space-x-2">
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+                        className="p-2 hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
                       >
                         <Minus className="w-4 h-4 text-gray-400" />
                       </button>
@@ -78,7 +78,7 @@ const Cart = () => {
                       
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+                        className="p-2 hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
                       >
                         <Plus className="w-4 h-4 text-gray-400" />
                       </button>
@@ -92,7 +92,7 @@ const Cart = () => {
                   </span>
                   <button
                     onClick={() => removeItem(item.id)}
-                    className="p-2 hover:bg-red-900 rounded-lg transition-colors group"
+                    className="p-2 hover:bg-red-900 rounded-lg transition-colors group cursor-pointer"
                   >
                     <X className="w-5 h-5 text-red-400 group-hover:text-red-300" />
                   </button>

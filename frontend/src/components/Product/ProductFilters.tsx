@@ -33,7 +33,7 @@ export const ProductFilters = ({
               <button
                 key={category}
                 onClick={() => onCategoryChange(category)}
-                className={`block w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                className={`block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer ${
                   (category === 'all' && !selectedCategory) || category === selectedCategory
                     ? 'bg-blue-600 text-white'
                     : 'text-gray-400 hover:text-white hover:bg-gray-700'
