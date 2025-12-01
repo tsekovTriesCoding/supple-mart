@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom';
 
+import { useIsAuthenticated } from '../hooks';
 import type { UserRole } from '../types/auth';
 
 interface ProtectedRouteProps {
@@ -8,10 +9,10 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
-  const token = localStorage.getItem('token');
+  const isAuthenticated = useIsAuthenticated();
   const userStr = localStorage.getItem('user');
   
-  if (!token || !userStr) {
+  if (!isAuthenticated || !userStr) {
     return <Navigate to="/" replace />;
   }
 

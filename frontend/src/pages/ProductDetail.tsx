@@ -1,10 +1,10 @@
 import { Heart, Minus, Plus, Share2, Shield, ShoppingCart, Star, Truck, ArrowLeft, MessageSquarePlus } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 import { calculateDiscountPercentage, formatPrice, isProductOnSale, useProduct } from '../hooks/useProducts';
-import { useCart, useWishlist } from '../hooks';
+import { useCart, useWishlist, useAuth } from '../hooks';
 import { ProductReviews } from '../components/Product';
 import ReviewModal from '../components/ReviewModal';
 import { LoadingSpinner } from '../components/LoadingSpinner';
@@ -23,28 +23,22 @@ const ProductDetail = () => {
   const { isWishlisted, toggleWishlist, isTogglingWishlist } = useWishlist({ 
     productId: productId?.toString() 
   });
+  const { isLoggedIn, user } = useAuth();
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [productId]);
 
-  const hasUserReviewed = () => {
-    if (!product?.reviews || !localStorage.getItem('token')) return false;
-    
-    const userData = localStorage.getItem('user');
-    if (!userData) return false;
-    
-    const user = JSON.parse(userData);
-    const userId = user.id;
+  const hasUserReviewed = useMemo(() => {
+    if (!product?.reviews || !isLoggedIn || !user) return false;
+    return product.reviews.some((review: { userId?: string }) => review.userId === user.id);
+  }, [product?.reviews, isLoggedIn, user]);
 
-    return product.reviews.some((review: { userId?: string }) => review.userId === userId);
-  };
-
-  const handleQuantityChange = (change: number) => {
+  const handleQuantityChange = useCallback((change: number) => {
     setQuantity(prev => Math.max(1, prev + change));
-  };
+  }, []);
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = useCallback(async () => {
     if (product) {
       if (!product.inStock) {
         toast.error('Product is out of stock');
@@ -58,14 +52,14 @@ const ProductDetail = () => {
         console.error('Failed to add item to cart:', error);
       }
     }
-  };
+  }, [product, quantity, addItem]);
 
-  const handleWishlistToggle = async () => {
+  const handleWishlistToggle = useCallback(async () => {
     if (!product) return;
     await toggleWishlist(product.id, product.name);
-  };
+  }, [product, toggleWishlist]);
 
-  const handleShare = () => {
+  const handleShare = useCallback(() => {
     if (navigator.share && product) {
       navigator.share({
         title: product.name,
@@ -73,11 +67,11 @@ const ProductDetail = () => {
         url: window.location.href,
       }).catch(err => console.error('Share failed:', err));
     }
-  };
+  }, [product]);
 
-  const handleReviewAdded = () => {
+  const handleReviewAdded = useCallback(() => {
     refetch();
-  };
+  }, [refetch]);
 
   if (isLoading) {
     return <LoadingSpinner size="lg" message="Loading product..." fullScreen />;
@@ -286,7 +280,7 @@ const ProductDetail = () => {
 
             {selectedTab === 'reviews' && (
               <div>
-                {localStorage.getItem('token') && !hasUserReviewed() && (
+                {isLoggedIn && !hasUserReviewed && (
                   <button
                     onClick={() => setIsReviewModalOpen(true)}
                     className="btn-primary mb-6 flex items-center space-x-2"

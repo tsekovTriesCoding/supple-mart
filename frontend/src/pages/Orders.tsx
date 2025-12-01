@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
 
 import { ordersAPI } from '../lib/api/orders';
+import { useIsAuthenticated } from '../hooks';
 import { Pagination } from '../components/Pagination';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import type { Order, OrderFilters } from '../types/order';
@@ -16,6 +17,7 @@ const Orders = () => {
   const [isOrderDetailOpen, setIsOrderDetailOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const isAuthenticated = useIsAuthenticated();
 
   const {
     data: ordersData,
@@ -138,7 +140,7 @@ const Orders = () => {
     return true;
   });
 
-  if (!localStorage.getItem('token')) {
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0a0a' }}>
         <div className="text-center">

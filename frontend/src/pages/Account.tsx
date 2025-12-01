@@ -7,6 +7,7 @@ import { AxiosError } from 'axios';
 import { userAPI, type UpdateUserProfileRequest } from '../lib/api/user';
 import { PasswordChangeModal } from '../components/PasswordChangeModal';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { FormInput } from '../components/Form';
 
 const Account = () => {
   const queryClient = useQueryClient();
@@ -179,41 +180,30 @@ const Account = () => {
                 </>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-2">First Name</label>
-                    <input
-                      type="text"
-                      value={formData.firstName}
-                      onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                      className="input w-full"
-                      required
-                    />
-                  </div>
+                  <FormInput
+                    label="First Name"
+                    type="text"
+                    value={formData.firstName}
+                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                    required
+                  />
 
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-2">Last Name</label>
-                    <input
-                      type="text"
-                      value={formData.lastName}
-                      onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                      className="input w-full"
-                      required
-                    />
-                  </div>
+                  <FormInput
+                    label="Last Name"
+                    type="text"
+                    value={formData.lastName}
+                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                    required
+                  />
 
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-2">Email</label>
-                    <input
-                      type="email"
-                      value={user.email}
-                      className="input w-full bg-gray-800 cursor-not-allowed opacity-60"
-                      disabled
-                    />
-                    <p className="text-xs text-gray-400 mt-1 flex items-center">
-                      <AlertCircle className="w-3 h-3 mr-1" />
-                      Email cannot be changed. Contact support if you need to update your email address.
-                    </p>
-                  </div>
+                  <FormInput
+                    label="Email"
+                    type="email"
+                    value={user.email}
+                    className="bg-gray-800 cursor-not-allowed opacity-60"
+                    disabled
+                    hint="Email cannot be changed. Contact support if you need to update your email address."
+                  />
 
                   <div className="flex space-x-3">
                     <button

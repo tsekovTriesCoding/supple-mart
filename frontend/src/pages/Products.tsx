@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Filter, Grid, List, Search } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -55,9 +55,9 @@ const Products = () => {
   });
 
   const { data: categoriesData } = useProductCategories();
-  const categories = ['all', ...(categoriesData || [])];
+  const categories = useMemo(() => ['all', ...(categoriesData || [])], [categoriesData]);
 
-  const handleCategoryChange = (category: string) => {
+  const handleCategoryChange = useCallback((category: string) => {
     const newCategory = category === 'all' ? 'all' : category;
     setSelectedCategory(newCategory);
     setCurrentPage(1);
@@ -69,9 +69,9 @@ const Products = () => {
       newSearchParams.delete('category');
     }
     setSearchParams(newSearchParams);
-  };
+  }, [searchParams, setSearchParams]);
 
-  const handleSortChange = (sortValue: string) => {
+  const handleSortChange = useCallback((sortValue: string) => {
     const [field, order] = sortValue.split('-') as [
       'name' | 'price' | 'createdAt',
       'asc' | 'desc'
@@ -79,9 +79,9 @@ const Products = () => {
     setSortBy(field);
     setSortOrder(order);
     setCurrentPage(1);
-  };
+  }, []);
 
-  const handleSearchChange = (query: string) => {
+  const handleSearchChange = useCallback((query: string) => {
     setSearchQuery(query);
     setCurrentPage(1);
 
@@ -92,13 +92,13 @@ const Products = () => {
       newSearchParams.delete('search');
     }
     setSearchParams(newSearchParams);
-  };
+  }, [searchParams, setSearchParams]);
 
-  const handleProductClick = (productId: string) => {
+  const handleProductClick = useCallback((productId: string) => {
     navigate(`/products/${productId}`);
-  };
+  }, [navigate]);
 
-  const addToCart = async (product: Product) => {
+  const addToCart = useCallback(async (product: Product) => {
     if (!product.inStock) {
       toast.error('Product is out of stock');
       return;
@@ -112,20 +112,20 @@ const Products = () => {
     } finally {
       setAddingToCartId(null);
     }
-  };
+  }, [addItem]);
 
-  const toggleWishlist = async (product: Product) => {
+  const toggleWishlist = useCallback(async (product: Product) => {
     await toggleWishlistHook(product.id, product.name);
-  };
+  }, [toggleWishlistHook]);
 
-  const sortOptions = [
+  const sortOptions = useMemo(() => [
     { value: 'name-asc', label: 'Name A-Z' },
     { value: 'name-desc', label: 'Name Z-A' },
     { value: 'price-asc', label: 'Price: Low to High' },
     { value: 'price-desc', label: 'Price: High to Low' },
     { value: 'createdAt-desc', label: 'Newest' },
     { value: 'createdAt-asc', label: 'Oldest' },
-  ];
+  ], []);
 
   if (isError) {
     const errorMessage =
