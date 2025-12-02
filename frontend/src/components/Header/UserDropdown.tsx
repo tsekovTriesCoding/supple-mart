@@ -44,6 +44,10 @@ export const UserDropdown = ({ isLoggedIn, user, onAuthModalOpen }: UserDropdown
     await logout();
   }, [logout]);
 
+  const closeDropdown = useCallback(() => {
+    setIsUserDropdownOpen(false);
+  }, []);
+
   if (isLoggedIn) {
     return (
       <div className="relative" ref={userRef}>
@@ -79,8 +83,8 @@ export const UserDropdown = ({ isLoggedIn, user, onAuthModalOpen }: UserDropdown
             <div className="py-2">
               <Link
                 to="/account"
-                className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
-                onClick={() => setIsUserDropdownOpen(false)}
+                onClick={closeDropdown}
+                className="flex items-center space-x-3 px-4 py-3 w-full text-left text-gray-300 hover:text-white hover:bg-gray-700 transition-colors cursor-pointer"
               >
                 <Settings className="w-5 h-5" />
                 <span>My Account</span>
@@ -89,8 +93,8 @@ export const UserDropdown = ({ isLoggedIn, user, onAuthModalOpen }: UserDropdown
               {user && (user as { role?: UserRole }).role === 'ADMIN' && (
                 <Link
                   to="/admin"
-                  className="flex items-center space-x-3 px-4 py-3 text-blue-400 hover:text-blue-300 hover:bg-gray-700 transition-colors"
-                  onClick={() => setIsUserDropdownOpen(false)}
+                  onClick={closeDropdown}
+                  className="flex items-center space-x-3 px-4 py-3 w-full text-left text-blue-400 hover:text-blue-300 hover:bg-gray-700 transition-colors cursor-pointer"
                 >
                   <Shield className="w-5 h-5" />
                   <span>Admin Panel</span>
@@ -99,8 +103,8 @@ export const UserDropdown = ({ isLoggedIn, user, onAuthModalOpen }: UserDropdown
 
               <Link
                 to="/orders"
-                className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
-                onClick={() => setIsUserDropdownOpen(false)}
+                onClick={closeDropdown}
+                className="flex items-center space-x-3 px-4 py-3 w-full text-left text-gray-300 hover:text-white hover:bg-gray-700 transition-colors cursor-pointer"
               >
                 <Package className="w-5 h-5" />
                 <span>Orders</span>
@@ -108,8 +112,8 @@ export const UserDropdown = ({ isLoggedIn, user, onAuthModalOpen }: UserDropdown
 
               <Link
                 to="/reviews"
-                className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
-                onClick={() => setIsUserDropdownOpen(false)}
+                onClick={closeDropdown}
+                className="flex items-center space-x-3 px-4 py-3 w-full text-left text-gray-300 hover:text-white hover:bg-gray-700 transition-colors cursor-pointer"
               >
                 <Star className="w-5 h-5" />
                 <span>Reviews</span>
@@ -117,8 +121,8 @@ export const UserDropdown = ({ isLoggedIn, user, onAuthModalOpen }: UserDropdown
 
               <Link
                 to="/wishlist"
-                className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
-                onClick={() => setIsUserDropdownOpen(false)}
+                onClick={closeDropdown}
+                className="flex items-center space-x-3 px-4 py-3 w-full text-left text-gray-300 hover:text-white hover:bg-gray-700 transition-colors cursor-pointer"
               >
                 <Heart className="w-5 h-5" />
                 <span>Wishlist</span>

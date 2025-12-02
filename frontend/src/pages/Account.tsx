@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { User, Mail, Calendar, AlertCircle } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
@@ -11,6 +12,7 @@ import { FormInput } from '../components/Form';
 
 const Account = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   
   const {
     data: user = null,
@@ -239,14 +241,17 @@ const Account = () => {
                 </button>
                 
                 <button 
-                  onClick={() => window.location.href = '/account/notifications'}
+                  onClick={() => navigate('/account/notifications')}
                   className="w-full text-left p-3 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer"
                 >
                   <h3 className="text-white font-medium">Notification Preferences</h3>
                   <p className="text-gray-400 text-sm">Manage email and push notifications</p>
                 </button>
                 
-                <button className="w-full text-left p-3 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer">
+                <button 
+                  onClick={() => navigate('/account/privacy')}
+                  className="w-full text-left p-3 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer"
+                >
                   <h3 className="text-white font-medium">Privacy Settings</h3>
                   <p className="text-gray-400 text-sm">Control your privacy preferences</p>
                 </button>

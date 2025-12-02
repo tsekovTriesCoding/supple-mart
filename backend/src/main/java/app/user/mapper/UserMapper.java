@@ -8,8 +8,6 @@ import app.user.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import java.time.LocalDateTime;
-
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
