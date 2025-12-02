@@ -1,4 +1,4 @@
-package app.order.dto;
+package app.admin.dto;
 
 import lombok.Builder;
 import lombok.Data;
@@ -10,14 +10,13 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class OrderDTO {
+public class AdminOrderResponse {
     private UUID id;
     private String orderNumber;
+    private String customerName;
+    private String customerEmail;
     private BigDecimal totalAmount;
     private String status;
-    private String shippingAddress;
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private List<OrderItemDTO> items;
+    private List<AdminOrderItem> items;
 }
-

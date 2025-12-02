@@ -1,7 +1,7 @@
 package app.payment.service;
 
 import app.exception.BadRequestException;
-import app.order.dto.OrderDTO;
+import app.order.dto.OrderResponse;
 import app.order.model.OrderStatus;
 import app.order.service.OrderService;
 import app.payment.config.StripeConfig;
@@ -41,7 +41,7 @@ public class PaymentService {
         try {
             User user = userService.getUserById(userId);
 
-            OrderDTO order = orderService.getOrderById(request.getOrderId(), userId);
+            OrderResponse order = orderService.getOrderById(request.getOrderId(), userId);
 
             if (!"pending".equals(order.getStatus())) {
                 throw new BadRequestException("Payment intent can only be created for pending orders");

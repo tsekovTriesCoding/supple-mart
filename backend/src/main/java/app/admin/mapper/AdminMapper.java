@@ -19,7 +19,7 @@ import java.util.UUID;
 public interface AdminMapper {
 
     // Dashboard Stats
-    default DashboardStatsDTO toDashboardStatsDTO(
+    default DashboardStats toDashboardStats(
             Long totalProducts,
             Long totalUsers,
             Long totalOrders,
@@ -27,7 +27,7 @@ public interface AdminMapper {
             Long pendingOrders,
             Long lowStockProducts
     ) {
-        return DashboardStatsDTO.builder()
+        return DashboardStats.builder()
                 .totalProducts(totalProducts)
                 .totalCustomers(totalUsers)
                 .totalOrders(totalOrders)
@@ -56,21 +56,21 @@ public interface AdminMapper {
     void updateProductEntity(@MappingTarget Product product, UpdateProductRequest request);
 
     @Mapping(target = "inStock", expression = "java(product.getStockQuantity() > 0)")
-    @Mapping(target = "isActive", source = "product.active")
+    @Mapping(target = "active", source = "product.active")
     @Mapping(target = "totalSales", source = "totalSales")
-    AdminProductDTO toAdminProductDTO(Product product, Integer totalSales);
+    AdminProductResponse toAdminProductResponse(Product product, Integer totalSales);
 
-    default List<AdminProductDTO> toAdminProductDTOList(List<Product> products, Map<UUID, Integer> salesMap) {
+    default List<AdminProductResponse> toAdminProductResponseList(List<Product> products, Map<UUID, Integer> salesMap) {
         return products.stream()
-                .map(product -> toAdminProductDTO(product, salesMap.getOrDefault(product.getId(), 0)))
+                .map(product -> toAdminProductResponse(product, salesMap.getOrDefault(product.getId(), 0)))
                 .toList();
     }
 
     default AdminProductPageResponse toAdminProductPageResponse(Page<Product> productPage, Map<UUID, Integer> salesMap) {
-        List<AdminProductDTO> productDTOs = toAdminProductDTOList(productPage.getContent(), salesMap);
+        List<AdminProductResponse> productResponses = toAdminProductResponseList(productPage.getContent(), salesMap);
 
         return AdminProductPageResponse.builder()
-                .content(productDTOs)
+                .content(productResponses)
                 .currentPage(productPage.getNumber())
                 .totalPages(productPage.getTotalPages())
                 .totalElements(productPage.getTotalElements())
@@ -83,18 +83,18 @@ public interface AdminMapper {
     @Mapping(target = "customerEmail", source = "user.email")
     @Mapping(target = "status", expression = "java(order.getStatus().name())")
     @Mapping(target = "items", source = "items")
-    AdminOrderDTO toAdminOrderDTO(Order order);
+    AdminOrderResponse toAdminOrderResponse(Order order);
 
     @Mapping(target = "productName", source = "product.name")
-    AdminOrderItemDTO toAdminOrderItemDTO(OrderItem orderItem);
+    AdminOrderItem toAdminOrderItem(OrderItem orderItem);
 
     default AdminOrdersResponse toAdminOrdersResponse(Page<Order> orderPage) {
         if (orderPage == null) {
             return null;
         }
 
-        List<AdminOrderDTO> orders = orderPage.getContent().stream()
-                .map(this::toAdminOrderDTO)
+        List<AdminOrderResponse> orders = orderPage.getContent().stream()
+                .map(this::toAdminOrderResponse)
                 .toList();
 
         return AdminOrdersResponse.builder()
@@ -107,15 +107,15 @@ public interface AdminMapper {
     }
 
     // User Mapping Methods
-    AdminUserDTO toAdminUserDTO(User user);
+    AdminUserResponse toAdminUserResponse(User user);
 
     default AdminUsersResponse toAdminUsersResponse(Page<User> userPage) {
         if (userPage == null) {
             return null;
         }
 
-        List<AdminUserDTO> users = userPage.getContent().stream()
-                .map(this::toAdminUserDTO)
+        List<AdminUserResponse> users = userPage.getContent().stream()
+                .map(this::toAdminUserResponse)
                 .toList();
 
         return AdminUsersResponse.builder()

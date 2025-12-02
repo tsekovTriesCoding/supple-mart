@@ -1,6 +1,6 @@
 package app.admin.service;
 
-import app.admin.dto.DashboardStatsDTO;
+import app.admin.dto.DashboardStats;
 import app.admin.mapper.AdminMapper;
 import app.order.service.OrderService;
 import app.product.service.ProductService;
@@ -21,7 +21,7 @@ public class AdminDashboardService {
     private final OrderService orderService;
     private final AdminMapper adminMapper;
 
-    public DashboardStatsDTO getDashboardStats() {
+    public DashboardStats getDashboardStats() {
         log.info("Fetching dashboard statistics");
 
         Long totalProducts = productService.getTotalProductsCount();
@@ -31,7 +31,7 @@ public class AdminDashboardService {
         Long pendingOrders = orderService.getPendingOrdersCount();
         Long lowStockProducts = productService.getLowStockProductsCount();
 
-        return adminMapper.toDashboardStatsDTO(
+        return adminMapper.toDashboardStats(
                 totalProducts,
                 totalUsers,
                 totalOrders,

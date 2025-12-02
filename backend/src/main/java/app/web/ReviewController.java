@@ -2,8 +2,8 @@ package app.web;
 
 import app.review.dto.CreateReviewRequest;
 import app.review.dto.UpdateReviewRequest;
-import app.review.dto.ReviewDTO;
-import app.review.dto.ReviewResponseDTO;
+import app.review.dto.Review;
+import app.review.dto.ReviewResponse;
 import app.review.service.ReviewService;
 import app.security.CustomUserDetails;
 import jakarta.validation.Valid;
@@ -24,16 +24,16 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @GetMapping
-    public ResponseEntity<List<ReviewResponseDTO>> getUserReviews(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        List<ReviewResponseDTO> reviews = reviewService.getUserReviewsDetailed(userDetails.getId());
+    public ResponseEntity<List<ReviewResponse>> getUserReviews(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<ReviewResponse> reviews = reviewService.getUserReviewsDetailed(userDetails.getId());
         return ResponseEntity.ok(reviews);
     }
 
     @PostMapping
-    public ResponseEntity<ReviewDTO> createReview(
+    public ResponseEntity<Review> createReview(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody CreateReviewRequest request) {
-        ReviewDTO review = reviewService.createReview(userDetails.getId(), request);
+        Review review = reviewService.createReview(userDetails.getId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(review);
     }
 
@@ -46,11 +46,11 @@ public class ReviewController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ReviewDTO> updateReview(
+    public ResponseEntity<Review> updateReview(
             @PathVariable UUID id,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody UpdateReviewRequest request) {
-        ReviewDTO updatedReview = reviewService.updateReview(id, userDetails.getId(), request);
+        Review updatedReview = reviewService.updateReview(id, userDetails.getId(), request);
         return ResponseEntity.ok(updatedReview);
     }
 }

@@ -12,7 +12,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class WishlistItemDTO {
+public class WishlistItem {
     private UUID id;
     private UUID productId;
     private String productName;

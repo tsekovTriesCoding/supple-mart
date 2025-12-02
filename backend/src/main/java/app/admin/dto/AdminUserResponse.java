@@ -13,7 +13,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdminUserDTO {
+public class AdminUserResponse {
     private UUID id;
     private String email;
     private String firstName;
@@ -22,4 +22,3 @@ public class AdminUserDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
-

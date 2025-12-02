@@ -10,8 +10,8 @@ import app.notification.event.OrderDeliveredEvent;
 import app.notification.event.OrderPlacedEvent;
 import app.notification.event.OrderShippedEvent;
 import app.order.dto.CreateOrderRequest;
-import app.order.dto.OrderDTO;
-import app.order.dto.OrderStatsDTO;
+import app.order.dto.OrderResponse;
+import app.order.dto.OrderStats;
 import app.order.dto.OrdersResponse;
 import app.order.mapper.OrderMapper;
 import app.order.model.Order;
@@ -71,7 +71,7 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public OrderDTO getOrderById(UUID orderId, UUID userId) {
+    public OrderResponse getOrderById(UUID orderId, UUID userId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
 
@@ -79,11 +79,11 @@ public class OrderService {
             throw new UnauthorizedException("You are not authorized to view this order");
         }
 
-        return orderMapper.toOrderDTO(order);
+        return orderMapper.toOrderResponse(order);
     }
 
     @Transactional
-    public OrderDTO createOrder(UUID userId, CreateOrderRequest request) {
+    public OrderResponse createOrder(UUID userId, CreateOrderRequest request) {
         User user = userService.getUserById(userId);
 
         Cart cart = cartService.getCartWithItemsForOrder(userId);
@@ -123,7 +123,7 @@ public class OrderService {
         ));
         log.info("OrderPlacedEvent published for order: {}", savedOrder.getOrderNumber());
 
-        return orderMapper.toOrderDTO(savedOrder);
+        return orderMapper.toOrderResponse(savedOrder);
     }
 
     /**
@@ -160,7 +160,7 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderDTO cancelOrder(UUID orderId, UUID userId) {
+    public OrderResponse cancelOrder(UUID orderId, UUID userId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
 
@@ -185,7 +185,7 @@ public class OrderService {
 
         log.info("Order {} cancelled and inventory released for user: {}", orderId, userId);
 
-        return orderMapper.toOrderDTO(savedOrder);
+        return orderMapper.toOrderResponse(savedOrder);
     }
 
     public Long getTotalOrdersCount() {
@@ -226,7 +226,7 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderDTO updateOrderStatus(UUID orderId, OrderStatus newStatus) {
+    public OrderResponse updateOrderStatus(UUID orderId, OrderStatus newStatus) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
 
@@ -261,11 +261,11 @@ public class OrderService {
             log.info("OrderDeliveredEvent published for order: {}", savedOrder.getOrderNumber());
         }
 
-        return orderMapper.toOrderDTO(savedOrder);
+        return orderMapper.toOrderResponse(savedOrder);
     }
 
     @Transactional(readOnly = true)
-    public OrderStatsDTO getUserOrderStats(UUID userId) {
+    public OrderStats getUserOrderStats(UUID userId) {
         Long totalOrders = orderRepository.countTotalOrdersByUser(userId);
         Long pendingCount = orderRepository.countOrdersByUserAndStatus(userId, OrderStatus.PENDING);
         Long paidCount = orderRepository.countOrdersByUserAndStatus(userId, OrderStatus.PAID);
@@ -275,7 +275,7 @@ public class OrderService {
         Long cancelledCount = orderRepository.countOrdersByUserAndStatus(userId, OrderStatus.CANCELLED);
         BigDecimal totalSpent = orderRepository.calculateTotalSpentByUser(userId);
 
-        return orderMapper.toOrderStatsDTO(totalOrders, pendingCount, paidCount, processingCount,
+        return orderMapper.toOrderStats(totalOrders, pendingCount, paidCount, processingCount,
                 shippedCount, deliveredCount, cancelledCount, totalSpent);
     }
 

@@ -2,7 +2,7 @@ package app.product.service;
 
 import app.exception.BadRequestException;
 import app.exception.ResourceNotFoundException;
-import app.product.dto.ProductDetailsDTO;
+import app.product.dto.ProductDetails;
 import app.product.dto.ProductPageResponse;
 import app.product.mapper.ProductMapper;
 import app.product.model.Category;
@@ -58,10 +58,10 @@ public class ProductService {
         return Arrays.asList(Category.values());
     }
 
-    public ProductDetailsDTO getProductDetailsById(UUID id) {
+    public ProductDetails getProductDetailsById(UUID id) {
         Product product = productRepository.findByIdWithReviews(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product with ID " + id + " not found"));
-        return productMapper.toDetailsDTO(product);
+        return productMapper.toProductDetails(product);
     }
 
     public Product getProductById(UUID id) {

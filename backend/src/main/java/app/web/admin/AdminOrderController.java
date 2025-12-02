@@ -3,7 +3,7 @@ package app.web.admin;
 import app.admin.dto.AdminOrdersResponse;
 import app.admin.dto.UpdateOrderStatusRequest;
 import app.admin.service.AdminOrderService;
-import app.order.dto.OrderDTO;
+import app.order.dto.OrderResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,12 +37,12 @@ public class AdminOrderController {
     }
 
     @PatchMapping("/{orderId}/status")
-    public ResponseEntity<OrderDTO> updateOrderStatus(
+    public ResponseEntity<OrderResponse> updateOrderStatus(
             @PathVariable UUID orderId,
             @Valid @RequestBody UpdateOrderStatusRequest request
     ) {
         log.info("Admin: Updating order {} status to {}", orderId, request.getStatus());
-        OrderDTO order = adminOrderService.updateOrderStatus(orderId, request.getStatus());
+        OrderResponse order = adminOrderService.updateOrderStatus(orderId, request.getStatus());
         return ResponseEntity.ok(order);
     }
 }

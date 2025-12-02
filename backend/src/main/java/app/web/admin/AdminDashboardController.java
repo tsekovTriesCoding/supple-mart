@@ -1,6 +1,6 @@
 package app.web.admin;
 
-import app.admin.dto.DashboardStatsDTO;
+import app.admin.dto.DashboardStats;
 import app.admin.service.AdminDashboardService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,9 +20,9 @@ public class AdminDashboardController {
     private final AdminDashboardService adminDashboardService;
 
     @GetMapping("/stats")
-    public ResponseEntity<DashboardStatsDTO> getDashboardStats() {
+    public ResponseEntity<DashboardStats> getDashboardStats() {
         log.info("Admin: Fetching dashboard statistics");
-        DashboardStatsDTO stats = adminDashboardService.getDashboardStats();
+        DashboardStats stats = adminDashboardService.getDashboardStats();
         return ResponseEntity.ok(stats);
     }
 }

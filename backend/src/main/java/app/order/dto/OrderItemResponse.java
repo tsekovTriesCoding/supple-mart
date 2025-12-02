@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class OrderItemDTO {
+public class OrderItemResponse {
     private UUID id;
     private ProductInfo product;
     private Integer quantity;
@@ -22,4 +22,3 @@ public class OrderItemDTO {
         private String imageUrl;
     }
 }
-

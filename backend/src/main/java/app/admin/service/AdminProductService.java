@@ -6,7 +6,7 @@ import app.admin.dto.ImageUploadResponse;
 import app.admin.dto.UpdateProductRequest;
 import app.admin.mapper.AdminMapper;
 import app.order.service.OrderService;
-import app.product.dto.ProductDetailsDTO;
+import app.product.dto.ProductDetails;
 import app.product.mapper.ProductMapper;
 import app.product.model.Category;
 import app.product.model.Product;
@@ -73,18 +73,18 @@ public class AdminProductService {
     }
 
     @Transactional
-    public ProductDetailsDTO createProduct(CreateProductRequest request) {
+    public ProductDetails createProduct(CreateProductRequest request) {
         log.info("Creating new product: {}", request.getName());
 
         Product product = adminMapper.toProductEntity(request);
         Product savedProduct = productService.createProduct(product);
 
         log.info("Product created successfully with ID: {}", savedProduct.getId());
-        return productMapper.toDetailsDTO(savedProduct);
+        return productMapper.toProductDetails(savedProduct);
     }
 
     @Transactional
-    public ProductDetailsDTO updateProduct(UUID id, UpdateProductRequest request) {
+    public ProductDetails updateProduct(UUID id, UpdateProductRequest request) {
         log.info("Updating product with ID: {}", id);
 
         Product product = productService.getProductById(id);
@@ -102,7 +102,7 @@ public class AdminProductService {
         Product updatedProduct = productService.updateProduct(product);
 
         log.info("Product updated successfully: {}", id);
-        return productMapper.toDetailsDTO(updatedProduct);
+        return productMapper.toProductDetails(updatedProduct);
     }
 
     @Transactional

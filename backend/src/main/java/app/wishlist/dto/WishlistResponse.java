@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WishlistResponse {
-    private List<WishlistItemDTO> content;
+    private List<WishlistItem> content;
     private int currentPage;
     private int pageSize;
     private int totalPages;

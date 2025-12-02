@@ -14,7 +14,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdminProductDTO {
+public class AdminProductResponse {
     private UUID id;
     private String name;
     private String description;
@@ -23,9 +23,8 @@ public class AdminProductDTO {
     private Integer stockQuantity;
     private String imageUrl;
     private boolean inStock;
-    private boolean isActive;
+    private boolean active;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Integer totalSales;
 }
-

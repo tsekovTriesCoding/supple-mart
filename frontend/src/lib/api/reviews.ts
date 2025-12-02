@@ -1,13 +1,13 @@
 import { api } from './index';
 import type { 
   Review,
-  ReviewResponseDTO,
+  ReviewResponse,
   CreateReviewRequest, 
   UpdateReviewRequest 
 } from '../../types/review';
 
 export const reviewsAPI = {
-  getUserReviews: async (): Promise<ReviewResponseDTO[]> => {
+  getUserReviews: async (): Promise<ReviewResponse[]> => {
     const response = await api.get('reviews');
     return response.data;
   },
@@ -17,12 +17,12 @@ export const reviewsAPI = {
     return response.data;
   },
 
-  createReview: async (review: CreateReviewRequest): Promise<ReviewResponseDTO> => {
+  createReview: async (review: CreateReviewRequest): Promise<ReviewResponse> => {
     const response = await api.post('reviews', review);
     return response.data;
   },
 
-  updateReview: async (reviewId: string, review: UpdateReviewRequest): Promise<ReviewResponseDTO> => {
+  updateReview: async (reviewId: string, review: UpdateReviewRequest): Promise<ReviewResponse> => {
     const response = await api.put(`reviews/${reviewId}`, review);
     return response.data;
   },

@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DashboardStatsDTO {
+public class DashboardStats {
     private Long totalProducts;
     private Long totalCustomers;
     private Long totalOrders;
@@ -19,4 +19,3 @@ public class DashboardStatsDTO {
     private Long pendingOrders;
     private Long lowStockProducts;
 }
-

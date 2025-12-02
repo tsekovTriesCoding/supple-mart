@@ -2,7 +2,7 @@ package app.admin.service;
 
 import app.admin.dto.AdminOrdersResponse;
 import app.admin.mapper.AdminMapper;
-import app.order.dto.OrderDTO;
+import app.order.dto.OrderResponse;
 import app.order.model.Order;
 import app.order.model.OrderStatus;
 import app.order.service.OrderService;
@@ -31,7 +31,7 @@ public class AdminOrderService {
         return adminMapper.toAdminOrdersResponse(orderPage);
     }
 
-    public OrderDTO updateOrderStatus(UUID orderId, String statusStr) {
+    public OrderResponse updateOrderStatus(UUID orderId, String statusStr) {
         log.info("Admin: Updating order {} status to {}", orderId, statusStr);
 
         OrderStatus newStatus = OrderStatus.valueOf(statusStr);

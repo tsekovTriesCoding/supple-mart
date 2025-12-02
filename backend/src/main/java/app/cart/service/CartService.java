@@ -1,7 +1,7 @@
 package app.cart.service;
 
 import app.cart.dto.AddCartItemRequest;
-import app.cart.dto.CartDTO;
+import app.cart.dto.CartResponse;
 import app.cart.mapper.CartMapper;
 import app.cart.model.Cart;
 import app.cartitem.model.CartItem;
@@ -30,17 +30,17 @@ public class CartService {
     private final CartMapper cartMapper;
 
     @Transactional(readOnly = true)
-    public CartDTO getCart(UUID userId) {
+    public CartResponse getCart(UUID userId) {
         User user = userService.getUserById(userId);
 
         Cart cart = cartRepository.findByUserWithItems(user)
                 .orElse(createEmptyCart(user));
 
-        return cartMapper.toCartDTO(cart);
+        return cartMapper.toCartResponse(cart);
     }
 
     @Transactional
-    public CartDTO addItemToCart(UUID userId, AddCartItemRequest request) {
+    public CartResponse addItemToCart(UUID userId, AddCartItemRequest request) {
         User user = userService.getUserById(userId);
         Product product = productService.getProductById(request.getProductId());
 
@@ -77,11 +77,11 @@ public class CartService {
         }
 
         Cart savedCart = cartRepository.save(cart);
-        return cartMapper.toCartDTO(savedCart);
+        return cartMapper.toCartResponse(savedCart);
     }
 
     @Transactional
-    public CartDTO emptyCart(UUID userId) {
+    public CartResponse emptyCart(UUID userId) {
         User user = userService.getUserById(userId);
 
         Cart cart = cartRepository.findByUserWithItems(user)
@@ -90,7 +90,7 @@ public class CartService {
         cart.getItems().clear();
 
         Cart savedCart = cartRepository.save(cart);
-        return cartMapper.toCartDTO(savedCart);
+        return cartMapper.toCartResponse(savedCart);
     }
 
     @Transactional(readOnly = true)
