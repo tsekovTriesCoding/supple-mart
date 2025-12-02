@@ -1,7 +1,7 @@
 package app.web;
 
 import app.cart.dto.AddCartItemRequest;
-import app.cart.dto.CartDTO;
+import app.cart.dto.CartResponse;
 import app.cart.service.CartService;
 import app.cartitem.dto.UpdateCartItemRequest;
 import app.cartitem.service.CartItemService;
@@ -22,45 +22,45 @@ public class CartController {
     private final CartItemService cartItemService;
 
     @GetMapping
-    public ResponseEntity<CartDTO> getCart(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        CartDTO cart = cartService.getCart(userDetails.getId());
+    public ResponseEntity<CartResponse> getCart(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        CartResponse cart = cartService.getCart(userDetails.getId());
         return ResponseEntity.ok(cart);
     }
 
     @PostMapping("/items")
-    public ResponseEntity<CartDTO> addItemToCart(
+    public ResponseEntity<CartResponse> addItemToCart(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody AddCartItemRequest request) {
-        CartDTO cart = cartService.addItemToCart(userDetails.getId(), request);
+        CartResponse cart = cartService.addItemToCart(userDetails.getId(), request);
         return ResponseEntity.ok(cart);
     }
 
     @PutMapping("/items/{id}")
-    public ResponseEntity<CartDTO> updateCartItem(
+    public ResponseEntity<CartResponse> updateCartItem(
             @PathVariable UUID id,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody UpdateCartItemRequest request) {
 
         cartItemService.updateCartItemQuantity(id, userDetails.getId(), request);
 
-        CartDTO cart = cartService.getCart(userDetails.getId());
+        CartResponse cart = cartService.getCart(userDetails.getId());
         return ResponseEntity.ok(cart);
     }
 
     @DeleteMapping("/items/{id}")
-    public ResponseEntity<CartDTO> deleteCartItem(
+    public ResponseEntity<CartResponse> deleteCartItem(
             @PathVariable UUID id,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         cartItemService.deleteCartItem(id, userDetails.getId());
 
-        CartDTO cart = cartService.getCart(userDetails.getId());
+        CartResponse cart = cartService.getCart(userDetails.getId());
         return ResponseEntity.ok(cart);
     }
 
     @DeleteMapping
-    public ResponseEntity<CartDTO> emptyCart(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        CartDTO cart = cartService.emptyCart(userDetails.getId());
+    public ResponseEntity<CartResponse> emptyCart(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        CartResponse cart = cartService.emptyCart(userDetails.getId());
         return ResponseEntity.ok(cart);
     }
 }

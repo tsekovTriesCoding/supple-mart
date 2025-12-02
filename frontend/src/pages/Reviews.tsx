@@ -10,13 +10,13 @@ import { useIsAuthenticated } from '../hooks';
 import ReviewModal from '../components/ReviewModal';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { StarRating } from '../components/StarRating';
-import type { ReviewResponseDTO } from '../types/review';
+import type { ReviewResponse } from '../types/review';
 
 const Reviews = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingReview, setEditingReview] = useState<ReviewResponseDTO | null>(null);
+  const [editingReview, setEditingReview] = useState<ReviewResponse | null>(null);
   const isAuthenticated = useIsAuthenticated();
 
   const { data: reviews = [], isLoading: loading, error } = useQuery({
@@ -29,7 +29,7 @@ const Reviews = () => {
   const deleteMutation = useMutation({
     mutationFn: (reviewId: string) => reviewsAPI.deleteReview(reviewId),
     onSuccess: (_, reviewId) => {
-      queryClient.setQueryData<ReviewResponseDTO[]>(['user-reviews'], (old = []) =>
+      queryClient.setQueryData<ReviewResponse[]>(['user-reviews'], (old = []) =>
         old.filter((review) => review.id !== reviewId)
       );
       toast.success('Review deleted successfully');

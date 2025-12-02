@@ -1,8 +1,8 @@
 package app.web;
 
 import app.order.dto.CreateOrderRequest;
-import app.order.dto.OrderDTO;
-import app.order.dto.OrderStatsDTO;
+import app.order.dto.OrderResponse;
+import app.order.dto.OrderStats;
 import app.order.dto.OrdersResponse;
 import app.order.service.OrderService;
 import app.security.CustomUserDetails;
@@ -46,28 +46,28 @@ public class OrderController {
     }
 
     @GetMapping("/stats")
-    public ResponseEntity<OrderStatsDTO> getOrderStats(
+    public ResponseEntity<OrderStats> getOrderStats(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        OrderStatsDTO stats = orderService.getUserOrderStats(userDetails.getId());
+        OrderStats stats = orderService.getUserOrderStats(userDetails.getId());
         return ResponseEntity.ok(stats);
     }
 
     @PostMapping
-    public ResponseEntity<OrderDTO> createOrder(
+    public ResponseEntity<OrderResponse> createOrder(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody CreateOrderRequest request) {
 
-        OrderDTO order = orderService.createOrder(userDetails.getId(), request);
+        OrderResponse order = orderService.createOrder(userDetails.getId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
 
     @PatchMapping("/{orderId}/cancel")
-    public ResponseEntity<OrderDTO> cancelOrder(
+    public ResponseEntity<OrderResponse> cancelOrder(
             @PathVariable UUID orderId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        OrderDTO order = orderService.cancelOrder(orderId, userDetails.getId());
+        OrderResponse order = orderService.cancelOrder(orderId, userDetails.getId());
         return ResponseEntity.ok(order);
     }
 }

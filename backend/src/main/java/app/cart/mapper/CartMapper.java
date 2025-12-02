@@ -1,8 +1,8 @@
 package app.cart.mapper;
 
-import app.cart.dto.CartDTO;
+import app.cart.dto.CartResponse;
 import app.cart.model.Cart;
-import app.cartitem.dto.CartItemDTO;
+import app.cartitem.dto.CartItemResponse;
 import app.cartitem.mapper.CartItemMapper;
 import app.cartitem.model.CartItem;
 import org.mapstruct.Mapper;
@@ -29,14 +29,14 @@ public abstract class CartMapper {
     @Mapping(target = "items", expression = "java(mapCartItems(cart))")
     @Mapping(target = "totalAmount", expression = "java(calculateTotalAmount(cart))")
     @Mapping(target = "totalItems", expression = "java(calculateTotalItems(cart))")
-    public abstract CartDTO toCartDTO(Cart cart);
+    public abstract CartResponse toCartResponse(Cart cart);
 
-    protected List<CartItemDTO> mapCartItems(Cart cart) {
+    protected List<CartItemResponse> mapCartItems(Cart cart) {
         if (cart == null || cart.getItems() == null) {
             return new ArrayList<>();
         }
         return cart.getItems().stream()
-                .map(cartItemMapper::toCartItemDTO)
+                .map(cartItemMapper::toCartItemResponse)
                 .toList();
     }
 

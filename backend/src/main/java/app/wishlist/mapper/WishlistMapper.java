@@ -3,7 +3,7 @@ package app.wishlist.mapper;
 import app.product.model.Product;
 import app.wishlist.dto.WishlistCheckResponse;
 import app.wishlist.dto.WishlistCountResponse;
-import app.wishlist.dto.WishlistItemDTO;
+import app.wishlist.dto.WishlistItem;
 import app.wishlist.dto.WishlistMessageResponse;
 import app.wishlist.dto.WishlistResponse;
 import app.wishlist.model.Wishlist;
@@ -27,7 +27,7 @@ public interface WishlistMapper {
     @Mapping(target = "inStock", expression = "java(wishlist.getProduct().getStockQuantity() != null && wishlist.getProduct().getStockQuantity() > 0)")
     @Mapping(target = "averageRating", expression = "java(calculateAverageRating(wishlist.getProduct()))")
     @Mapping(target = "totalReviews", expression = "java(wishlist.getProduct().getReviews() != null ? wishlist.getProduct().getReviews().size() : 0)")
-    WishlistItemDTO toWishlistItemDTO(Wishlist wishlist);
+    WishlistItem toWishlistItem(Wishlist wishlist);
     
     default Double calculateAverageRating(Product product) {
         if (product.getReviews() == null || product.getReviews().isEmpty()) {
@@ -44,8 +44,8 @@ public interface WishlistMapper {
             return null;
         }
         
-        List<WishlistItemDTO> items = wishlistPage.getContent().stream()
-                .map(this::toWishlistItemDTO)
+        List<WishlistItem> items = wishlistPage.getContent().stream()
+                .map(this::toWishlistItem)
                 .toList();
         
         return WishlistResponse.builder()

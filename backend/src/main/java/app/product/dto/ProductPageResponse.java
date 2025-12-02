@@ -8,7 +8,7 @@ import java.util.List;
 @Data
 @Builder
 public class ProductPageResponse {
-    private List<ProductDTO> products;
+    private List<ProductSummary> products;
     private int currentPage;
     private int totalPages;
     private long totalElements;

@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class ReviewDTO {
+public class Review {
     private UUID id;
     private UUID userId;
     private String userName;

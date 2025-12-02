@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminUsersResponse {
-    private List<AdminUserDTO> content;
+    private List<AdminUserResponse> content;
     private int currentPage;
     private int pageSize;
     private int totalPages;

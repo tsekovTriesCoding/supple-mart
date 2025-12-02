@@ -1,6 +1,6 @@
 package app.cart.dto;
 
-import app.cartitem.dto.CartItemDTO;
+import app.cartitem.dto.CartItemResponse;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,9 +10,9 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class CartDTO {
+public class CartResponse {
     private UUID id;
-    private List<CartItemDTO> items;
+    private List<CartItemResponse> items;
     private BigDecimal totalAmount;
     private Integer totalItems;
 }

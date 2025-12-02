@@ -8,10 +8,9 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class AdminOrderItemDTO {
+public class AdminOrderItem {
     private UUID id;
     private String productName;
     private Integer quantity;
     private BigDecimal price;
 }
-

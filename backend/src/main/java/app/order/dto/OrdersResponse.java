@@ -8,7 +8,7 @@ import java.util.List;
 @Data
 @Builder
 public class OrdersResponse {
-    private List<OrderDTO> orders;
+    private List<OrderResponse> orders;
     private int currentPage;
     private int totalPages;
     private long totalElements;

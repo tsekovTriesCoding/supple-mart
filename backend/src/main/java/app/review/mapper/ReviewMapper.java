@@ -1,8 +1,9 @@
 package app.review.mapper;
 
-import app.review.dto.ReviewDTO;
-import app.review.dto.ReviewResponseDTO;
-import app.review.model.Review;
+import app.product.model.Product;
+import app.review.dto.Review;
+import app.review.dto.ReviewResponse;
+import app.user.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -13,19 +14,19 @@ public interface ReviewMapper {
 
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "userName", expression = "java(review.getUser().getFirstName() + \" \" + review.getUser().getLastName())")
-    ReviewDTO toDTO(Review review);
+    Review toReview(app.review.model.Review review);
 
-    List<ReviewDTO> toDTOList(List<Review> reviews);
+    List<Review> toReviewList(List<app.review.model.Review> reviews);
 
     @Mapping(target = "user", source = "user")
     @Mapping(target = "product", source = "product")
-    ReviewResponseDTO toResponseDTO(Review review);
+    ReviewResponse toReviewResponse(app.review.model.Review review);
 
     @Mapping(target = "name", expression = "java(user.getFirstName() + \" \" + user.getLastName())")
-    ReviewResponseDTO.UserInfo toUserInfo(app.user.model.User user);
+    ReviewResponse.UserInfo toUserInfo(User user);
 
     @Mapping(target = "imageUrl", expression = "java(product.getImageUrl() != null && !product.getImageUrl().isEmpty() ? product.getImageUrl() : null)")
-    ReviewResponseDTO.ProductInfo toProductInfo(app.product.model.Product product);
+    ReviewResponse.ProductInfo toProductInfo(Product product);
 
-    List<ReviewResponseDTO> toResponseDTOList(List<Review> reviews);
+    List<ReviewResponse> toReviewResponseList(List<app.review.model.Review> reviews);
 }

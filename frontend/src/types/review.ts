@@ -8,7 +8,7 @@ export interface Review {
   updatedAt: string;
 }
 
-export interface ReviewResponseDTO {
+export interface ReviewResponse {
   id: string;
   rating: number;
   comment: string;

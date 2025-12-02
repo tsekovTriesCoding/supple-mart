@@ -5,7 +5,7 @@ import app.admin.dto.CreateProductRequest;
 import app.admin.dto.ImageUploadResponse;
 import app.admin.dto.UpdateProductRequest;
 import app.admin.service.AdminProductService;
-import app.product.dto.ProductDetailsDTO;
+import app.product.dto.ProductDetails;
 import app.product.model.Category;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -49,19 +49,19 @@ public class AdminProductController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductDetailsDTO> createProduct(@Valid @RequestBody CreateProductRequest request) {
+    public ResponseEntity<ProductDetails> createProduct(@Valid @RequestBody CreateProductRequest request) {
         log.info("Admin: Creating new product: {}", request.getName());
-        ProductDetailsDTO product = adminProductService.createProduct(request);
+        ProductDetails product = adminProductService.createProduct(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(product);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProductDetailsDTO> updateProduct(
+    public ResponseEntity<ProductDetails> updateProduct(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateProductRequest request
     ) {
         log.info("Admin: Updating product with ID: {}", id);
-        ProductDetailsDTO product = adminProductService.updateProduct(id, request);
+        ProductDetails product = adminProductService.updateProduct(id, request);
         return ResponseEntity.ok(product);
     }
 
