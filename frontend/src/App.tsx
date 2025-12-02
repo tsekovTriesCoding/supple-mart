@@ -15,6 +15,7 @@ import Reviews from './pages/Reviews';
 import Wishlist from './pages/Wishlist';
 import ProductDetail from './pages/ProductDetail';
 import NotificationPreferences from './pages/NotificationPreferences';
+import PrivacySettings from './pages/PrivacySettings';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
@@ -79,6 +80,7 @@ function App() {
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
                   <Route path="/account/notifications" element={<ProtectedRoute><NotificationPreferences /></ProtectedRoute>} />
+                  <Route path="/account/privacy" element={<ProtectedRoute><PrivacySettings /></ProtectedRoute>} />
                   <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
                   <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
                   <Route path="/wishlist" element={<Wishlist />} />

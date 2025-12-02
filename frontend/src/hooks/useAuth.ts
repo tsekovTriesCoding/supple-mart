@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import { authAPI } from '../lib/api';
 import { useCart } from './useCart';
 import type { User, UserRole } from '../types/auth';
@@ -85,7 +86,11 @@ export const useAuth = (options: UseAuthOptions = {}) => {
 };
 
 export const useIsAuthenticated = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Initialize synchronously from localStorage to avoid redirect flash
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    const token = localStorage.getItem('token');
+    return !!token;
+  });
 
   useEffect(() => {
     const token = localStorage.getItem('token');
