@@ -8,12 +8,14 @@ import app.product.mapper.ProductMapper;
 import app.product.model.Category;
 import app.product.model.Product;
 import app.product.repository.ProductRepository;
+import app.product.specification.ProductSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,9 +49,12 @@ public class ProductService {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
-        Page<Product> productPage = productRepository.findProductsWithFilters(
-                search, category, minPrice, maxPrice, active, pageable
+        // Use JPA Specification for dynamic, composable filtering
+        Specification<Product> spec = ProductSpecification.withFilters(
+                search, category, minPrice, maxPrice, active
         );
+
+        Page<Product> productPage = productRepository.findAll(spec, pageable);
 
         return productMapper.toPageResponse(productPage);
     }
@@ -85,9 +90,10 @@ public class ProductService {
             Boolean active,
             Pageable pageable
     ) {
-        return productRepository.findProductsWithFilters(
-                search, category, minPrice, maxPrice, active, pageable
+        Specification<Product> spec = ProductSpecification.withFilters(
+                search, category, minPrice, maxPrice, active
         );
+        return productRepository.findAll(spec, pageable);
     }
 
     @Transactional
