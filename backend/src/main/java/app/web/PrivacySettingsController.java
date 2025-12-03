@@ -4,6 +4,11 @@ import app.privacy.dto.PrivacySettingsResponse;
 import app.privacy.dto.UpdatePrivacySettingsRequest;
 import app.privacy.service.PrivacySettingsService;
 import app.security.CustomUserDetails;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +19,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/privacy-settings")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Privacy Settings", description = "Manage user privacy settings")
 public class PrivacySettingsController {
 
     private final PrivacySettingsService privacySettingsService;
 
+    @Operation(summary = "Get privacy settings", description = "Retrieve the current user's privacy settings")
+    @ApiResponse(responseCode = "200", description = "Settings retrieved successfully",
+            content = @Content(schema = @Schema(implementation = PrivacySettingsResponse.class)))
     @GetMapping
     public ResponseEntity<PrivacySettingsResponse> getPrivacySettings(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -27,6 +36,8 @@ public class PrivacySettingsController {
         return ResponseEntity.ok(settings);
     }
 
+    @Operation(summary = "Update privacy settings", description = "Update the current user's privacy settings")
+    @ApiResponse(responseCode = "200", description = "Settings updated successfully")
     @PutMapping
     public ResponseEntity<PrivacySettingsResponse> updatePrivacySettings(
             @AuthenticationPrincipal CustomUserDetails userDetails,
