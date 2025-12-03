@@ -7,6 +7,12 @@ import app.user.dto.UserProfileResponse;
 import app.user.mapper.UserMapper;
 import app.user.model.User;
 import app.user.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,11 +24,15 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("api/user")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "User Profile", description = "User profile management endpoints")
 public class UserController {
 
     private final UserService userService;
     private final UserMapper userMapper;
 
+    @Operation(summary = "Get user profile", description = "Retrieve the current user's profile information")
+    @ApiResponse(responseCode = "200", description = "Profile retrieved successfully",
+            content = @Content(schema = @Schema(implementation = UserProfileResponse.class)))
     @GetMapping("/profile")
     public ResponseEntity<UserProfileResponse> getProfile(
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -35,6 +45,11 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Update user profile", description = "Update the current user's profile information")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Profile updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid profile data")
+    })
     @PutMapping("/profile")
     public ResponseEntity<UserProfileResponse> updateProfile(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -49,6 +64,11 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Change password", description = "Change the current user's password")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Password changed successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid password or passwords don't match")
+    })
     @PutMapping("/change-password")
     public ResponseEntity<Void> changePassword(
             @AuthenticationPrincipal CustomUserDetails userDetails,

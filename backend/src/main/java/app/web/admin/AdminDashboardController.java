@@ -2,6 +2,11 @@ package app.web.admin;
 
 import app.admin.dto.DashboardStats;
 import app.admin.service.AdminDashboardService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +20,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/admin/dashboard")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
+@Tag(name = "Admin - Dashboard", description = "Admin dashboard statistics (requires ADMIN role)")
 public class AdminDashboardController {
 
     private final AdminDashboardService adminDashboardService;
 
+    @Operation(summary = "Get dashboard statistics", description = "Retrieve overall platform statistics including products, users, orders, and revenue")
+    @ApiResponse(responseCode = "200", description = "Statistics retrieved successfully",
+            content = @Content(schema = @Schema(implementation = DashboardStats.class)))
     @GetMapping("/stats")
     public ResponseEntity<DashboardStats> getDashboardStats() {
         log.info("Admin: Fetching dashboard statistics");
