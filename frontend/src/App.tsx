@@ -4,6 +4,7 @@ import { Suspense, lazy } from 'react';
 
 import Header from './components/Header';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { LoadingSpinner } from './components/LoadingSpinner';
 import { CartProvider } from './hooks';
 
 const Home = lazy(() => import('./pages/Home'));
@@ -29,12 +30,7 @@ const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
 const AdminCache = lazy(() => import('./pages/admin/AdminCache'));
 
 const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0a0a' }}>
-    <div className="flex flex-col items-center space-y-4">
-      <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-      <p className="text-gray-400">Loading...</p>
-    </div>
-  </div>
+  <LoadingSpinner fullScreen size="lg" message="Loading..." />
 );
 
 function App() {
