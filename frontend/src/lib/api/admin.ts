@@ -6,7 +6,8 @@ import type {
   AdminUsersResponse,
   CreateProductRequest, 
   UpdateProductRequest,
-  DashboardStats
+  DashboardStats,
+  CacheStatsResponse
 } from '../../types/admin';
 
 export type {
@@ -14,7 +15,8 @@ export type {
   AdminProductsResponse,
   CreateProductRequest,
   UpdateProductRequest,
-  DashboardStats
+  DashboardStats,
+  CacheStatsResponse
 };
 
 class AdminAPI {
@@ -124,6 +126,26 @@ class AdminAPI {
       totalPages: data.totalPages,
       totalElements: data.totalElements
     };
+  }
+
+  async getCacheStats(): Promise<CacheStatsResponse> {
+    const { data } = await api.get('admin/cache/stats');
+    return data;
+  }
+
+  async getCacheNames(): Promise<string[]> {
+    const { data } = await api.get('admin/cache/names');
+    return data;
+  }
+
+  async clearCache(cacheName: string): Promise<{ message: string }> {
+    const { data } = await api.delete(`admin/cache/${cacheName}`);
+    return data;
+  }
+
+  async clearAllCaches(): Promise<{ message: string }> {
+    const { data } = await api.delete('admin/cache');
+    return data;
   }
 }
 

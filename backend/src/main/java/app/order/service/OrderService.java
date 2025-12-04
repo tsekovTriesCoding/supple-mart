@@ -3,6 +3,7 @@ package app.order.service;
 import app.cart.model.Cart;
 import app.cart.service.CartService;
 import app.cartitem.model.CartItem;
+import app.config.CacheConfig;
 import app.exception.BadRequestException;
 import app.exception.ResourceNotFoundException;
 import app.exception.UnauthorizedException;
@@ -23,6 +24,7 @@ import app.user.model.User;
 import app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -82,7 +84,12 @@ public class OrderService {
         return orderMapper.toOrderResponse(order);
     }
 
+    /**
+     * Creates a new order from the user's cart.
+     * Evicts dashboard stats cache since order counts change.
+     */
     @Transactional
+    @CacheEvict(value = CacheConfig.DASHBOARD_STATS_CACHE, allEntries = true)
     public OrderResponse createOrder(UUID userId, CreateOrderRequest request) {
         User user = userService.getUserById(userId);
 
@@ -159,7 +166,12 @@ public class OrderService {
         // For now, we just update the status
     }
 
+    /**
+     * Cancels an order and releases inventory.
+     * Evicts dashboard stats cache since order status changes.
+     */
     @Transactional
+    @CacheEvict(value = CacheConfig.DASHBOARD_STATS_CACHE, allEntries = true)
     public OrderResponse cancelOrder(UUID orderId, UUID userId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
@@ -225,7 +237,12 @@ public class OrderService {
         return orderRepository.findAllOrdersWithFilters(status, startDate, endDate, pageable);
     }
 
+    /**
+     * Updates order status (admin operation).
+     * Evicts dashboard stats cache since pending orders count may change.
+     */
     @Transactional
+    @CacheEvict(value = CacheConfig.DASHBOARD_STATS_CACHE, allEntries = true)
     public OrderResponse updateOrderStatus(UUID orderId, OrderStatus newStatus) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
