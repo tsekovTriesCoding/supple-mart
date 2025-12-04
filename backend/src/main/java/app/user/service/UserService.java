@@ -1,5 +1,6 @@
 package app.user.service;
 
+import app.config.CacheConfig;
 import app.exception.ResourceNotFoundException;
 import app.notification.event.AccountSecurityEvent;
 import app.user.dto.RegisterRequest;
@@ -9,6 +10,8 @@ import app.user.model.Role;
 import app.user.model.User;
 import app.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -61,6 +64,10 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
+    /**
+     * Get user by ID - cached for repeated lookups.
+     */
+    @Cacheable(value = CacheConfig.USERS_CACHE, key = "#userId")
     public User getUserById(UUID userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User with ID " + userId + " not found"));
@@ -82,9 +89,14 @@ public class UserService implements UserDetailsService {
         return userRepository.findUsersWithSearch(search, roleEnum, pageable);
     }
 
+    /**
+     * Update user profile - evicts user cache.
+     */
     @Transactional
+    @CacheEvict(value = CacheConfig.USERS_CACHE, key = "#userId")
     public User updateUserProfile(UUID userId, UpdateUserProfileRequest request) {
-        User user = getUserById(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User with ID " + userId + " not found"));
 
         // Check if email is being changed and if it's already taken by another user
 //        if (!user.getEmail().equals(request.getEmail())) {
@@ -104,9 +116,14 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
+    /**
+     * Change user password - evicts user cache.
+     */
     @Transactional
+    @CacheEvict(value = CacheConfig.USERS_CACHE, key = "#userId")
     public void changePassword(UUID userId, String currentPassword, String newPassword) {
-        User user = getUserById(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User with ID " + userId + " not found"));
 
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
             throw new BadCredentialsException("Current password is incorrect");

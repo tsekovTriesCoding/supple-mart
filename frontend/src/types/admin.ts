@@ -96,3 +96,15 @@ export interface AdminUsersResponse {
   totalPages: number;
   totalElements: number;
 }
+
+export interface CacheStats {
+  size: number;
+  hitCount: number;
+  missCount: number;
+  hitRate: number;
+  evictionCount: number;
+}
+
+export interface CacheStatsResponse {
+  [cacheName: string]: CacheStats;
+}

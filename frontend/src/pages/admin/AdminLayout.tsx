@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { BarChart3, Package, ShoppingBag, Users, ArrowLeft } from 'lucide-react';
+import { BarChart3, Package, ShoppingBag, Users, ArrowLeft, Database } from 'lucide-react';
 
 const AdminLayout = () => {
   const location = useLocation();
@@ -9,6 +9,7 @@ const AdminLayout = () => {
     { path: '/admin/products', label: 'Products', icon: Package },
     { path: '/admin/orders', label: 'Orders', icon: ShoppingBag },
     { path: '/admin/users', label: 'Users', icon: Users },
+    { path: '/admin/cache', label: 'Cache', icon: Database },
   ];
 
   const isActiveRoute = (path: string) => {
