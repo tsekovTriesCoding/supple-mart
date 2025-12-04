@@ -1,28 +1,41 @@
 import { Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { Suspense, lazy } from 'react';
 
 import Header from './components/Header';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import Home from './pages/Home';
-import Products from './pages/Products';
-import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import Account from './pages/Account';
-import Orders from './pages/Orders';
-import Reviews from './pages/Reviews';
-import Wishlist from './pages/Wishlist';
-import ProductDetail from './pages/ProductDetail';
-import NotificationPreferences from './pages/NotificationPreferences';
-import PrivacySettings from './pages/PrivacySettings';
-import AdminLayout from './pages/admin/AdminLayout';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminProducts from './pages/admin/AdminProducts';
-import AdminOrders from './pages/admin/AdminOrders';
-import AdminUsers from './pages/admin/AdminUsers';
-import AdminCache from './pages/admin/AdminCache';
 import { CartProvider } from './hooks';
+
+const Home = lazy(() => import('./pages/Home'));
+const Products = lazy(() => import('./pages/Products'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const Cart = lazy(() => import('./pages/Cart'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const About = lazy(() => import('./pages/About'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Wishlist = lazy(() => import('./pages/Wishlist'));
+
+const Account = lazy(() => import('./pages/Account'));
+const Orders = lazy(() => import('./pages/Orders'));
+const Reviews = lazy(() => import('./pages/Reviews'));
+const NotificationPreferences = lazy(() => import('./pages/NotificationPreferences'));
+const PrivacySettings = lazy(() => import('./pages/PrivacySettings'));
+
+const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminProducts = lazy(() => import('./pages/admin/AdminProducts'));
+const AdminOrders = lazy(() => import('./pages/admin/AdminOrders'));
+const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
+const AdminCache = lazy(() => import('./pages/admin/AdminCache'));
+
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0a0a' }}>
+    <div className="flex flex-col items-center space-y-4">
+      <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      <p className="text-gray-400">Loading...</p>
+    </div>
+  </div>
+);
 
 function App() {
   return (
@@ -50,48 +63,52 @@ function App() {
           },
         }}
       />
-      <Routes>
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute requiredRole="ADMIN">
-              <AdminLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<AdminDashboard />} />
-          <Route path="products" element={<AdminProducts />} />
-          <Route path="orders" element={<AdminOrders />} />
-          <Route path="users" element={<AdminUsers />} />
-          <Route path="cache" element={<AdminCache />} />
-        </Route>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute requiredRole="ADMIN">
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="products" element={<AdminProducts />} />
+            <Route path="orders" element={<AdminOrders />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="cache" element={<AdminCache />} />
+          </Route>
 
-        <Route
-          path="/*"
-          element={
-            <div className="min-h-screen" style={{ backgroundColor: '#0a0a0a' }}>
-              <Header />
-              <main className="container mx-auto px-4 py-8">
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/products" element={<Products />} />
-                  <Route path="/products/:productId" element={<ProductDetail />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
-                  <Route path="/account/notifications" element={<ProtectedRoute><NotificationPreferences /></ProtectedRoute>} />
-                  <Route path="/account/privacy" element={<ProtectedRoute><PrivacySettings /></ProtectedRoute>} />
-                  <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
-                  <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
-                  <Route path="/wishlist" element={<Wishlist />} />
-                </Routes>
-              </main>
-            </div>
-          }
-        />
-      </Routes>
+          <Route
+            path="/*"
+            element={
+              <div className="min-h-screen" style={{ backgroundColor: '#0a0a0a' }}>
+                <Header />
+                <main className="container mx-auto px-4 py-8">
+                  <Suspense fallback={<PageLoader />}>
+                    <Routes>
+                      <Route path="/" element={<Home />} />
+                      <Route path="/products" element={<Products />} />
+                      <Route path="/products/:productId" element={<ProductDetail />} />
+                      <Route path="/cart" element={<Cart />} />
+                      <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+                      <Route path="/about" element={<About />} />
+                      <Route path="/contact" element={<Contact />} />
+                      <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+                      <Route path="/account/notifications" element={<ProtectedRoute><NotificationPreferences /></ProtectedRoute>} />
+                      <Route path="/account/privacy" element={<ProtectedRoute><PrivacySettings /></ProtectedRoute>} />
+                      <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+                      <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
+                      <Route path="/wishlist" element={<Wishlist />} />
+                    </Routes>
+                  </Suspense>
+                </main>
+              </div>
+            }
+          />
+        </Routes>
+      </Suspense>
     </CartProvider>
   );
 }
