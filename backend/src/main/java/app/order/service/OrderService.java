@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -200,17 +201,9 @@ public class OrderService {
         return orderMapper.toOrderResponse(savedOrder);
     }
 
-    public Long getTotalOrdersCount() {
-        return orderRepository.count();
-    }
-
     public BigDecimal getTotalRevenue() {
         BigDecimal revenue = orderRepository.calculateTotalRevenue();
         return revenue != null ? revenue : BigDecimal.ZERO;
-    }
-
-    public Long getPendingOrdersCount() {
-        return orderRepository.countPendingOrders();
     }
 
     public Integer getTotalSalesByProductId(UUID productId) {
@@ -300,5 +293,62 @@ public class OrderService {
         String datePart = LocalDateTime.now().toString().substring(0, 10).replace("-", "");
         String randomPart = String.format("%05d", (int) (Math.random() * 100000));
         return "ORD-" + datePart + "-" + randomPart;
+    }
+
+    /**
+     * Find orders with a specific status updated before the cutoff date.
+     * Used by scheduled tasks for auto-delivery updates.
+     */
+    @Transactional(readOnly = true)
+    public List<Order> findOrdersByStatusAndUpdatedBefore(OrderStatus status, LocalDateTime cutoffDate) {
+        return orderRepository.findByStatusAndUpdatedBefore(status, cutoffDate);
+    }
+
+    /**
+     * Find delivered orders without reviews within a timeframe.
+     * Used by scheduled tasks for review reminders.
+     */
+    @Transactional(readOnly = true)
+    public List<Order> findDeliveredOrdersWithoutReviews(LocalDateTime startDate, LocalDateTime endDate) {
+        return orderRepository.findDeliveredOrdersWithoutReviews(startDate, endDate);
+    }
+
+    /**
+     * Auto-deliver a shipped order (update status to DELIVERED).
+     * Used by scheduled tasks.
+     */
+    @Transactional
+    @CacheEvict(value = CacheConfig.DASHBOARD_STATS_CACHE, allEntries = true)
+    public void autoDeliverOrder(Order order) {
+        order.setStatus(OrderStatus.DELIVERED);
+        Order savedOrder = orderRepository.save(order);
+        
+        User user = order.getUser();
+        eventPublisher.publishEvent(new OrderDeliveredEvent(
+                this,
+                savedOrder.getOrderNumber(),
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName()
+        ));
+        log.info("Order {} auto-delivered", order.getId());
+    }
+
+    /**
+     * Count total orders.
+     * Used by scheduled tasks for reporting.
+     */
+    @Transactional(readOnly = true)
+    public long countOrders() {
+        return orderRepository.count();
+    }
+
+    /**
+     * Count pending orders.
+     * Used by scheduled tasks for reporting.
+     */
+    @Transactional(readOnly = true)
+    public long countPendingOrders() {
+        return orderRepository.countPendingOrders();
     }
 }

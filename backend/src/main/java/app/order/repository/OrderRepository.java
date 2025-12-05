@@ -1,7 +1,9 @@
 package app.order.repository;
 
 import app.order.model.Order;
+import app.order.model.OrderItem;
 import app.order.model.OrderStatus;
+import app.review.model.Review;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -64,4 +67,27 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.user.id = :userId AND o.status IN ('DELIVERED', 'PROCESSING', 'SHIPPED', 'PAID')")
     BigDecimal calculateTotalSpentByUser(@Param("userId") UUID userId);
+
+    /**
+     * Find orders with a specific status that were last updated before the cutoff date.
+     * Used for auto-updating order statuses (e.g., SHIPPED -> DELIVERED after X days).
+     */
+    @Query("SELECT o FROM Order o WHERE o.status = :status AND o.updatedAt < :cutoffDate")
+    List<Order> findByStatusAndUpdatedBefore(
+            @Param("status") OrderStatus status,
+            @Param("cutoffDate") LocalDateTime cutoffDate
+    );
+
+    /**
+     * Find delivered orders that haven't been reviewed within a timeframe.
+     * Used for sending review reminder notifications.
+     */
+    @Query("SELECT o FROM Order o WHERE o.status = 'DELIVERED' " +
+           "AND o.updatedAt BETWEEN :startDate AND :endDate " +
+           "AND NOT EXISTS (SELECT r FROM Review r WHERE r.user = o.user AND r.product IN " +
+           "(SELECT oi.product FROM OrderItem oi WHERE oi.order = o))")
+    List<Order> findDeliveredOrdersWithoutReviews(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
 }

@@ -88,14 +88,6 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product with ID " + id + " not found"));
     }
 
-    public Long getTotalProductsCount() {
-        return productRepository.count();
-    }
-
-    public Long getLowStockProductsCount() {
-        return productRepository.countLowStockProducts();
-    }
-
     public Page<Product> getProductsWithFilters(
             String search,
             Category category,
@@ -197,5 +189,41 @@ public class ProductService {
         productRepository.save(product);
         log.debug("Released {} units of product {}. Current stock: {}",
                 quantity, productId, product.getStockQuantity());
+    }
+
+    /**
+     * Find products with low stock (below threshold).
+     * Used by scheduled tasks for inventory alerts.
+     */
+    @Transactional(readOnly = true)
+    public List<Product> findLowStockProducts(int threshold) {
+        return productRepository.findLowStockProducts(threshold);
+    }
+
+    /**
+     * Find products that are out of stock.
+     * Used by scheduled tasks for inventory alerts.
+     */
+    @Transactional(readOnly = true)
+    public List<Product> findOutOfStockProducts() {
+        return productRepository.findOutOfStockProducts();
+    }
+
+    /**
+     * Count products with low stock.
+     * Used by scheduled tasks for reporting.
+     */
+    @Transactional(readOnly = true)
+    public long countLowStockProducts() {
+        return productRepository.countLowStockProducts();
+    }
+
+    /**
+     * Count total products.
+     * Used by health checks.
+     */
+    @Transactional(readOnly = true)
+    public long countProducts() {
+        return productRepository.count();
     }
 }
