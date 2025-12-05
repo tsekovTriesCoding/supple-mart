@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,4 +19,16 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
 
     @Query("SELECT COUNT(p) FROM Product p WHERE p.stockQuantity < 10")
     Long countLowStockProducts();
+
+    /**
+     * Find products with low stock (below threshold).
+     */
+    @Query("SELECT p FROM Product p WHERE p.stockQuantity < :threshold AND p.isActive = true ORDER BY p.stockQuantity ASC")
+    List<Product> findLowStockProducts(@Param("threshold") int threshold);
+
+    /**
+     * Find products that are out of stock.
+     */
+    @Query("SELECT p FROM Product p WHERE p.stockQuantity = 0 AND p.isActive = true")
+    List<Product> findOutOfStockProducts();
 }

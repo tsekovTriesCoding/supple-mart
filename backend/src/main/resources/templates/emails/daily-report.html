@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 0;
+            background: #ffffff;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .content {
+            background: #f9f9f9;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+        }
+        .report-date {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .stat-card.warning .stat-value {
+            color: #f57c00;
+        }
+        .stat-card.danger .stat-value {
+            color: #e74c3c;
+        }
+        .stat-card.success .stat-value {
+            color: #27ae60;
+        }
+        .section-title {
+            font-weight: bold;
+            margin: 25px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #888;
+        }
+        .timestamp {
+            text-align: right;
+            color: #888;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Daily Business Report</h1>
+        </div>
+        <div class="content">
+            <p class="report-date" th:text="'Report for ' + ${reportDate}"></p>
+            
+            <h3 class="section-title">Order Statistics</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" th:text="${totalOrders}">0</div>
+                    <div class="stat-label">Total Orders</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-value" th:text="${pendingOrders}">0</div>
+                    <div class="stat-label">Pending Orders</div>
+                </div>
+            </div>
+            
+            <h3 class="section-title">Inventory Status</h3>
+            <div class="stats-grid">
+                <div class="stat-card" th:classappend="${lowStockCount > 0 ? 'danger' : 'success'}">
+                    <div class="stat-value" th:text="${lowStockCount}">0</div>
+                    <div class="stat-label">Low Stock Products</div>
+                </div>
+            </div>
+            
+            <p th:if="${pendingOrders > 0}" style="color: #f57c00;">
+                You have <strong th:text="${pendingOrders}">0</strong> pending orders that need attention.
+            </p>
+            
+            <p th:if="${lowStockCount > 0}" style="color: #e74c3c;">
+                <strong th:text="${lowStockCount}">0</strong> products are running low on stock.
+            </p>
+            
+            <p th:if="${pendingOrders == 0 && lowStockCount == 0}" style="color: #27ae60;">
+                All systems running smoothly! No immediate action required.
+            </p>
+            
+            <p class="timestamp" th:text="'Generated on ' + ${currentTime}"></p>
+        </div>
+        <div class="footer">
+            <p>This is an automated daily report from SuppleMart.</p>
+            <p>© SuppleMart - Business Intelligence</p>
+        </div>
+    </div>
+</body>
+</html>

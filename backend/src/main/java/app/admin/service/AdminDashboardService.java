@@ -32,12 +32,12 @@ public class AdminDashboardService {
     public DashboardStats getDashboardStats() {
         log.info("Fetching dashboard statistics (cache miss)");
 
-        Long totalProducts = productService.getTotalProductsCount();
+        Long totalProducts = productService.countProducts();
         Long totalUsers = userService.getTotalUsersCount();
-        Long totalOrders = orderService.getTotalOrdersCount();
+        Long totalOrders = orderService.countOrders();
         BigDecimal totalRevenue = orderService.getTotalRevenue();
-        Long pendingOrders = orderService.getPendingOrdersCount();
-        Long lowStockProducts = productService.getLowStockProductsCount();
+        Long pendingOrders = orderService.countPendingOrders();
+        Long lowStockProducts = productService.countLowStockProducts();
 
         return adminMapper.toDashboardStats(
                 totalProducts,

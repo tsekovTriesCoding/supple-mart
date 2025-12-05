@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -108,6 +109,15 @@ public class CartService {
 
         cart.getItems().clear();
         cartRepository.save(cart);
+    }
+
+    /**
+     * Find abandoned carts - carts with items that haven't been updated since the cutoff date.
+     * Used by scheduled tasks for sending reminder notifications.
+     */
+    @Transactional(readOnly = true)
+    public List<Cart> findAbandonedCarts(LocalDateTime cutoffDate) {
+        return cartRepository.findAbandonedCarts(cutoffDate);
     }
 
     private Cart createEmptyCart(User user) {
