@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, Calendar, AlertCircle } from 'lucide-react';
+import { User, Mail, Calendar, AlertCircle, Camera, Trash2 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
@@ -13,6 +13,7 @@ import { FormInput } from '../components/Form';
 const Account = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const {
     data: user = null,
@@ -39,6 +40,7 @@ const Account = () => {
           firstName: updatedUser.firstName,
           lastName: updatedUser.lastName,
           role: updatedUser.role,
+          imageUrl: updatedUser.imageUrl,
         })
       );
       
@@ -49,6 +51,60 @@ const Account = () => {
       const message = error instanceof AxiosError
         ? error.response?.data?.message || 'Failed to update profile'
         : 'Failed to update profile';
+      toast.error(message);
+    },
+  });
+
+  const uploadPictureMutation = useMutation({
+    mutationFn: (file: File) => userAPI.updateProfilePicture(file),
+    onSuccess: (updatedUser) => {
+      queryClient.setQueryData(['user-profile'], updatedUser);
+      
+      localStorage.setItem(
+        'user',
+        JSON.stringify({
+          id: updatedUser.id,
+          email: updatedUser.email,
+          firstName: updatedUser.firstName,
+          lastName: updatedUser.lastName,
+          role: updatedUser.role,
+          imageUrl: updatedUser.imageUrl,
+        })
+      );
+      
+      toast.success('Profile picture updated successfully!');
+    },
+    onError: (error) => {
+      const message = error instanceof AxiosError
+        ? error.response?.data?.message || 'Failed to upload profile picture'
+        : 'Failed to upload profile picture';
+      toast.error(message);
+    },
+  });
+
+  const deletePictureMutation = useMutation({
+    mutationFn: () => userAPI.deleteProfilePicture(),
+    onSuccess: (updatedUser) => {
+      queryClient.setQueryData(['user-profile'], updatedUser);
+      
+      localStorage.setItem(
+        'user',
+        JSON.stringify({
+          id: updatedUser.id,
+          email: updatedUser.email,
+          firstName: updatedUser.firstName,
+          lastName: updatedUser.lastName,
+          role: updatedUser.role,
+          imageUrl: updatedUser.imageUrl,
+        })
+      );
+      
+      toast.success('Profile picture removed successfully!');
+    },
+    onError: (error) => {
+      const message = error instanceof AxiosError
+        ? error.response?.data?.message || 'Failed to remove profile picture'
+        : 'Failed to remove profile picture';
       toast.error(message);
     },
   });
@@ -82,6 +138,36 @@ const Account = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateProfileMutation.mutate(formData);
+  };
+
+  const handlePictureUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handlePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File size must be less than 5MB');
+        return;
+      }
+
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        toast.error('Invalid file type. Please upload JPG, PNG, GIF, or WebP');
+        return;
+      }
+
+      uploadPictureMutation.mutate(file);
+    }
+    // Reset input so the same file can be selected again
+    e.target.value = '';
+  };
+
+  const handleDeletePicture = () => {
+    if (window.confirm('Are you sure you want to remove your profile picture?')) {
+      deletePictureMutation.mutate();
+    }
   };
 
   if (isLoading) {
@@ -126,6 +212,72 @@ const Account = () => {
                 Total Orders: <span className="text-white font-semibold">{user.totalOrders}</span>
               </div>
             )}
+          </div>
+
+          <div className="card p-6 mb-6">
+            <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
+              <Camera className="w-5 h-5 mr-2 text-blue-400" />
+              Profile Picture
+            </h2>
+            
+            <div className="flex items-center space-x-6">
+              <div className="relative">
+                {user.imageUrl ? (
+                  <img 
+                    src={user.imageUrl} 
+                    alt="Profile" 
+                    className="w-24 h-24 rounded-full object-cover ring-4 ring-gray-700"
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded-full bg-gray-700 flex items-center justify-center">
+                    <User className="w-12 h-12 text-gray-400" />
+                  </div>
+                )}
+                
+                {(uploadPictureMutation.isPending || deletePictureMutation.isPending) && (
+                  <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                    <LoadingSpinner size="sm" />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex-1">
+                <p className="text-gray-400 text-sm mb-4">
+                  Upload a new profile picture. Max file size: 5MB. Supported formats: JPG, PNG, GIF, WebP.
+                </p>
+                
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={handlePictureUploadClick}
+                    disabled={uploadPictureMutation.isPending || deletePictureMutation.isPending}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center space-x-2"
+                  >
+                    <Camera className="w-4 h-4" />
+                    <span>Upload Picture</span>
+                  </button>
+                  
+                  {user.imageUrl && (
+                    <button
+                      onClick={handleDeletePicture}
+                      disabled={uploadPictureMutation.isPending || deletePictureMutation.isPending}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center space-x-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>Remove Picture</span>
+                    </button>
+                  )}
+                </div>
+                
+                {/* Hidden File Input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                  onChange={handlePictureChange}
+                  className="hidden"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">

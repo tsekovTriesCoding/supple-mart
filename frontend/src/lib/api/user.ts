@@ -35,4 +35,20 @@ export const userAPI = {
   deleteAccount: async (): Promise<void> => {
     await api.delete('user/account');
   },
+
+  updateProfilePicture: async (file: File): Promise<UserProfileResponse> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const { data } = await api.post<UserProfileResponse>('user/profile-picture', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return data;
+  },
+
+  deleteProfilePicture: async (): Promise<UserProfileResponse> => {
+    const { data } = await api.delete<UserProfileResponse>('user/profile-picture');
+    return data;
+  },
 };

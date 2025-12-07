@@ -16,9 +16,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("api/user")
@@ -85,5 +87,38 @@ public class UserController {
         log.info("Password changed successfully for user: {}", userDetails.getUsername());
         return ResponseEntity.ok().build();
     }
-}
 
+    @Operation(summary = "Update profile picture", description = "Upload a new profile picture for the current user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Profile picture updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid file format or size")
+    })
+    @PostMapping(value = "/profile-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UserProfileResponse> updateProfilePicture(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam("file") MultipartFile file
+    ) {
+        log.info("Profile picture upload requested for user: {}", userDetails.getUsername());
+
+        User updatedUser = userService.updateProfilePicture(userDetails.getId(), file);
+        UserProfileResponse response = userMapper.toUserProfileResponse(updatedUser);
+
+        log.info("Profile picture updated successfully for user: {}", updatedUser.getEmail());
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Delete profile picture", description = "Remove the current user's profile picture")
+    @ApiResponse(responseCode = "200", description = "Profile picture deleted successfully")
+    @DeleteMapping("/profile-picture")
+    public ResponseEntity<UserProfileResponse> deleteProfilePicture(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        log.info("Profile picture deletion requested for user: {}", userDetails.getUsername());
+
+        User updatedUser = userService.deleteProfilePicture(userDetails.getId());
+        UserProfileResponse response = userMapper.toUserProfileResponse(updatedUser);
+
+        log.info("Profile picture deleted successfully for user: {}", updatedUser.getEmail());
+        return ResponseEntity.ok(response);
+    }
+}

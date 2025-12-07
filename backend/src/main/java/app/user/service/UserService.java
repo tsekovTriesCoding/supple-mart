@@ -1,5 +1,6 @@
 package app.user.service;
 
+import app.cloudinary.CloudinaryService;
 import app.config.CacheConfig;
 import app.exception.ResourceNotFoundException;
 import app.notification.event.AccountSecurityEvent;
@@ -23,10 +24,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Domain service for user management operations.
@@ -40,6 +43,9 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final CloudinaryService cloudinaryService;
+
+    private static final String PROFILE_PICTURES_FOLDER = "supple-mart/profile-pictures";
 
     public User authenticateUser(String email, String password) {
         User user = userRepository.findByEmail(email)
@@ -102,13 +108,19 @@ public class UserService {
 
     /**
      * Update existing user with OAuth2 provider info (link accounts).
+     * Only updates imageUrl if user doesn't have a custom-uploaded profile picture.
      */
     @Transactional
     @CacheEvict(value = CacheConfig.USERS_CACHE, key = "#user.id")
     public User linkOAuth2Provider(User user, AuthProvider authProvider, String providerId, String imageUrl) {
         user.setAuthProvider(authProvider);
         user.setProviderId(providerId);
-        user.setImageUrl(imageUrl);
+        
+        String currentImageUrl = user.getImageUrl();
+        if (currentImageUrl == null || !cloudinaryService.isCloudinaryUrl(currentImageUrl)) {
+            user.setImageUrl(imageUrl);
+        }
+        
         user.setUpdatedAt(LocalDateTime.now());
 
         return userRepository.save(user);
@@ -116,13 +128,19 @@ public class UserService {
 
     /**
      * Update OAuth2 user profile from provider data.
+     * Only updates imageUrl if user doesn't have a custom-uploaded profile picture.
      */
     @Transactional
     @CacheEvict(value = CacheConfig.USERS_CACHE, key = "#user.id")
     public User updateOAuth2User(User user, String firstName, String lastName, String imageUrl) {
         user.setFirstName(firstName);
         user.setLastName(lastName);
-        user.setImageUrl(imageUrl);
+        
+        String currentImageUrl = user.getImageUrl();
+        if (currentImageUrl == null || !cloudinaryService.isCloudinaryUrl(currentImageUrl)) {
+            user.setImageUrl(imageUrl);
+        }
+        
         user.setUpdatedAt(LocalDateTime.now());
 
         return userRepository.save(user);
@@ -194,5 +212,59 @@ public class UserService {
                 "Password Changed",
                 "Your password was successfully changed on " + LocalDateTime.now()
         ));
+    }
+
+    /**
+     * Update user profile picture - uploads to Cloudinary and evicts user cache.
+     */
+    @Transactional
+    @CacheEvict(value = CacheConfig.USERS_CACHE, key = "#userId")
+    public User updateProfilePicture(UUID userId, MultipartFile file) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User with ID " + userId + " not found"));
+
+        // Delete old profile picture if it exists and is from Cloudinary
+        String oldImageUrl = user.getImageUrl();
+        if (oldImageUrl != null && cloudinaryService.isCloudinaryUrl(oldImageUrl)) {
+            String publicId = cloudinaryService.extractPublicId(oldImageUrl);
+            if (publicId != null) {
+                cloudinaryService.deleteImage(publicId);
+            }
+        }
+
+        // Upload new profile picture
+        try {
+            String newImageUrl = cloudinaryService.uploadImage(file, PROFILE_PICTURES_FOLDER).get();
+            user.setImageUrl(newImageUrl);
+            user.setUpdatedAt(LocalDateTime.now());
+
+            return userRepository.save(user);
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Failed to upload profile picture", e);
+        }
+    }
+
+    /**
+     * Delete user profile picture - removes from Cloudinary and evicts user cache.
+     */
+    @Transactional
+    @CacheEvict(value = CacheConfig.USERS_CACHE, key = "#userId")
+    public User deleteProfilePicture(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User with ID " + userId + " not found"));
+
+        String imageUrl = user.getImageUrl();
+        if (imageUrl != null && cloudinaryService.isCloudinaryUrl(imageUrl)) {
+            String publicId = cloudinaryService.extractPublicId(imageUrl);
+            if (publicId != null) {
+                cloudinaryService.deleteImage(publicId);
+            }
+        }
+
+        user.setImageUrl(null);
+        user.setUpdatedAt(LocalDateTime.now());
+
+        return userRepository.save(user);
     }
 }

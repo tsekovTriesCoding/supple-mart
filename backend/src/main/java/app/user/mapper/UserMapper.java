@@ -29,6 +29,7 @@ public interface UserMapper {
     @Mapping(target = "firstName", source = "firstName")
     @Mapping(target = "lastName", source = "lastName")
     @Mapping(target = "role", source = "role")
+    @Mapping(target = "imageUrl", source = "imageUrl")
     AuthResponse.UserInfo toUserInfo(User user);
 
     @Mapping(target = "id", ignore = true)
@@ -46,6 +47,7 @@ public interface UserMapper {
 
     @Mapping(target = "id", expression = "java(user.getId().toString())")
     @Mapping(target = "name", expression = "java(user.getFirstName() + \" \" + user.getLastName())")
+    @Mapping(target = "imageUrl", source = "imageUrl")
     @Mapping(target = "createdAt", expression = "java(user.getCreatedAt() != null ? user.getCreatedAt().toString() : null)")
     @Mapping(target = "updatedAt", expression = "java(user.getUpdatedAt() != null ? user.getUpdatedAt().toString() : null)")
     UserProfileResponse toUserProfileResponse(User user);
