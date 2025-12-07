@@ -6,6 +6,7 @@ import app.notification.event.AccountSecurityEvent;
 import app.user.dto.RegisterRequest;
 import app.user.dto.UpdateUserProfileRequest;
 import app.user.mapper.UserMapper;
+import app.user.model.AuthProvider;
 import app.user.model.Role;
 import app.user.model.User;
 import app.user.repository.UserRepository;
@@ -18,32 +19,27 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Domain service for user management operations.
+ * Does not implement UserDetailsService - authentication is handled by CustomUserDetailsService.
+ */
 @Service
 @RequiredArgsConstructor
-public class UserService implements UserDetailsService {
+public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final ApplicationEventPublisher eventPublisher;
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = this.userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User with email " + username + " not found."));
-
-        return userMapper.toCustomUserDetails(user);
-    }
 
     public User authenticateUser(String email, String password) {
         User user = userRepository.findByEmail(email)
@@ -57,11 +53,17 @@ public class UserService implements UserDetailsService {
     }
 
     public User registerUser(RegisterRequest registerRequest) {
-
         String encodedPassword = passwordEncoder.encode(registerRequest.getPassword());
         User user = userMapper.toUser(registerRequest, encodedPassword);
 
         return userRepository.save(user);
+    }
+
+    /**
+     * Find user by email.
+     */
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
     /**
@@ -75,6 +77,55 @@ public class UserService implements UserDetailsService {
 
     public boolean existsByEmail(String email) {
         return userRepository.findByEmail(email).isPresent();
+    }
+
+    /**
+     * Register a new OAuth2 user.
+     */
+    @Transactional
+    public User registerOAuth2User(String email, String firstName, String lastName,
+                                    String imageUrl, AuthProvider authProvider, String providerId) {
+        User user = User.builder()
+                .email(email)
+                .firstName(firstName)
+                .lastName(lastName)
+                .imageUrl(imageUrl)
+                .authProvider(authProvider)
+                .providerId(providerId)
+                .role(Role.CUSTOMER)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        return userRepository.save(user);
+    }
+
+    /**
+     * Update existing user with OAuth2 provider info (link accounts).
+     */
+    @Transactional
+    @CacheEvict(value = CacheConfig.USERS_CACHE, key = "#user.id")
+    public User linkOAuth2Provider(User user, AuthProvider authProvider, String providerId, String imageUrl) {
+        user.setAuthProvider(authProvider);
+        user.setProviderId(providerId);
+        user.setImageUrl(imageUrl);
+        user.setUpdatedAt(LocalDateTime.now());
+
+        return userRepository.save(user);
+    }
+
+    /**
+     * Update OAuth2 user profile from provider data.
+     */
+    @Transactional
+    @CacheEvict(value = CacheConfig.USERS_CACHE, key = "#user.id")
+    public User updateOAuth2User(User user, String firstName, String lastName, String imageUrl) {
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setImageUrl(imageUrl);
+        user.setUpdatedAt(LocalDateTime.now());
+
+        return userRepository.save(user);
     }
 
     public Long getTotalUsersCount() {

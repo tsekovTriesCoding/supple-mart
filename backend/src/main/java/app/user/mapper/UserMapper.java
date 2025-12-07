@@ -39,6 +39,9 @@ public interface UserMapper {
     @Mapping(target = "role", source = "registerRequest.role")
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "authProvider", constant = "LOCAL")
+    @Mapping(target = "providerId", ignore = true)
+    @Mapping(target = "imageUrl", ignore = true)
     User toUser(RegisterRequest registerRequest, String encodedPassword);
 
     @Mapping(target = "id", expression = "java(user.getId().toString())")
