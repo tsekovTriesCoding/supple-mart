@@ -17,6 +17,7 @@ public class UserProfileResponse {
     private String email;
     private Role role;
     private String name;
+    private String imageUrl;
     private String createdAt;
     private String updatedAt;
 }

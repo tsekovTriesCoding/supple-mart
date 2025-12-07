@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom';
 import { User, ChevronDown, Settings, Package, Star, LogOut, UserCircle, Shield, Heart } from 'lucide-react';
 
 import { useAuth } from '../../hooks';
-import type { UserData, UserRole } from '../../types/auth';
+import type { User as UserType, UserRole } from '../../types/auth';
 
 interface UserDropdownProps {
   isLoggedIn: boolean;
-  user: UserData | null;
+  user: UserType | null;
   onAuthModalOpen: () => void;
 }
 
@@ -57,7 +57,15 @@ export const UserDropdown = ({ isLoggedIn, user, onAuthModalOpen }: UserDropdown
           className="p-2 transition-colors hover:text-blue-400 md:cursor-pointer inline-flex items-center space-x-1 group"
           style={{ color: '#d1d5db' }}
         >
-          <User className="w-6 h-6 group-hover:text-blue-400 transition-colors" />
+          {user?.imageUrl ? (
+            <img 
+              src={user.imageUrl} 
+              alt="Profile" 
+              className="w-6 h-6 rounded-full object-cover ring-2 ring-transparent group-hover:ring-blue-400 transition-all"
+            />
+          ) : (
+            <User className="w-6 h-6 group-hover:text-blue-400 transition-colors" />
+          )}
           <span className="hidden lg:block text-sm group-hover:text-blue-400 transition-colors">
             {user?.name || user?.firstName || 'Account'}
           </span>
@@ -71,8 +79,16 @@ export const UserDropdown = ({ isLoggedIn, user, onAuthModalOpen }: UserDropdown
             onMouseLeave={handleUserMouseLeave}
           >
             <div className="p-4 border-b border-gray-700">
-              <div className="flex items-center space-x-2">
-                <User className="w-8 h-8 text-blue-400" />
+              <div className="flex items-center space-x-3">
+                {user?.imageUrl ? (
+                  <img 
+                    src={user.imageUrl} 
+                    alt="Profile" 
+                    className="w-10 h-10 rounded-full object-cover ring-2 ring-blue-400"
+                  />
+                ) : (
+                  <User className="w-10 h-10 text-blue-400" />
+                )}
                 <div>
                   <p className="text-white font-medium">{user?.name || user?.firstName || 'User'}</p>
                   <p className="text-gray-400 text-sm">{user?.email}</p>
