@@ -29,6 +29,8 @@ const AdminOrders = lazy(() => import('./pages/admin/AdminOrders'));
 const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
 const AdminCache = lazy(() => import('./pages/admin/AdminCache'));
 
+const OAuth2Callback = lazy(() => import('./pages/OAuth2Callback'));
+
 const PageLoader = () => (
   <LoadingSpinner fullScreen size="lg" message="Loading..." />
 );
@@ -61,6 +63,9 @@ function App() {
       />
       <Suspense fallback={<PageLoader />}>
         <Routes>
+          {/* OAuth2 Callback Route - outside main layout */}
+          <Route path="/oauth2/callback" element={<OAuth2Callback />} />
+
           <Route
             path="/admin"
             element={
