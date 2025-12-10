@@ -16,6 +16,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -53,6 +54,7 @@ public class Product {
     private Integer stockQuantity;
 
     @Column(name = "is_active")
+    @Builder.Default
     private boolean isActive = true;
 
     @Column(name = "created_at")
@@ -71,15 +73,18 @@ public class Product {
 
     @NotAudited
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Review> reviews;
+    @Builder.Default
+    private List<Review> reviews = new ArrayList<>();
 
     @NotAudited
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<CartItem> cartItems;
+    @Builder.Default
+    private List<CartItem> cartItems = new ArrayList<>();
 
     @NotAudited
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<OrderItem> orderItems;
+    @Builder.Default
+    private List<OrderItem> orderItems = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
