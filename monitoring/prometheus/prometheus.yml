@@ -1,0 +1,28 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # SuppleMart Spring Boot Application
+  - job_name: 'supplemart-backend'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+        labels:
+          application: 'supple-mart'
+          environment: 'development'
+
+  # Add more targets here for different environments
+  # - job_name: 'supplemart-backend-prod'
+  #   metrics_path: '/actuator/prometheus'
+  #   static_configs:
+  #     - targets: ['your-prod-server:8080']
+  #       labels:
+  #         application: 'supple-mart'
+  #         environment: 'production'

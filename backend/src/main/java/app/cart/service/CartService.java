@@ -120,6 +120,15 @@ public class CartService {
         return cartRepository.findAbandonedCarts(cutoffDate);
     }
 
+    /**
+     * Count total number of carts.
+     * Used for metrics/monitoring.
+     */
+    @Transactional(readOnly = true)
+    public long countCarts() {
+        return cartRepository.count();
+    }
+
     private Cart createEmptyCart(User user) {
         return Cart.builder()
                 .user(user)
