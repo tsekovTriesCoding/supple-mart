@@ -1,13 +1,11 @@
 package app;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class SuppleMartApplicationTests {
+class SuppleMartApplicationTests extends BaseIntegrationTest {
 
 	@Test
 	void contextLoads() {
-	}
 
+	}
 }
