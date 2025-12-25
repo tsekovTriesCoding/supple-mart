@@ -1,5 +1,6 @@
 package app.review.service;
 
+import app.exception.DuplicateResourceException;
 import app.exception.ResourceNotFoundException;
 import app.exception.UnauthorizedException;
 import app.product.model.Product;
@@ -14,6 +15,7 @@ import app.user.model.User;
 import app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,17 +29,24 @@ public class ReviewService {
     private final UserService userService;
     private final ProductService productService;
 
+    @Transactional(readOnly = true)
     public List<Review> getUserReviews(UUID userId) {
         List<app.review.model.Review> reviews = reviewRepository.findByUserId(userId);
         return reviewMapper.toReviewList(reviews);
     }
 
+    @Transactional(readOnly = true)
     public List<ReviewResponse> getUserReviewsDetailed(UUID userId) {
         List<app.review.model.Review> reviews = reviewRepository.findByUserId(userId);
         return reviewMapper.toReviewResponseList(reviews);
     }
 
+    @Transactional
     public Review createReview(UUID userId, CreateReviewRequest request) {
+        if (reviewRepository.existsByUserIdAndProductId(userId, request.getProductId())) {
+            throw new DuplicateResourceException("You have already reviewed this product");
+        }
+
         User user = userService.getUserById(userId);
         Product product = productService.getProductById(request.getProductId());
 
@@ -52,6 +61,7 @@ public class ReviewService {
         return reviewMapper.toReview(savedReview);
     }
 
+    @Transactional
     public void deleteReview(UUID reviewId, UUID userId) {
         app.review.model.Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Review with ID " + reviewId + " not found"));
@@ -63,6 +73,7 @@ public class ReviewService {
         reviewRepository.delete(review);
     }
 
+    @Transactional
     public Review updateReview(UUID reviewId, UUID userId, UpdateReviewRequest request) {
         app.review.model.Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Review with ID " + reviewId + " not found"));

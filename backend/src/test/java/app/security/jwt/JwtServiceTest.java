@@ -32,8 +32,8 @@ class JwtServiceTest {
     private UserDetails testUserDetails;
 
     private static final String SECRET = "VGhpc0lzQVZlcnlTZWN1cmVTZWNyZXRLZXlGb3JUZXN0aW5nUHVycG9zZXNPbmx5MTIzNDU2Nzg5MA==";
-    private static final long EXPIRATION = 3600L; // 1 hour in seconds
-    private static final long REFRESH_EXPIRATION = 86400L; // 24 hours in seconds
+    private static final long EXPIRATION = 3600L;
+    private static final long REFRESH_EXPIRATION = 86400L;
 
     @BeforeEach
     void setUp() {

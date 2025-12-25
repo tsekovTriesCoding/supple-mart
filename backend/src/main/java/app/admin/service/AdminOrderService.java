@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -17,6 +18,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class AdminOrderService {
 
     private final OrderService orderService;
@@ -31,6 +33,7 @@ public class AdminOrderService {
         return adminMapper.toAdminOrdersResponse(orderPage);
     }
 
+    @Transactional
     public OrderResponse updateOrderStatus(UUID orderId, String statusStr) {
         log.info("Admin: Updating order {} status to {}", orderId, statusStr);
 

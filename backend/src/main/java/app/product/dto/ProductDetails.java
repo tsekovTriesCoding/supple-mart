@@ -2,6 +2,7 @@ package app.product.dto;
 
 import app.product.model.Category;
 import app.review.dto.Review;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 
@@ -21,6 +22,8 @@ public class ProductDetails {
     private Category category;
     private Integer stockQuantity;
     private boolean inStock;
+    @JsonProperty("isActive")
+    private boolean isActive;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<Review> reviews;

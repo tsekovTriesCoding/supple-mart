@@ -1,5 +1,6 @@
 package app.wishlist.service;
 
+import app.exception.DuplicateResourceException;
 import app.exception.ResourceNotFoundException;
 import app.product.model.Category;
 import app.product.model.Product;
@@ -114,14 +115,14 @@ class WishlistServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw IllegalStateException when product already in wishlist")
+        @DisplayName("Should throw DuplicateResourceException when product already in wishlist")
         void addToWishlist_WithExistingProduct_ThrowsException() {
             when(userService.getUserById(userId)).thenReturn(testUser);
             when(productService.getProductById(productId)).thenReturn(testProduct);
             when(wishlistRepository.existsByUserIdAndProductId(userId, productId)).thenReturn(true);
 
             assertThatThrownBy(() -> wishlistService.addToWishlist(userId, productId))
-                    .isInstanceOf(IllegalStateException.class)
+                    .isInstanceOf(DuplicateResourceException.class)
                     .hasMessageContaining("already in wishlist");
         }
     }
