@@ -36,6 +36,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
 
+    @Transactional(readOnly = true)
     public ProductPageResponse getAllProducts(
             String search,
             Category category,
@@ -75,6 +76,7 @@ public class ProductService {
     /**
      * Get product details by ID - cached for repeated views.
      */
+    @Transactional(readOnly = true)
     @Cacheable(value = CacheConfig.PRODUCTS_CACHE, key = "#id")
     public ProductDetails getProductDetailsById(UUID id) {
         log.debug("Fetching product details for ID: {} (cache miss)", id);
@@ -83,11 +85,13 @@ public class ProductService {
         return productMapper.toProductDetails(product);
     }
 
+    @Transactional(readOnly = true)
     public Product getProductById(UUID id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product with ID " + id + " not found"));
     }
 
+    @Transactional(readOnly = true)
     public Page<Product> getProductsWithFilters(
             String search,
             Category category,

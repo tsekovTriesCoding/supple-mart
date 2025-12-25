@@ -94,7 +94,13 @@ public class OrderService {
     public OrderResponse createOrder(UUID userId, CreateOrderRequest request) {
         User user = userService.getUserById(userId);
 
-        Cart cart = cartService.getCartWithItemsForOrder(userId);
+        Cart cart;
+        try {
+            cart = cartService.getCartWithItemsForOrder(userId);
+        } catch (ResourceNotFoundException e) {
+            // No cart exists for user - treat same as empty cart
+            throw new BadRequestException("Cart is empty. Cannot create order with no items");
+        }
 
         if (cart.getItems() == null || cart.getItems().isEmpty()) {
             throw new BadRequestException("Cart is empty. Cannot create order with no items");

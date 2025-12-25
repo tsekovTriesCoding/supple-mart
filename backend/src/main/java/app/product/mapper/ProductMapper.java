@@ -34,6 +34,7 @@ public abstract class ProductMapper {
     public abstract List<ProductSummary> toProductSummaryList(List<Product> products);
 
     @Mapping(target = "inStock", expression = "java(isInStock(product))")
+    @Mapping(target = "isActive", source = "active")
     @Mapping(target = "reviews", expression = "java(mapReviews(product))")
     @Mapping(target = "averageRating", expression = "java(calculateAverageRatingFromReviews(mapReviews(product)))")
     @Mapping(target = "totalReviews", expression = "java(mapReviews(product).size())")

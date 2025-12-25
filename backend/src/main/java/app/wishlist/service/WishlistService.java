@@ -1,5 +1,6 @@
 package app.wishlist.service;
 
+import app.exception.DuplicateResourceException;
 import app.exception.ResourceNotFoundException;
 import app.product.model.Product;
 import app.product.service.ProductService;
@@ -35,7 +36,7 @@ public class WishlistService {
         Product product = productService.getProductById(productId);
 
         if (wishlistRepository.existsByUserIdAndProductId(userId, productId)) {
-            throw new IllegalStateException("Product already in wishlist");
+            throw new DuplicateResourceException("Product already in wishlist");
         }
 
         Wishlist wishlist = Wishlist.builder()
