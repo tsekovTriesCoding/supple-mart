@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { formatCategoryForDisplay } from '../../utils/categoryUtils';
 
@@ -19,13 +19,17 @@ export const ProductFilters = ({
 }: ProductFiltersProps) => {
   const [tempPriceRange, setTempPriceRange] = useState(priceRange);
 
+  useEffect(() => {
+    setTempPriceRange(priceRange);
+  }, [priceRange]);
+
   const handleApplyPriceFilter = () => {
     onPriceRangeChange(tempPriceRange);
   };
 
   return (
     <div className="mt-6 pt-6 border-t border-gray-600 animate-slide-in">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <h3 className="text-lg font-semibold text-white mb-3">Categories</h3>
           <div className="space-y-2">
@@ -57,6 +61,7 @@ export const ProductFilters = ({
                   setTempPriceRange({ ...tempPriceRange, min: e.target.value })
                 }
                 className="input flex-1"
+                min="0"
               />
               <input
                 type="number"
@@ -66,6 +71,7 @@ export const ProductFilters = ({
                   setTempPriceRange({ ...tempPriceRange, max: e.target.value })
                 }
                 className="input flex-1"
+                min="0"
               />
             </div>
             <button 
@@ -74,28 +80,6 @@ export const ProductFilters = ({
             >
               Apply
             </button>
-          </div>
-        </div>
-
-        <div>
-          <h3 className="text-lg font-semibold text-white mb-3">Quick Filters</h3>
-          <div className="space-y-2">
-            <label className="flex items-center space-x-2 text-gray-300 cursor-pointer">
-              <input type="checkbox" className="rounded border-gray-600" />
-              <span>In Stock Only</span>
-            </label>
-            <label className="flex items-center space-x-2 text-gray-300 cursor-pointer">
-              <input type="checkbox" className="rounded border-gray-600" />
-              <span>On Sale</span>
-            </label>
-            <label className="flex items-center space-x-2 text-gray-300 cursor-pointer">
-              <input type="checkbox" className="rounded border-gray-600" />
-              <span>Free Shipping</span>
-            </label>
-            <label className="flex items-center space-x-2 text-gray-300 cursor-pointer">
-              <input type="checkbox" className="rounded border-gray-600" />
-              <span>Top Rated (4.5+)</span>
-            </label>
           </div>
         </div>
       </div>

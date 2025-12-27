@@ -82,52 +82,6 @@ export const useProductsByCategory = (category: string, params?: {
   });
 };
 
-// export const useCreateProduct = () => {
-//   const queryClient = useQueryClient();
-
-//   return useMutation({
-//     mutationFn: productsAPI.createProduct,
-//     onSuccess: () => {
-//       queryClient.invalidateQueries({ queryKey: ['products'] });
-//       queryClient.invalidateQueries({ queryKey: ['featuredProducts'] });
-//     },
-//   });
-// };
-
-// export const useUpdateProduct = () => {
-//   const queryClient = useQueryClient();
-
-//   return useMutation({
-//     mutationFn: ({ id, data }: {
-//       id: string | number;
-//       data: {
-//         name?: string;
-//         description?: string;
-//         price?: number;
-//         category?: string;
-//         imageUrl?: string;
-//         stock?: number;
-//       }
-//     }) => productsAPI.updateProduct(id, data),
-//     onSuccess: (_, { id }) => {
-//       queryClient.invalidateQueries({ queryKey: ['product', id] });
-//       queryClient.invalidateQueries({ queryKey: ['products'] });
-//     },
-//   });
-// };
-
-// export const useDeleteProduct = () => {
-//   const queryClient = useQueryClient();
-
-//   return useMutation({
-//     mutationFn: productsAPI.deleteProduct,
-//     onSuccess: () => {
-//       queryClient.invalidateQueries({ queryKey: ['products'] });
-//       queryClient.invalidateQueries({ queryKey: ['featuredProducts'] });
-//     },
-//   });
-// };
-
 export const formatPrice = (price: number): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',

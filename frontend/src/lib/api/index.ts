@@ -16,9 +16,6 @@ api.interceptors.request.use(
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log(`Making ${config.method?.toUpperCase()} request to ${config.url} with token:`, `${token.substring(0, 20)}...`);
-    } else {
-      console.log(`Making ${config.method?.toUpperCase()} request to ${config.url} without token`);
     }
     return config;
   },
@@ -32,13 +29,6 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.log('API Error:', {
-      status: error.response?.status,
-      data: error.response?.data,
-      url: error.config?.url,
-      method: error.config?.method
-    });
-    
     // Don't logout on validation errors like wrong password
     if (error.response?.status === 401 || error.response?.status === 403) {
       const errorMessage = error.response?.data?.message || '';
@@ -46,7 +36,6 @@ api.interceptors.response.use(
                                 errorMessage.toLowerCase().includes('incorrect');
       
       if (!isValidationError) {
-        console.log('Authentication failed, clearing tokens');
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');

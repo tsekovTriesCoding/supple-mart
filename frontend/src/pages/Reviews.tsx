@@ -144,7 +144,10 @@ const Reviews = () => {
               <Star className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <h2 className="text-xl font-semibold text-white mb-2">No Reviews Yet</h2>
               <p className="text-gray-400 mb-6">You haven't written any reviews yet. Purchase and review products to share your experience!</p>
-              <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
+              <button 
+                onClick={() => navigate('/products')}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
+              >
                 Start Shopping
               </button>
             </div>

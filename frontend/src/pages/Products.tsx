@@ -226,7 +226,7 @@ const Products = () => {
           {showFilters && (
             <ProductFilters
               categories={categories}
-              selectedCategory={categories[0] || ''}
+              selectedCategory={selectedCategory}
               priceRange={priceRange}
               onCategoryChange={handleCategoryChange}
               onPriceRangeChange={setPriceRange}

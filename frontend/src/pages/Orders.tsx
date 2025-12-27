@@ -226,7 +226,7 @@ const Orders = () => {
                 <select
                   value={statusFilter}
                   onChange={(e) => handleFilterChange(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500 cursor-pointer"
                 >
                   <option value="">All Orders</option>
                   <option value="PENDING">Pending</option>

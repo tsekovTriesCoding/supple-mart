@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Heart} from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { useCart, useWishlist, useIsAuthenticated } from '../hooks';

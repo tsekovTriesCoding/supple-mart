@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '../test/test-utils';
-import { ProductCard } from './Product/ProductCard';
-import type { Product } from '../hooks/useProducts';
+import { render, screen } from '../../test/test-utils';
+import { ProductCard } from './ProductCard';
+import type { Product } from '../../hooks/useProducts';
 
 const createMockProduct = (overrides: Partial<Product> = {}): Product => ({
   id: '1',
