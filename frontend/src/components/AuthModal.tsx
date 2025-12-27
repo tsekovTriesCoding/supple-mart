@@ -167,7 +167,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   const getProviderButtonStyle = (providerName: string) => {
     switch (providerName.toLowerCase()) {
       case 'google':
-        return 'bg-white hover:bg-gray-100 text-gray-800 border border-gray-300';
+        return 'bg-white hover:bg-gray-200 text-gray-800 border border-gray-300';
       case 'github':
         return 'bg-gray-800 hover:bg-gray-700 text-white border border-gray-600';
       default:
@@ -228,7 +228,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                     key={provider.name}
                     onClick={() => handleOAuth2Login(provider)}
                     disabled={isLoading}
-                    className={`w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg font-medium transition-colors ${getProviderButtonStyle(provider.name)} disabled:opacity-50 disabled:cursor-not-allowed`}
+                    className={`w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg font-medium transition-colors cursor-pointer ${getProviderButtonStyle(provider.name)} disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
                     {getProviderIcon(provider.name)}
                     <span>Continue with {provider.displayName}</span>
