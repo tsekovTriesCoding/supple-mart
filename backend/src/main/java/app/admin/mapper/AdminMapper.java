@@ -44,6 +44,8 @@ public interface AdminMapper {
     @Mapping(target = "reviews", ignore = true)
     @Mapping(target = "cartItems", ignore = true)
     @Mapping(target = "orderItems", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "lastModifiedBy", ignore = true)
     Product toProductEntity(CreateProductRequest request);
 
     @Mapping(target = "id", ignore = true)
@@ -52,6 +54,8 @@ public interface AdminMapper {
     @Mapping(target = "reviews", ignore = true)
     @Mapping(target = "cartItems", ignore = true)
     @Mapping(target = "orderItems", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "lastModifiedBy", ignore = true)
     @Mapping(target = "active", source = "request.isActive")
     void updateProductEntity(@MappingTarget Product product, UpdateProductRequest request);
 

@@ -32,5 +32,6 @@ public class RegisterRequest {
     @NotBlank(message = "Last name is required")
     private String lastName;
 
+    @Builder.Default
     private Role role = Role.CUSTOMER;
 }
