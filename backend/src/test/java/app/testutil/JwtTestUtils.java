@@ -1,21 +1,19 @@
 package app.testutil;
 
-import app.security.CustomUserDetails;
-import app.security.jwt.JwtService;
-import app.user.model.Role;
-import app.user.model.User;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.UUID;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithSecurityContext;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 import org.springframework.stereotype.Component;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.Collections;
-import java.util.UUID;
+import app.security.CustomUserDetails;
+import app.user.model.Role;
+import app.user.model.User;
 
 /**
  * Test utilities for JWT authentication in integration tests.

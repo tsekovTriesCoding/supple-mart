@@ -1,12 +1,13 @@
 package app.web;
 
-import app.BaseIntegrationTest;
-import app.testutil.TestDataFactory;
-import app.user.dto.ChangePasswordRequest;
-import app.user.dto.UpdateUserProfileRequest;
-import app.user.model.AuthProvider;
-import app.user.model.Role;
-import app.user.model.User;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.time.LocalDateTime;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -15,11 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDateTime;
-
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import app.BaseIntegrationTest;
+import app.testutil.TestDataFactory;
+import app.user.dto.ChangePasswordRequest;
+import app.user.dto.UpdateUserProfileRequest;
+import app.user.model.AuthProvider;
+import app.user.model.Role;
+import app.user.model.User;
 
 /**
  * Integration tests for UserController.

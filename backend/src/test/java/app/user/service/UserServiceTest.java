@@ -1,14 +1,18 @@
 package app.user.service;
 
-import app.cloudinary.CloudinaryService;
-import app.exception.ResourceNotFoundException;
-import app.user.dto.RegisterRequest;
-import app.user.dto.UpdateUserProfileRequest;
-import app.user.mapper.UserMapper;
-import app.user.model.AuthProvider;
-import app.user.model.Role;
-import app.user.model.User;
-import app.user.repository.UserRepository;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -26,16 +30,15 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import app.cloudinary.CloudinaryService;
+import app.exception.ResourceNotFoundException;
+import app.user.dto.RegisterRequest;
+import app.user.dto.UpdateUserProfileRequest;
+import app.user.mapper.UserMapper;
+import app.user.model.AuthProvider;
+import app.user.model.Role;
+import app.user.model.User;
+import app.user.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("UserService Unit Tests")
@@ -288,7 +291,7 @@ class UserServiceTest {
 
             when(userRepository.save(any(User.class))).thenReturn(testUser);
 
-            User result = userService.linkOAuth2Provider(testUser, provider, providerId, imageUrl);
+            userService.linkOAuth2Provider(testUser, provider, providerId, imageUrl);
 
             assertThat(testUser.getAuthProvider()).isEqualTo(provider);
             assertThat(testUser.getProviderId()).isEqualTo(providerId);

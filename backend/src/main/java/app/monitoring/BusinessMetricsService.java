@@ -1,5 +1,10 @@
 package app.monitoring;
 
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
+
+import org.springframework.stereotype.Service;
+
 import app.cart.service.CartService;
 import app.order.service.OrderService;
 import app.product.service.ProductService;
@@ -9,10 +14,6 @@ import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
 
 /**
  * Service for tracking custom business metrics.
