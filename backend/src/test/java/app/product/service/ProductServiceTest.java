@@ -35,6 +35,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.mockito.ArgumentMatchers;
+
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ProductService Unit Tests")
 class ProductServiceTest {
@@ -80,7 +82,7 @@ class ProductServiceTest {
             Page<Product> productPage = new PageImpl<>(List.of(testProduct));
             ProductPageResponse expectedResponse = ProductPageResponse.builder().build();
 
-            when(productRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(productPage);
+            when(productRepository.findAll(ArgumentMatchers.<Specification<Product>>any(), any(Pageable.class))).thenReturn(productPage);
             when(productMapper.toPageResponse(productPage)).thenReturn(expectedResponse);
 
             ProductPageResponse result = productService.getAllProducts(
@@ -88,7 +90,7 @@ class ProductServiceTest {
             );
 
             assertThat(result).isNotNull();
-            verify(productRepository).findAll(any(Specification.class), any(Pageable.class));
+            verify(productRepository).findAll(ArgumentMatchers.<Specification<Product>>any(), any(Pageable.class));
             verify(productMapper).toPageResponse(productPage);
         }
 
@@ -98,7 +100,7 @@ class ProductServiceTest {
             Page<Product> productPage = new PageImpl<>(List.of(testProduct));
             ProductPageResponse expectedResponse = ProductPageResponse.builder().build();
 
-            when(productRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(productPage);
+            when(productRepository.findAll(ArgumentMatchers.<Specification<Product>>any(), any(Pageable.class))).thenReturn(productPage);
             when(productMapper.toPageResponse(productPage)).thenReturn(expectedResponse);
 
             ProductPageResponse result = productService.getAllProducts(
@@ -106,7 +108,7 @@ class ProductServiceTest {
             );
 
             assertThat(result).isNotNull();
-            verify(productRepository).findAll(any(Specification.class), any(Pageable.class));
+            verify(productRepository).findAll(ArgumentMatchers.<Specification<Product>>any(), any(Pageable.class));
         }
     }
 

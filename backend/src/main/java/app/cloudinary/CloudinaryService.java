@@ -28,6 +28,7 @@ public class CloudinaryService {
         validateFile(file);
 
         try {
+            @SuppressWarnings("unchecked")
             Map<String, Object> uploadParams = ObjectUtils.asMap(
                     "folder", folder,
                     "resource_type", "image",
@@ -36,7 +37,8 @@ public class CloudinaryService {
                     "fetch_format", "auto"
             );
 
-            Map<?, ?> uploadResult = cloudinary.uploader().upload(file.getBytes(), uploadParams);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(), uploadParams);
             String imageUrl = (String) uploadResult.get("secure_url");
 
             log.info("Image uploaded successfully to Cloudinary: {}", imageUrl);
@@ -49,9 +51,10 @@ public class CloudinaryService {
     }
 
     @Async
+    @SuppressWarnings("unchecked")
     public void deleteImage(String publicId) {
         try {
-            Map<?, ?> result = cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+            Map<String, Object> result = cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
             log.info("Image deleted from Cloudinary: {}", publicId);
         } catch (IOException e) {
             log.error("Failed to delete image from Cloudinary: {}", publicId, e);

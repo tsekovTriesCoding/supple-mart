@@ -20,6 +20,7 @@ public interface WishlistMapper {
     @Mapping(target = "productName", source = "product.name")
     @Mapping(target = "productDescription", source = "product.description")
     @Mapping(target = "price", source = "product.price")
+    @Mapping(target = "originalPrice", ignore = true)
     @Mapping(target = "category", source = "product.category")
     @Mapping(target = "imageUrl", source = "product.imageUrl")
     @Mapping(target = "stockQuantity", source = "product.stockQuantity")
