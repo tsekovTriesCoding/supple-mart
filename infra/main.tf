@@ -282,12 +282,11 @@ resource "azurerm_key_vault" "main" {
   public_network_access_enabled = true
 }
 
-# Key Vault Secrets Officer role for current user (for deployment)
+# Key Vault Secrets Officer role for deployer (ServicePrincipal from GitHub Actions)
 resource "azurerm_role_assignment" "kv_secrets_officer_deployer" {
   scope                = azurerm_key_vault.main.id
   role_definition_id   = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/providers/Microsoft.Authorization/roleDefinitions/b86a8fe4-44ce-4948-aee5-eccb2c155cd7"
   principal_id         = data.azurerm_client_config.current.object_id
-  principal_type       = "User"
 }
 
 # Key Vault Secrets User role for managed identity
