@@ -3,6 +3,11 @@ output "RESOURCE_GROUP_ID" {
   description = "Resource Group ID"
 }
 
+output "RESOURCE_GROUP_NAME" {
+  value       = azurerm_resource_group.main.name
+  description = "Resource Group name"
+}
+
 output "AZURE_CONTAINER_REGISTRY_ENDPOINT" {
   value       = azurerm_container_registry.main.login_server
   description = "Azure Container Registry login server"
@@ -13,24 +18,14 @@ output "AZURE_CONTAINER_REGISTRY_NAME" {
   description = "Azure Container Registry name"
 }
 
-output "AZURE_KEY_VAULT_NAME" {
-  value       = azurerm_key_vault.main.name
-  description = "Azure Key Vault name"
+output "MYSQL_CONTAINER_APP_NAME" {
+  value       = azurerm_container_app.mysql.name
+  description = "MySQL Container App name"
 }
 
-output "AZURE_KEY_VAULT_ENDPOINT" {
-  value       = azurerm_key_vault.main.vault_uri
-  description = "Azure Key Vault URI"
-}
-
-output "MYSQL_SERVER_FQDN" {
-  value       = azurerm_mysql_flexible_server.main.fqdn
-  description = "MySQL Flexible Server FQDN"
-}
-
-output "MYSQL_DATABASE_NAME" {
-  value       = azurerm_mysql_flexible_database.main.name
-  description = "MySQL Database name"
+output "MYSQL_INTERNAL_FQDN" {
+  value       = azurerm_container_app.mysql.ingress[0].fqdn
+  description = "MySQL Container App internal FQDN"
 }
 
 output "BACKEND_URL" {

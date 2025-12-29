@@ -1,5 +1,5 @@
 # Azure Infrastructure for SuppleMart
-# Deployed using Azure Developer CLI (azd) with Terraform
+# Simplified version with containerized MySQL (no Azure MySQL Flexible Server)
 
 terraform {
   required_version = ">= 1.5.0"
@@ -21,11 +21,7 @@ terraform {
 }
 
 provider "azurerm" {
-  features {
-    key_vault {
-      purge_soft_delete_on_destroy = false
-    }
-  }
+  features {}
 }
 
 provider "azurecaf" {}
@@ -192,12 +188,6 @@ resource "azurecaf_name" "container_registry" {
   clean_input   = true
 }
 
-resource "azurecaf_name" "key_vault" {
-  name          = var.environmentName
-  resource_type = "azurerm_key_vault"
-  clean_input   = true
-}
-
 resource "azurecaf_name" "log_analytics" {
   name          = var.environmentName
   resource_type = "azurerm_log_analytics_workspace"
@@ -207,12 +197,6 @@ resource "azurecaf_name" "log_analytics" {
 resource "azurecaf_name" "container_app_env" {
   name          = var.environmentName
   resource_type = "azurerm_container_app_environment"
-  clean_input   = true
-}
-
-resource "azurecaf_name" "mysql_server" {
-  name          = var.environmentName
-  resource_type = "azurerm_mysql_flexible_server"
   clean_input   = true
 }
 
@@ -269,155 +253,6 @@ resource "azurerm_role_assignment" "acr_pull" {
   skip_service_principal_aad_check = true
 }
 
-# Azure Key Vault
-
-resource "azurerm_key_vault" "main" {
-  name                       = azurecaf_name.key_vault.result
-  resource_group_name        = azurerm_resource_group.main.name
-  location                   = azurerm_resource_group.main.location
-  tenant_id                  = data.azurerm_client_config.current.tenant_id
-  sku_name                   = "standard"
-  soft_delete_retention_days = 7
-  purge_protection_enabled   = false
-  enable_rbac_authorization  = true
-  public_network_access_enabled = true
-}
-
-# Key Vault Secrets Officer role for deployer (ServicePrincipal from GitHub Actions)
-resource "azurerm_role_assignment" "kv_secrets_officer_deployer" {
-  scope                = azurerm_key_vault.main.id
-  role_definition_id   = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/providers/Microsoft.Authorization/roleDefinitions/b86a8fe4-44ce-4948-aee5-eccb2c155cd7"
-  principal_id         = data.azurerm_client_config.current.object_id
-}
-
-# Key Vault Secrets User role for managed identity
-resource "azurerm_role_assignment" "kv_secrets_user" {
-  scope                = azurerm_key_vault.main.id
-  role_definition_id   = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/providers/Microsoft.Authorization/roleDefinitions/4633458b-17de-408a-b874-0445c86b69e6"
-  principal_id         = azurerm_user_assigned_identity.main.principal_id
-  principal_type       = "ServicePrincipal"
-
-  depends_on = [azurerm_role_assignment.kv_secrets_officer_deployer]
-}
-
-# Key Vault Secrets
-
-resource "azurerm_key_vault_secret" "db_password" {
-  name         = "db-password"
-  value        = var.db_admin_password
-  key_vault_id = azurerm_key_vault.main.id
-
-  depends_on = [azurerm_role_assignment.kv_secrets_officer_deployer]
-}
-
-resource "azurerm_key_vault_secret" "jwt_secret" {
-  name         = "jwt-secret"
-  value        = var.jwt_secret
-  key_vault_id = azurerm_key_vault.main.id
-
-  depends_on = [azurerm_role_assignment.kv_secrets_officer_deployer]
-}
-
-resource "azurerm_key_vault_secret" "google_client_secret" {
-  count        = var.google_client_secret != "" ? 1 : 0
-  name         = "google-client-secret"
-  value        = var.google_client_secret
-  key_vault_id = azurerm_key_vault.main.id
-
-  depends_on = [azurerm_role_assignment.kv_secrets_officer_deployer]
-}
-
-resource "azurerm_key_vault_secret" "github_oauth_client_secret" {
-  count        = var.github_oauth_client_secret != "" ? 1 : 0
-  name         = "github-oauth-client-secret"
-  value        = var.github_oauth_client_secret
-  key_vault_id = azurerm_key_vault.main.id
-
-  depends_on = [azurerm_role_assignment.kv_secrets_officer_deployer]
-}
-
-resource "azurerm_key_vault_secret" "cloudinary_api_secret" {
-  count        = var.cloudinary_api_secret != "" ? 1 : 0
-  name         = "cloudinary-api-secret"
-  value        = var.cloudinary_api_secret
-  key_vault_id = azurerm_key_vault.main.id
-
-  depends_on = [azurerm_role_assignment.kv_secrets_officer_deployer]
-}
-
-resource "azurerm_key_vault_secret" "stripe_secret_key" {
-  count        = var.stripe_secret_key != "" ? 1 : 0
-  name         = "stripe-secret-key"
-  value        = var.stripe_secret_key
-  key_vault_id = azurerm_key_vault.main.id
-
-  depends_on = [azurerm_role_assignment.kv_secrets_officer_deployer]
-}
-
-resource "azurerm_key_vault_secret" "stripe_webhook_secret" {
-  count        = var.stripe_webhook_secret != "" ? 1 : 0
-  name         = "stripe-webhook-secret"
-  value        = var.stripe_webhook_secret
-  key_vault_id = azurerm_key_vault.main.id
-
-  depends_on = [azurerm_role_assignment.kv_secrets_officer_deployer]
-}
-
-resource "azurerm_key_vault_secret" "mail_password" {
-  count        = var.mail_password != "" ? 1 : 0
-  name         = "mail-password"
-  value        = var.mail_password
-  key_vault_id = azurerm_key_vault.main.id
-
-  depends_on = [azurerm_role_assignment.kv_secrets_officer_deployer]
-}
-
-# Azure Database for MySQL Flexible Server
-
-resource "azurerm_mysql_flexible_server" "main" {
-  name                   = azurecaf_name.mysql_server.result
-  resource_group_name    = azurerm_resource_group.main.name
-  location               = azurerm_resource_group.main.location
-  administrator_login    = var.db_admin_username
-  administrator_password = var.db_admin_password
-  sku_name               = "B_Standard_B1ms"
-  version                = "8.0.21"
-  zone                   = "1"
-
-  storage {
-    size_gb = 20
-  }
-
-  backup_retention_days = 7
-}
-
-# MySQL Firewall rule to allow Azure services
-resource "azurerm_mysql_flexible_server_firewall_rule" "allow_azure" {
-  name                = "AllowAzureServices"
-  resource_group_name = azurerm_resource_group.main.name
-  server_name         = azurerm_mysql_flexible_server.main.name
-  start_ip_address    = "0.0.0.0"
-  end_ip_address      = "0.0.0.0"
-}
-
-# MySQL Database
-resource "azurerm_mysql_flexible_database" "main" {
-  name                = "supplemart_db"
-  resource_group_name = azurerm_resource_group.main.name
-  server_name         = azurerm_mysql_flexible_server.main.name
-  charset             = "utf8mb4"
-  collation           = "utf8mb4_unicode_ci"
-}
-
-# Store MySQL connection string in Key Vault
-resource "azurerm_key_vault_secret" "mysql_connection_string" {
-  name         = "mysql-connection-string"
-  value        = "jdbc:mysql://${azurerm_mysql_flexible_server.main.fqdn}:3306/${azurerm_mysql_flexible_database.main.name}?useSSL=true&requireSSL=true&serverTimezone=UTC"
-  key_vault_id = azurerm_key_vault.main.id
-
-  depends_on = [azurerm_role_assignment.kv_secrets_officer_deployer]
-}
-
 # Container Apps Environment
 
 resource "azurerm_container_app_environment" "main" {
@@ -425,6 +260,144 @@ resource "azurerm_container_app_environment" "main" {
   resource_group_name        = azurerm_resource_group.main.name
   location                   = azurerm_resource_group.main.location
   log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
+}
+
+# Azure Container App Environment Storage for MySQL data persistence
+resource "azurerm_storage_account" "mysql" {
+  name                     = "st${replace(var.environmentName, "-", "")}mysql"
+  resource_group_name      = azurerm_resource_group.main.name
+  location                 = azurerm_resource_group.main.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+}
+
+resource "azurerm_storage_share" "mysql" {
+  name                 = "mysql-data"
+  storage_account_name = azurerm_storage_account.mysql.name
+  quota                = 5
+}
+
+resource "azurerm_container_app_environment_storage" "mysql" {
+  name                         = "mysql-storage"
+  container_app_environment_id = azurerm_container_app_environment.main.id
+  account_name                 = azurerm_storage_account.mysql.name
+  share_name                   = azurerm_storage_share.mysql.name
+  access_key                   = azurerm_storage_account.mysql.primary_access_key
+  access_mode                  = "ReadWrite"
+}
+
+# MySQL Container App
+
+resource "azurerm_container_app" "mysql" {
+  name                         = "ca-mysql-${var.environmentName}"
+  container_app_environment_id = azurerm_container_app_environment.main.id
+  resource_group_name          = azurerm_resource_group.main.name
+  revision_mode                = "Single"
+
+  template {
+    min_replicas = 1
+    max_replicas = 1
+
+    volume {
+      name         = "mysql-data"
+      storage_name = azurerm_container_app_environment_storage.mysql.name
+      storage_type = "AzureFile"
+    }
+
+    container {
+      name   = "mysql"
+      image  = "mysql:8.0"
+      cpu    = 1.0
+      memory = "2Gi"
+
+      env {
+        name  = "MYSQL_ROOT_PASSWORD"
+        value = var.db_admin_password
+      }
+
+      env {
+        name  = "MYSQL_DATABASE"
+        value = "supplemart_db"
+      }
+
+      env {
+        name  = "MYSQL_USER"
+        value = var.db_admin_username
+      }
+
+      env {
+        name  = "MYSQL_PASSWORD"
+        value = var.db_admin_password
+      }
+
+      volume_mounts {
+        name = "mysql-data"
+        path = "/var/lib/mysql"
+      }
+    }
+  }
+
+  ingress {
+    external_enabled = false
+    target_port      = 3306
+    transport        = "tcp"
+    exposed_port     = 3306
+
+    traffic_weight {
+      percentage      = 100
+      latest_revision = true
+    }
+  }
+
+  depends_on = [azurerm_container_app_environment_storage.mysql]
+}
+
+# Frontend Container App (created first for backend URL reference)
+
+resource "azurerm_container_app" "frontend" {
+  name                         = "ca-frontend-${var.environmentName}"
+  container_app_environment_id = azurerm_container_app_environment.main.id
+  resource_group_name          = azurerm_resource_group.main.name
+  revision_mode                = "Single"
+
+  tags = {
+    "azd-service-name" = "frontend"
+  }
+
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.main.id]
+  }
+
+  registry {
+    server   = azurerm_container_registry.main.login_server
+    identity = azurerm_user_assigned_identity.main.id
+  }
+
+  ingress {
+    external_enabled = true
+    target_port      = 80
+    transport        = "auto"
+
+    traffic_weight {
+      percentage      = 100
+      latest_revision = true
+    }
+  }
+
+  template {
+    min_replicas = 0
+    max_replicas = 10
+
+    container {
+      name   = "frontend"
+      image  = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+      cpu    = 0.5
+      memory = "1Gi"
+    }
+  }
+
+  depends_on = [azurerm_role_assignment.acr_pull]
 }
 
 # Backend Container App
@@ -472,7 +445,7 @@ resource "azurerm_container_app" "backend" {
 
       env {
         name  = "SPRING_DATASOURCE_URL"
-        value = "jdbc:mysql://${azurerm_mysql_flexible_server.main.fqdn}:3306/${azurerm_mysql_flexible_database.main.name}?useSSL=true&requireSSL=true&serverTimezone=UTC"
+        value = "jdbc:mysql://ca-mysql-${var.environmentName}:3306/supplemart_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
       }
 
       env {
@@ -584,7 +557,7 @@ resource "azurerm_container_app" "backend" {
 
   depends_on = [
     azurerm_role_assignment.acr_pull,
-    azurerm_mysql_flexible_server_firewall_rule.allow_azure,
+    azurerm_container_app.mysql,
     azurerm_container_app.frontend
   ]
 }
@@ -611,54 +584,6 @@ resource "azapi_resource_action" "backend_cors" {
   }
 
   depends_on = [azurerm_container_app.backend]
-}
-
-# Frontend Container App
-
-resource "azurerm_container_app" "frontend" {
-  name                         = "ca-frontend-${var.environmentName}"
-  container_app_environment_id = azurerm_container_app_environment.main.id
-  resource_group_name          = azurerm_resource_group.main.name
-  revision_mode                = "Single"
-
-  tags = {
-    "azd-service-name" = "frontend"
-  }
-
-  identity {
-    type         = "UserAssigned"
-    identity_ids = [azurerm_user_assigned_identity.main.id]
-  }
-
-  registry {
-    server   = azurerm_container_registry.main.login_server
-    identity = azurerm_user_assigned_identity.main.id
-  }
-
-  ingress {
-    external_enabled = true
-    target_port      = 80
-    transport        = "auto"
-
-    traffic_weight {
-      percentage      = 100
-      latest_revision = true
-    }
-  }
-
-  template {
-    min_replicas = 0
-    max_replicas = 10
-
-    container {
-      name   = "frontend"
-      image  = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
-      cpu    = 0.5
-      memory = "1Gi"
-    }
-  }
-
-  depends_on = [azurerm_role_assignment.acr_pull]
 }
 
 # Frontend CORS configuration
