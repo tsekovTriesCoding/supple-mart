@@ -13,10 +13,6 @@ terraform {
       source  = "aztfmod/azurecaf"
       version = "~> 1.2"
     }
-    azapi = {
-      source  = "azure/azapi"
-      version = "~> 2.0"
-    }
   }
 }
 
@@ -25,7 +21,6 @@ provider "azurerm" {
 }
 
 provider "azurecaf" {}
-provider "azapi" {}
 
 # Variables
 
@@ -398,6 +393,10 @@ resource "azurerm_container_app" "frontend" {
   }
 
   depends_on = [azurerm_role_assignment.acr_pull]
+
+  lifecycle {
+    ignore_changes = [template[0].container[0].image]
+  }
 }
 
 # Backend Container App
@@ -560,52 +559,8 @@ resource "azurerm_container_app" "backend" {
     azurerm_container_app.mysql,
     azurerm_container_app.frontend
   ]
-}
 
-# Backend CORS configuration
-resource "azapi_resource_action" "backend_cors" {
-  type        = "Microsoft.App/containerApps@2023-05-01"
-  resource_id = azurerm_container_app.backend.id
-  method      = "PATCH"
-
-  body = {
-    properties = {
-      configuration = {
-        ingress = {
-          corsPolicy = {
-            allowedOrigins = ["*"]
-            allowedHeaders = ["*"]
-            allowedMethods = ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
-            maxAge         = 86400
-          }
-        }
-      }
-    }
+  lifecycle {
+    ignore_changes = [template[0].container[0].image]
   }
-
-  depends_on = [azurerm_container_app.backend]
-}
-
-# Frontend CORS configuration
-resource "azapi_resource_action" "frontend_cors" {
-  type        = "Microsoft.App/containerApps@2023-05-01"
-  resource_id = azurerm_container_app.frontend.id
-  method      = "PATCH"
-
-  body = {
-    properties = {
-      configuration = {
-        ingress = {
-          corsPolicy = {
-            allowedOrigins = ["*"]
-            allowedHeaders = ["*"]
-            allowedMethods = ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
-            maxAge         = 86400
-          }
-        }
-      }
-    }
-  }
-
-  depends_on = [azurerm_container_app.frontend]
 }
