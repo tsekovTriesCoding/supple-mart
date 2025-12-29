@@ -262,10 +262,11 @@ resource "azurerm_container_registry" "main" {
 
 # AcrPull role assignment for managed identity
 resource "azurerm_role_assignment" "acr_pull" {
-  scope                = azurerm_container_registry.main.id
-  role_definition_id   = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/providers/Microsoft.Authorization/roleDefinitions/7f951dda-4ed3-4680-a7ca-43fe172d538d"
-  principal_id         = azurerm_user_assigned_identity.main.principal_id
-  principal_type       = "ServicePrincipal"
+  scope                            = azurerm_container_registry.main.id
+  role_definition_id               = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/providers/Microsoft.Authorization/roleDefinitions/7f951dda-4ed3-4680-a7ca-43fe172d538d"
+  principal_id                     = azurerm_user_assigned_identity.main.principal_id
+  principal_type                   = "ServicePrincipal"
+  skip_service_principal_aad_check = true
 }
 
 # Azure Key Vault
