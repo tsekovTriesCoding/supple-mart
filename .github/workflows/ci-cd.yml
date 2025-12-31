@@ -172,6 +172,7 @@ jobs:
           echo "acr_name=$(terraform output -raw AZURE_CONTAINER_REGISTRY_NAME)" >> $GITHUB_OUTPUT
           echo "backend_app_name=$(terraform output -raw BACKEND_CONTAINER_APP_NAME)" >> $GITHUB_OUTPUT
           echo "frontend_app_name=$(terraform output -raw FRONTEND_CONTAINER_APP_NAME)" >> $GITHUB_OUTPUT
+          echo "backend_url=$(terraform output -raw BACKEND_URL)" >> $GITHUB_OUTPUT
           echo "resource_group=rg-${{ vars.AZURE_ENV_NAME }}" >> $GITHUB_OUTPUT
 
       - name: Login to Azure Container Registry
@@ -188,6 +189,7 @@ jobs:
         run: |
           docker build \
             --build-arg VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }} \
+            --build-arg VITE_API_URL=${{ steps.tf-outputs.outputs.backend_url }}/api/ \
             -t ${{ steps.tf-outputs.outputs.acr_endpoint }}/frontend:${{ github.sha }} ./frontend
           docker push ${{ steps.tf-outputs.outputs.acr_endpoint }}/frontend:${{ github.sha }}
           docker tag ${{ steps.tf-outputs.outputs.acr_endpoint }}/frontend:${{ github.sha }} ${{ steps.tf-outputs.outputs.acr_endpoint }}/frontend:latest

@@ -5,7 +5,9 @@ WORKDIR /app
 
 # Build arguments for Vite environment variables (embedded at build time)
 ARG VITE_STRIPE_PUBLISHABLE_KEY
+ARG VITE_API_URL
 ENV VITE_STRIPE_PUBLISHABLE_KEY=$VITE_STRIPE_PUBLISHABLE_KEY
+ENV VITE_API_URL=$VITE_API_URL
 
 # Copy package files first for better caching
 COPY package.json package-lock.json* ./
@@ -30,17 +32,6 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy built assets from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Create non-root user for security
-RUN addgroup -g 1001 -S appgroup && \
-    adduser -u 1001 -S appuser -G appgroup && \
-    chown -R appuser:appgroup /usr/share/nginx/html && \
-    chown -R appuser:appgroup /var/cache/nginx && \
-    chown -R appuser:appgroup /var/log/nginx && \
-    touch /var/run/nginx.pid && \
-    chown -R appuser:appgroup /var/run/nginx.pid
-
-USER appuser
 
 # Expose port
 EXPOSE 80
