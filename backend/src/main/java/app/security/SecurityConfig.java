@@ -5,6 +5,7 @@ import app.security.oauth2.CustomOAuth2UserService;
 import app.security.oauth2.OAuth2AuthenticationFailureHandler;
 import app.security.oauth2.OAuth2AuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -22,6 +23,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -38,6 +40,9 @@ public class SecurityConfig {
     private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
     private final RestAccessDeniedHandler restAccessDeniedHandler;
+
+    @Value("${app.frontend-url:}")
+    private String frontendUrl;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -87,11 +92,22 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of(
+        
+        List<String> allowedOrigins = new ArrayList<>(List.of(
             "http://localhost:5173",  // Vite dev server
             "http://localhost",       // Docker nginx
             "http://localhost:80"     // Docker nginx explicit port
         ));
+        
+        // Add frontend URL from environment (for Azure deployment)
+        if (frontendUrl != null && !frontendUrl.isBlank()) {
+            allowedOrigins.add(frontendUrl);
+        }
+        
+        // Allow Azure Container Apps domains
+        allowedOrigins.add("https://*.azurecontainerapps.io");
+        
+        configuration.setAllowedOriginPatterns(allowedOrigins);
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
