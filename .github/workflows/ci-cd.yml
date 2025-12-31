@@ -189,17 +189,11 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_USE_OIDC: true
         run: |
-          terraform output
-          ACR_ENDPOINT=$(terraform output -raw AZURE_CONTAINER_REGISTRY_ENDPOINT)
-          ACR_NAME=$(terraform output -raw AZURE_CONTAINER_REGISTRY_NAME)
-          BACKEND_APP=$(terraform output -raw BACKEND_CONTAINER_APP_NAME)
-          FRONTEND_APP=$(terraform output -raw FRONTEND_CONTAINER_APP_NAME)
-          BACKEND_URL=$(terraform output -raw BACKEND_URL)
-          echo "acr_endpoint=$ACR_ENDPOINT" >> $GITHUB_OUTPUT
-          echo "acr_name=$ACR_NAME" >> $GITHUB_OUTPUT
-          echo "backend_app_name=$BACKEND_APP" >> $GITHUB_OUTPUT
-          echo "frontend_app_name=$FRONTEND_APP" >> $GITHUB_OUTPUT
-          echo "backend_url=$BACKEND_URL" >> $GITHUB_OUTPUT
+          echo "acr_endpoint=$(terraform output -raw AZURE_CONTAINER_REGISTRY_ENDPOINT)" >> $GITHUB_OUTPUT
+          echo "acr_name=$(terraform output -raw AZURE_CONTAINER_REGISTRY_NAME)" >> $GITHUB_OUTPUT
+          echo "backend_app_name=$(terraform output -raw BACKEND_CONTAINER_APP_NAME)" >> $GITHUB_OUTPUT
+          echo "frontend_app_name=$(terraform output -raw FRONTEND_CONTAINER_APP_NAME)" >> $GITHUB_OUTPUT
+          echo "backend_url=$(terraform output -raw BACKEND_URL)" >> $GITHUB_OUTPUT
           echo "resource_group=rg-${{ vars.AZURE_ENV_NAME }}" >> $GITHUB_OUTPUT
 
       - name: Login to Azure Container Registry
