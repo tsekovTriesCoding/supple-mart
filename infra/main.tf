@@ -257,31 +257,8 @@ resource "azurerm_container_app_environment" "main" {
   log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
 }
 
-# Azure Container App Environment Storage for MySQL data persistence
-resource "azurerm_storage_account" "mysql" {
-  name                     = "st${replace(var.environmentName, "-", "")}mysql"
-  resource_group_name      = azurerm_resource_group.main.name
-  location                 = azurerm_resource_group.main.location
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-}
-
-resource "azurerm_storage_share" "mysql" {
-  name                 = "mysql-data"
-  storage_account_name = azurerm_storage_account.mysql.name
-  quota                = 5
-}
-
-resource "azurerm_container_app_environment_storage" "mysql" {
-  name                         = "mysql-storage"
-  container_app_environment_id = azurerm_container_app_environment.main.id
-  account_name                 = azurerm_storage_account.mysql.name
-  share_name                   = azurerm_storage_share.mysql.name
-  access_key                   = azurerm_storage_account.mysql.primary_access_key
-  access_mode                  = "ReadWrite"
-}
-
-# MySQL Container App
+# MySQL Container App (ephemeral - data not persisted across restarts)
+# Note: Azure Files has permission issues with MySQL. For production, use Azure Database for MySQL.
 
 resource "azurerm_container_app" "mysql" {
   name                         = "ca-mysql-${var.environmentName}"
@@ -292,12 +269,6 @@ resource "azurerm_container_app" "mysql" {
   template {
     min_replicas = 1
     max_replicas = 1
-
-    volume {
-      name         = "mysql-data"
-      storage_name = azurerm_container_app_environment_storage.mysql.name
-      storage_type = "AzureFile"
-    }
 
     container {
       name   = "mysql"
@@ -324,11 +295,6 @@ resource "azurerm_container_app" "mysql" {
         name  = "MYSQL_PASSWORD"
         value = var.db_admin_password
       }
-
-      volume_mounts {
-        name = "mysql-data"
-        path = "/var/lib/mysql"
-      }
     }
   }
 
@@ -343,8 +309,6 @@ resource "azurerm_container_app" "mysql" {
       latest_revision = true
     }
   }
-
-  depends_on = [azurerm_container_app_environment_storage.mysql]
 }
 
 # Frontend Container App (created first for backend URL reference)
