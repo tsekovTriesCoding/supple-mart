@@ -211,6 +211,7 @@ jobs:
           docker build \
             --build-arg VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }} \
             --build-arg VITE_API_URL=${{ steps.tf-outputs.outputs.backend_url }}/api/ \
+            --build-arg VITE_BACKEND_URL=${{ steps.tf-outputs.outputs.backend_url }} \
             -t ${{ steps.tf-outputs.outputs.acr_endpoint }}/frontend:${{ github.sha }} ./frontend
           docker push ${{ steps.tf-outputs.outputs.acr_endpoint }}/frontend:${{ github.sha }}
           docker tag ${{ steps.tf-outputs.outputs.acr_endpoint }}/frontend:${{ github.sha }} ${{ steps.tf-outputs.outputs.acr_endpoint }}/frontend:latest

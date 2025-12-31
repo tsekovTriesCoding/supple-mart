@@ -6,8 +6,10 @@ WORKDIR /app
 # Build arguments for Vite environment variables (embedded at build time)
 ARG VITE_STRIPE_PUBLISHABLE_KEY
 ARG VITE_API_URL
+ARG VITE_BACKEND_URL
 ENV VITE_STRIPE_PUBLISHABLE_KEY=$VITE_STRIPE_PUBLISHABLE_KEY
 ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
 
 # Copy package files first for better caching
 COPY package.json package-lock.json* ./
