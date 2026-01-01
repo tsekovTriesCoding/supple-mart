@@ -3,6 +3,8 @@ package app.security.jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class JwtService {
@@ -20,7 +23,8 @@ public class JwtService {
     private final JwtConfig jwtConfig;
     private final SecretKey jwtSecretKey;
 
-    // For production use Redis or persistent store. This is fine for practice/dev.
+    // In-memory token revocation store with automatic cleanup
+    // For production with multiple instances, consider Redis
     private final Map<String, Date> revokedTokens = new ConcurrentHashMap<>();
 
     public String extractUsername(String token) {
@@ -89,6 +93,20 @@ public class JwtService {
     private void cleanupExpiredRevocations() {
         Date now = new Date();
         revokedTokens.entrySet().removeIf(entry -> entry.getValue().before(now));
+    }
+
+    /**
+     * Scheduled cleanup of expired revoked tokens - runs every hour.
+     * Prevents unbounded memory growth in long-running instances.
+     */
+    @Scheduled(fixedRate = 3600000)
+    public void scheduledCleanup() {
+        int sizeBefore = revokedTokens.size();
+        cleanupExpiredRevocations();
+        int removed = sizeBefore - revokedTokens.size();
+        if (removed > 0) {
+            log.debug("Cleaned up {} expired revoked tokens, {} remaining", removed, revokedTokens.size());
+        }
     }
 
     public boolean isTokenRevoked(String token) {

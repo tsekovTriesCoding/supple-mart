@@ -30,7 +30,7 @@ export const ProductCard = ({
 
   return (
     <div
-      className={`card-hover ${isListView ? 'p-6' : 'p-4'} animate-slide-in cursor-pointer transition-all duration-200 ${
+      className={`card-hover ${isListView ? 'p-6' : 'p-4 h-full flex flex-col'} animate-slide-in cursor-pointer transition-all duration-200 ${
         isLoading ? 'opacity-75' : isListView ? 'hover:scale-[1.01]' : 'hover:scale-[1.02]'
       }`}
       style={{ animationDelay: `${animationDelay}s` }}
@@ -45,7 +45,7 @@ export const ProductCard = ({
         </div>
       )}
 
-      <div className={isListView ? 'flex flex-col md:flex-row gap-6 relative' : 'relative'}>
+      <div className={isListView ? 'flex flex-col md:flex-row gap-6 relative' : 'relative flex flex-col flex-grow'}>
         <div className={`bg-gray-800 rounded-lg overflow-hidden relative ${
           isListView ? 'w-full md:w-48 h-48 shrink-0' : 'aspect-square mb-4'
         }`}>
@@ -74,13 +74,13 @@ export const ProductCard = ({
           )}
         </div>
 
-        <div className={isListView ? 'flex-1' : 'space-y-2'}>
+        <div className={isListView ? 'flex-1' : 'flex flex-col grow'}>
           <div className="flex justify-between items-start">
             <div className={isListView ? '' : 'flex-1'}>
               <span className="text-sm text-blue-400 font-medium">
                 {formatCategoryForDisplay(product.category)}
               </span>
-              <h3 className={`font-semibold text-white ${isListView ? 'text-xl mt-1' : 'text-lg mt-2'} line-clamp-2`}>
+              <h3 className={`font-semibold text-white ${isListView ? 'text-xl mt-1' : 'text-lg mt-2 h-14'} line-clamp-2`}>
                 {product.name}
               </h3>
               {product.brand && <p className="text-gray-400 mt-1">{product.brand}</p>}
@@ -121,7 +121,7 @@ export const ProductCard = ({
             </>
           )}
 
-          <div className={`flex items-center ${isListView ? 'justify-between' : 'space-x-2'}`}>
+          <div className={`flex items-center ${isListView ? 'justify-between' : 'space-x-2 mt-auto pt-2'}`}>
             <div className="flex items-center space-x-2">
               <span className={`font-bold text-blue-400 ${isListView ? 'text-2xl' : 'text-xl'}`}>
                 ${product.price}
