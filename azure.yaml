@@ -1,0 +1,53 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/refs/heads/main/schemas/v1.0/azure.yaml.json
+
+name: supple-mart
+metadata:
+  template: supple-mart@1.0.0
+
+# Infrastructure configuration
+infra:
+  provider: terraform
+  path: ./infra
+  module: main
+
+# Services configuration
+services:
+  backend:
+    project: ./backend
+    language: java
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+      context: .
+
+  frontend:
+    project: ./frontend
+    language: ts
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+      context: .
+
+# Hooks for custom actions
+hooks:
+  # Pre-provision hook to validate configuration
+  preprovision:
+    shell: sh
+    run: |
+      echo "Validating Azure configuration..."
+      echo "Environment: ${AZURE_ENV_NAME}"
+      echo "Location: ${AZURE_LOCATION}"
+
+  # Post-provision hook to display outputs
+  postprovision:
+    shell: sh
+    run: |
+      echo "Infrastructure provisioned successfully!"
+      echo "Frontend URL: $(azd env get-values | grep FRONTEND_URL | cut -d'=' -f2)"
+      echo "Backend URL: $(azd env get-values | grep BACKEND_URL | cut -d'=' -f2)"
+
+  # Pre-deploy hook to run tests
+  predeploy:
+    shell: sh
+    run: |
+      echo "Running pre-deployment checks..."

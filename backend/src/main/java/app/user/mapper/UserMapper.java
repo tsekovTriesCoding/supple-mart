@@ -37,7 +37,7 @@ public interface UserMapper {
     @Mapping(target = "email", source = "registerRequest.email")
     @Mapping(target = "firstName", source = "registerRequest.firstName")
     @Mapping(target = "lastName", source = "registerRequest.lastName")
-    @Mapping(target = "role", source = "registerRequest.role")
+    @Mapping(target = "role", expression = "java(registerRequest.getRole() != null ? registerRequest.getRole() : app.user.model.Role.CUSTOMER)")
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "authProvider", constant = "LOCAL")
