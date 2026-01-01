@@ -1,6 +1,7 @@
 package app.payment.service;
 
 import app.exception.BadRequestException;
+import app.exception.ResourceNotFoundException;
 import app.order.dto.OrderResponse;
 import app.order.model.OrderStatus;
 import app.order.service.OrderService;
@@ -120,6 +121,7 @@ public class PaymentService {
     /**
      * Handles successful payment - updates order status to PAID
      * Order flow: PENDING -> PAID (payment completed)
+     * Gracefully handles missing orders (e.g., test webhooks) to avoid Stripe retries
      */
     private void handlePaymentIntentSucceeded(Event event) {
         PaymentIntent paymentIntent = deserializePaymentIntent(event);
@@ -127,14 +129,19 @@ public class PaymentService {
 
         log.info("Payment succeeded for payment intent: {}", paymentIntentId);
 
-        orderService.updateOrderStatusByPaymentIntentId(paymentIntentId, OrderStatus.PAID);
-        log.info("Order status updated to PAID for payment intent: {}", paymentIntentId);
+        try {
+            orderService.updateOrderStatusByPaymentIntentId(paymentIntentId, OrderStatus.PAID);
+            log.info("Order status updated to PAID for payment intent: {}", paymentIntentId);
+        } catch (ResourceNotFoundException e) {
+            log.warn("Order not found for payment intent: {} - this may be a test webhook or duplicate event", paymentIntentId);
+        }
     }
 
     /**
      * Handles processing payment - updates order status to PROCESSING
      * Order flow: PENDING -> PROCESSING (payment being verified)
      * This is typically used for payments that require additional verification (e.g., bank transfers)
+     * Gracefully handles missing orders to avoid Stripe retries
      */
     private void handlePaymentIntentProcessing(Event event) {
         PaymentIntent paymentIntent = deserializePaymentIntent(event);
@@ -142,13 +149,18 @@ public class PaymentService {
 
         log.info("Payment processing for payment intent: {}", paymentIntentId);
 
-        orderService.updateOrderStatusByPaymentIntentId(paymentIntentId, OrderStatus.PROCESSING);
-        log.info("Order status updated to PROCESSING for payment intent: {}", paymentIntentId);
+        try {
+            orderService.updateOrderStatusByPaymentIntentId(paymentIntentId, OrderStatus.PROCESSING);
+            log.info("Order status updated to PROCESSING for payment intent: {}", paymentIntentId);
+        } catch (ResourceNotFoundException e) {
+            log.warn("Order not found for payment intent: {} - this may be a test webhook or duplicate event", paymentIntentId);
+        }
     }
 
     /**
      * Handles canceled payment - updates order status to CANCELLED
      * Order flow: PENDING/PROCESSING -> CANCELLED (payment canceled by user or system)
+     * Gracefully handles missing orders to avoid Stripe retries
      */
     private void handlePaymentIntentCanceled(Event event) {
         PaymentIntent paymentIntent = deserializePaymentIntent(event);
@@ -156,8 +168,12 @@ public class PaymentService {
 
         log.info("Payment canceled for payment intent: {}", paymentIntentId);
 
-        orderService.updateOrderStatusByPaymentIntentId(paymentIntentId, OrderStatus.CANCELLED);
-        log.info("Order status updated to CANCELLED for payment intent: {}", paymentIntentId);
+        try {
+            orderService.updateOrderStatusByPaymentIntentId(paymentIntentId, OrderStatus.CANCELLED);
+            log.info("Order status updated to CANCELLED for payment intent: {}", paymentIntentId);
+        } catch (ResourceNotFoundException e) {
+            log.warn("Order not found for payment intent: {} - this may be a test webhook or duplicate event", paymentIntentId);
+        }
     }
 
     /**
