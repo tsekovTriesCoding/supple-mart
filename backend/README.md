@@ -350,11 +350,10 @@ OAuth2 flow:
 
 ### Password Requirements
 
-- Minimum 8 characters
+- Minimum 6 characters
 - At least one uppercase letter
 - At least one lowercase letter
 - At least one digit
-- At least one special character
 
 ## API Endpoints
 
