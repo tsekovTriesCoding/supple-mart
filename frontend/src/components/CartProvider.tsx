@@ -31,7 +31,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           localStorage.removeItem('user');
           dispatch({ type: 'LOADING_ERROR', payload: 'Session expired. Please login again.' });
           toast.error('Session expired. Please login again.');
-          console.log('Authentication failed, clearing tokens');
           return;
         } else if (axiosError.response?.status === 404) {
           dispatch({ type: 'LOADING_SUCCESS', payload: [] });
