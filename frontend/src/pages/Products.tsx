@@ -230,6 +230,7 @@ const Products = () => {
               priceRange={priceRange}
               onCategoryChange={handleCategoryChange}
               onPriceRangeChange={setPriceRange}
+              onClose={() => setShowFilters(false)}
             />
           )}
         </div>

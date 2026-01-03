@@ -8,6 +8,7 @@ interface ProductFiltersProps {
   priceRange: { min: string; max: string };
   onCategoryChange: (category: string) => void;
   onPriceRangeChange: (range: { min: string; max: string }) => void;
+  onClose?: () => void;
 }
 
 export const ProductFilters = ({
@@ -16,6 +17,7 @@ export const ProductFilters = ({
   priceRange,
   onCategoryChange,
   onPriceRangeChange,
+  onClose,
 }: ProductFiltersProps) => {
   const [tempPriceRange, setTempPriceRange] = useState(priceRange);
 
@@ -25,18 +27,24 @@ export const ProductFilters = ({
 
   const handleApplyPriceFilter = () => {
     onPriceRangeChange(tempPriceRange);
+    onClose?.();
+  };
+
+  const handleCategoryChange = (category: string) => {
+    onCategoryChange(category);
+    onClose?.();
   };
 
   return (
-    <div className="mt-6 pt-6 border-t border-gray-600 animate-slide-in">
+    <div className="mt-6 pt-6 border-t border-gray-600 animate-slide-in overflow-hidden">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
+        <div className="min-w-0">
           <h3 className="text-lg font-semibold text-white mb-3">Categories</h3>
-          <div className="space-y-2">
+          <div className="space-y-2 max-h-48 md:max-h-none overflow-y-auto pr-2">
             {categories.map((category: string) => (
               <button
                 key={category}
-                onClick={() => onCategoryChange(category)}
+                onClick={() => handleCategoryChange(category)}
                 className={`block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer ${
                   (category === 'all' && !selectedCategory) || category === selectedCategory
                     ? 'bg-blue-600 text-white'
@@ -49,10 +57,10 @@ export const ProductFilters = ({
           </div>
         </div>
 
-        <div>
+        <div className="min-w-0">
           <h3 className="text-lg font-semibold text-white mb-3">Price Range</h3>
           <div className="space-y-3">
-            <div className="flex space-x-2">
+            <div className="flex gap-2">
               <input
                 type="number"
                 placeholder="Min"
@@ -60,7 +68,7 @@ export const ProductFilters = ({
                 onChange={(e) =>
                   setTempPriceRange({ ...tempPriceRange, min: e.target.value })
                 }
-                className="input flex-1"
+                className="input w-full min-w-0"
                 min="0"
               />
               <input
@@ -70,7 +78,7 @@ export const ProductFilters = ({
                 onChange={(e) =>
                   setTempPriceRange({ ...tempPriceRange, max: e.target.value })
                 }
-                className="input flex-1"
+                className="input w-full min-w-0"
                 min="0"
               />
             </div>

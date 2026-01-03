@@ -205,7 +205,7 @@ export const UserDropdown = ({ isLoggedIn, user, onAuthModalOpen }: UserDropdown
                 onAuthModalOpen();
                 setIsUserDropdownOpen(false);
               }}
-              className="flex items-center space-x-3 px-4 py-3 w-full text-left text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+              className="flex items-center space-x-3 px-4 py-3 w-full text-left text-gray-300 hover:text-white hover:bg-gray-700 transition-colors cursor-pointer"
             >
               <User className="w-5 h-5" />
               <span>Sign In / Create Account</span>
