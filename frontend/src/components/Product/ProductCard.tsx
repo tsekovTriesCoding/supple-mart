@@ -45,7 +45,7 @@ export const ProductCard = ({
         </div>
       )}
 
-      <div className={isListView ? 'flex flex-col md:flex-row gap-6 relative' : 'relative flex flex-col flex-grow'}>
+      <div className={isListView ? 'flex flex-col md:flex-row gap-6 relative' : 'relative flex flex-col grow'}>
         <div className={`bg-gray-800 rounded-lg overflow-hidden relative ${
           isListView ? 'w-full md:w-48 h-48 shrink-0' : 'aspect-square mb-4'
         }`}>
