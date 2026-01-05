@@ -1,7 +1,8 @@
-import { Minus, Plus, X, ShoppingBag, ArrowLeft } from 'lucide-react';
+import { Minus, Plus, X, ShoppingBag, ArrowLeft, Truck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { useCart, formatCartPrice } from '../hooks';
+import { FREE_SHIPPING_THRESHOLD, getAmountForFreeShipping, getShippingCost, formatShippingPrice } from '../utils/shipping';
 
 const Cart = () => {
   const { items, updateQuantity, removeItem, clearCart, totalItems, totalPrice } = useCart();
@@ -113,15 +114,44 @@ const Cart = () => {
               </div>
               
               <div className="flex justify-between text-gray-300">
-                <span>Shipping</span>
-                <span className="text-green-400">Free</span>
+                <span>Shipping (Standard)</span>
+                <span className={getShippingCost('standard', totalPrice) === 0 ? 'text-green-400' : 'text-gray-300'}>
+                  {formatShippingPrice(getShippingCost('standard', totalPrice))}
+                </span>
               </div>
+
+              {getAmountForFreeShipping(totalPrice) > 0 && (
+                <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-3">
+                  <div className="flex items-center space-x-2 text-blue-400">
+                    <Truck className="w-4 h-4" />
+                    <span className="text-sm">
+                      Add {formatCartPrice(getAmountForFreeShipping(totalPrice))} more for free shipping!
+                    </span>
+                  </div>
+                  <div className="mt-2 h-2 bg-gray-700 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-blue-500 transition-all duration-300"
+                      style={{ width: `${Math.min((totalPrice / FREE_SHIPPING_THRESHOLD) * 100, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {getAmountForFreeShipping(totalPrice) === 0 && (
+                <div className="bg-green-900/30 border border-green-700 rounded-lg p-3">
+                  <div className="flex items-center space-x-2 text-green-400">
+                    <Truck className="w-4 h-4" />
+                    <span className="text-sm">🎉 You've unlocked free standard shipping!</span>
+                  </div>
+                </div>
+              )}
               
               <div className="border-t border-gray-700 pt-4">
                 <div className="flex justify-between text-white font-semibold text-lg">
-                  <span>Total</span>
-                  <span>{formatCartPrice(totalPrice)}</span>
+                  <span>Estimated Total</span>
+                  <span>{formatCartPrice(totalPrice + getShippingCost('standard', totalPrice))}</span>
                 </div>
+                <p className="text-gray-500 text-xs mt-1">Shipping options available at checkout</p>
               </div>
             </div>
 

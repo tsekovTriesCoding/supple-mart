@@ -23,6 +23,8 @@ export interface Order {
   orderNumber: string;
   status: OrderStatus;
   totalAmount: number;
+  shippingCost?: number;
+  shippingMethod?: string;
   items: OrderItem[];
   shippingAddress: string;
   stripePaymentIntentId?: string;
@@ -47,6 +49,8 @@ export interface OrdersResponse {
 
 export interface CreateOrderRequest {
   shippingAddress: string;
+  shippingCost: number;
+  shippingMethod?: string;
 }
 
 export interface OrderStats {

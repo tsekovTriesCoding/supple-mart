@@ -14,6 +14,8 @@ public class OrderResponse {
     private UUID id;
     private String orderNumber;
     private BigDecimal totalAmount;
+    private BigDecimal shippingCost;
+    private String shippingMethod;
     private String status;
     private String shippingAddress;
     private LocalDateTime createdAt;

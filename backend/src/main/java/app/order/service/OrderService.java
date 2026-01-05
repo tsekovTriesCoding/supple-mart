@@ -110,14 +110,19 @@ public class OrderService {
             productService.reserveInventory(cartItem.getProduct().getId(), cartItem.getQuantity());
         }
 
-        BigDecimal totalAmount = cart.getItems().stream()
+        BigDecimal subtotal = cart.getItems().stream()
                 .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        BigDecimal shippingCost = request.getShippingCost() != null ? request.getShippingCost() : BigDecimal.ZERO;
+        BigDecimal totalAmount = subtotal.add(shippingCost);
+        
+        log.info("Order total calculated - Subtotal: {}, Shipping: {}, Total: {}", subtotal, shippingCost, totalAmount);
 
         String orderNumber = generateOrderNumber();
 
         Order order = orderMapper.toOrder(user, orderNumber, totalAmount,
-                request.getShippingAddress(), cart.getItems());
+                request.getShippingAddress(), shippingCost, request.getShippingMethod(), cart.getItems());
 
         Order savedOrder = orderRepository.save(order);
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Package, Clock, CheckCircle, XCircle, Eye, Truck, Search } from 'lucide-react';
+import { Package, Clock, CheckCircle, XCircle, Eye, Truck, Search, MapPin, CreditCard, Calendar, Receipt, Zap } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
@@ -346,78 +346,161 @@ const Orders = () => {
       {isOrderDetailOpen && selectedOrder && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-gray-900 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-gray-700 p-6 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-white">Order Details</h2>
+            <div className="sticky top-0 bg-linear-to-r from-blue-600 to-purple-600 p-6 flex items-center justify-between rounded-t-2xl">
+              <div className="flex items-center space-x-3">
+                <div className="bg-white/20 p-2 rounded-lg">
+                  <Receipt className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-white">Order #{selectedOrder.orderNumber}</h2>
+                  <p className="text-white/80 text-sm">Placed on {formatDate(selectedOrder.createdAt)}</p>
+                </div>
+              </div>
               <button
                 onClick={() => setIsOrderDetailOpen(false)}
-                className="p-2 hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
+                className="p-2 hover:bg-white/20 rounded-lg transition-colors cursor-pointer"
               >
-                <XCircle className="w-6 h-6 text-gray-400" />
+                <XCircle className="w-6 h-6 text-white" />
               </button>
             </div>
             
             <div className="p-6">
-              <div className="mb-6">
-                <div className="flex items-center space-x-4 mb-4">
-                  {getStatusIcon(selectedOrder.status)}
-                  <div>
-                    <h3 className="text-xl font-semibold text-white">
-                      Order #{selectedOrder.orderNumber}
-                    </h3>
-                    <p className="text-gray-400">
-                      Placed on {formatDate(selectedOrder.createdAt)}
-                    </p>
+              <div className="mb-8">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    {getStatusIcon(selectedOrder.status)}
+                    <span className={`px-4 py-2 rounded-full text-sm font-semibold border ${getStatusColor(selectedOrder.status)}`}>
+                      {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
+                    </span>
                   </div>
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(selectedOrder.status)}`}
-                  >
-                    {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
-                  </span>
+                  <div className="flex items-center space-x-2 text-gray-400">
+                    <Calendar className="w-4 h-4" />
+                    <span className="text-sm">Last updated: {formatDate(selectedOrder.updatedAt)}</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="card p-4 mb-6">
-                <h4 className="text-lg font-semibold text-white mb-3">Shipping Information</h4>
-                <div>
-                  <p className="text-gray-400 text-sm mb-2">Shipping Address</p>
-                  <div className="text-white whitespace-pre-line">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div className="card p-5 border border-gray-700">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="bg-blue-500/20 p-2 rounded-lg">
+                      <MapPin className="w-5 h-5 text-blue-400" />
+                    </div>
+                    <h4 className="text-lg font-semibold text-white">Shipping Address</h4>
+                  </div>
+                  <div className="text-gray-300 whitespace-pre-line text-sm leading-relaxed">
                     {selectedOrder.shippingAddress}
                   </div>
                 </div>
+
+                <div className="card p-5 border border-gray-700">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="bg-purple-500/20 p-2 rounded-lg">
+                      {selectedOrder.shippingMethod === 'overnight' ? (
+                        <Zap className="w-5 h-5 text-purple-400" />
+                      ) : selectedOrder.shippingMethod === 'express' ? (
+                        <Clock className="w-5 h-5 text-purple-400" />
+                      ) : (
+                        <Truck className="w-5 h-5 text-purple-400" />
+                      )}
+                    </div>
+                    <h4 className="text-lg font-semibold text-white">Delivery Method</h4>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-white font-medium capitalize">
+                      {selectedOrder.shippingMethod ? `${selectedOrder.shippingMethod} Shipping` : 'Standard Shipping'}
+                    </p>
+                    <p className="text-gray-400 text-sm">
+                      {selectedOrder.shippingMethod === 'overnight' && 'Delivered within 1 business day'}
+                      {selectedOrder.shippingMethod === 'express' && 'Delivered within 2-3 business days'}
+                      {(!selectedOrder.shippingMethod || selectedOrder.shippingMethod === 'standard') && 'Delivered within 5-7 business days'}
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              <div className="card p-4 mb-6">
-                <h4 className="text-lg font-semibold text-white mb-3">Order Items</h4>
+              <div className="card p-5 border border-gray-700 mb-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="bg-green-500/20 p-2 rounded-lg">
+                    <Package className="w-5 h-5 text-green-400" />
+                  </div>
+                  <h4 className="text-lg font-semibold text-white">
+                    Order Items ({selectedOrder.items.length} {selectedOrder.items.length === 1 ? 'item' : 'items'})
+                  </h4>
+                </div>
                 <div className="space-y-4">
                   {selectedOrder.items.map((item) => (
-                    <div key={item.id} className="flex items-center space-x-4 py-3 border-b border-gray-700 last:border-b-0">
+                    <div key={item.id} className="flex items-center space-x-4 py-4 border-b border-gray-700 last:border-b-0 last:pb-0">
                       <img
                         src={item.product.imageUrl}
                         alt={item.product.name}
-                        className="w-16 h-16 object-cover rounded-lg"
+                        className="w-20 h-20 object-cover rounded-xl shadow-lg"
                       />
-                      <div className="flex-1">
-                        <h5 className="text-white font-medium">{item.product.name}</h5>
-                        <p className="text-gray-400 text-sm">Quantity: {item.quantity}</p>
+                      <div className="flex-1 min-w-0">
+                        <h5 className="text-white font-medium text-lg">{item.product.name}</h5>
+                        <div className="flex items-center space-x-4 mt-1">
+                          <span className="text-gray-400 text-sm">Qty: {item.quantity}</span>
+                          <span className="text-gray-500">•</span>
+                          <span className="text-gray-400 text-sm">${item.price.toFixed(2)} each</span>
+                        </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-white font-semibold">${item.price.toFixed(2)}</p>
-                        <p className="text-gray-400 text-sm">each</p>
+                        <p className="text-white font-semibold text-lg">${(item.price * item.quantity).toFixed(2)}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="card p-4">
-                <h4 className="text-lg font-semibold text-white mb-3">Order Summary</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-white font-semibold text-lg pt-2 border-t border-gray-700">
-                    <span>Total:</span>
-                    <span>${selectedOrder.totalAmount.toFixed(2)}</span>
+              <div className="card p-5 border border-gray-700 bg-linear-to-br from-gray-800/50 to-gray-900/50">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="bg-yellow-500/20 p-2 rounded-lg">
+                    <CreditCard className="w-5 h-5 text-yellow-400" />
+                  </div>
+                  <h4 className="text-lg font-semibold text-white">Payment Summary</h4>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between text-gray-300">
+                    <span>Subtotal ({(() => {
+                      const count = selectedOrder.items.reduce((sum, item) => sum + item.quantity, 0);
+                      return `${count} ${count === 1 ? 'item' : 'items'}`;
+                    })()})</span>
+                    <span>${selectedOrder.items.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-300">
+                    <span className="flex items-center space-x-2">
+                      <span>Shipping</span>
+                      {selectedOrder.shippingMethod && (
+                        <span className="text-xs text-gray-500 capitalize">({selectedOrder.shippingMethod})</span>
+                      )}
+                    </span>
+                    <span className={selectedOrder.shippingCost === 0 ? 'text-green-400' : ''}>
+                      {selectedOrder.shippingCost === 0 ? 'FREE' : `$${(selectedOrder.shippingCost ?? 0).toFixed(2)}`}
+                    </span>
+                  </div>
+                  <div className="border-t border-gray-600 pt-3 mt-3">
+                    <div className="flex justify-between text-white font-bold text-xl">
+                      <span>Total Paid</span>
+                      <span className="text-green-400">${selectedOrder.totalAmount.toFixed(2)}</span>
+                    </div>
                   </div>
                 </div>
               </div>
+
+              {(selectedOrder.status.toUpperCase() === 'PENDING' || selectedOrder.status.toUpperCase() === 'PAID') && (
+                <div className="mt-6 flex justify-end">
+                  <button
+                    onClick={() => {
+                      handleCancelOrder(selectedOrder.id);
+                      setIsOrderDetailOpen(false);
+                    }}
+                    className="flex items-center space-x-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors cursor-pointer"
+                  >
+                    <XCircle className="w-5 h-5" />
+                    <span>Cancel Order</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

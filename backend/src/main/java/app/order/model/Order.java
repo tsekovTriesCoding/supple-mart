@@ -52,6 +52,12 @@ public class Order {
     @Column(name = "shipping_address", columnDefinition = "TEXT")
     private String shippingAddress;
 
+    @Column(name = "shipping_cost", precision = 10, scale = 2)
+    private BigDecimal shippingCost;
+
+    @Column(name = "shipping_method")
+    private String shippingMethod;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

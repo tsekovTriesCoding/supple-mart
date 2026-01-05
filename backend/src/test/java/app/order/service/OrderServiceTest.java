@@ -241,12 +241,15 @@ class OrderServiceTest {
         void createOrder_WithValidCart_CreatesOrder() {
             CreateOrderRequest request = new CreateOrderRequest();
             request.setShippingAddress("123 Test St");
+            request.setShippingCost(BigDecimal.valueOf(5.99));
+            request.setShippingMethod("standard");
 
             OrderResponse expectedResponse = OrderResponse.builder().build();
 
             when(userService.getUserById(userId)).thenReturn(testUser);
             when(cartService.getCartWithItemsForOrder(userId)).thenReturn(testCart);
-            when(orderMapper.toOrder(eq(testUser), anyString(), any(BigDecimal.class), eq(request.getShippingAddress()), any()))
+            when(orderMapper.toOrder(eq(testUser), anyString(), any(BigDecimal.class), eq(request.getShippingAddress()), 
+                    any(BigDecimal.class), eq(request.getShippingMethod()), any()))
                     .thenReturn(testOrder);
             when(orderRepository.save(testOrder)).thenReturn(testOrder);
             when(orderMapper.toOrderResponse(testOrder)).thenReturn(expectedResponse);
@@ -264,6 +267,7 @@ class OrderServiceTest {
         void createOrder_WithEmptyCart_ThrowsException() {
             CreateOrderRequest request = new CreateOrderRequest();
             request.setShippingAddress("123 Test St");
+            request.setShippingCost(BigDecimal.valueOf(5.99));
 
             Cart emptyCart = Cart.builder()
                     .id(UUID.randomUUID())
@@ -284,6 +288,7 @@ class OrderServiceTest {
         void createOrder_WithNullCartItems_ThrowsException() {
             CreateOrderRequest request = new CreateOrderRequest();
             request.setShippingAddress("123 Test St");
+            request.setShippingCost(BigDecimal.valueOf(5.99));
 
             Cart nullItemsCart = Cart.builder()
                     .id(UUID.randomUUID())

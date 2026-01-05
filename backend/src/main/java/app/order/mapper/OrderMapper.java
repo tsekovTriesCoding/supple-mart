@@ -87,16 +87,19 @@ public interface OrderMapper {
     }
 
     /**
-     * Creates Order entity from user, order number, total amount, shipping address, and cart items
+     * Creates Order entity from user, order number, total amount, shipping details, and cart items
      */
     default Order toOrder(app.user.model.User user, String orderNumber, java.math.BigDecimal totalAmount,
-                          String shippingAddress, List<CartItem> cartItems) {
+                          String shippingAddress, java.math.BigDecimal shippingCost, String shippingMethod,
+                          List<CartItem> cartItems) {
         Order order = Order.builder()
                 .user(user)
                 .orderNumber(orderNumber)
                 .totalAmount(totalAmount)
                 .status(app.order.model.OrderStatus.PENDING)
                 .shippingAddress(shippingAddress)
+                .shippingCost(shippingCost)
+                .shippingMethod(shippingMethod)
                 .build();
 
         List<OrderItem> orderItems = cartItemsToOrderItems(cartItems);

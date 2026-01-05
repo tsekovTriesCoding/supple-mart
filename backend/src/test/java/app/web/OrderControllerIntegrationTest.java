@@ -178,6 +178,8 @@ class OrderControllerIntegrationTest extends BaseIntegrationTest {
 
             CreateOrderRequest request = new CreateOrderRequest();
             request.setShippingAddress("456 Order Street, Order City, OC 67890");
+            request.setShippingCost(BigDecimal.valueOf(5.99));
+            request.setShippingMethod("standard");
 
             mockMvc.perform(post(ORDERS_BASE_URL)
                             .header("Authorization", bearerToken(authToken))
@@ -197,6 +199,7 @@ class OrderControllerIntegrationTest extends BaseIntegrationTest {
         void createOrder_WithEmptyCart_ReturnsBadRequest() throws Exception {
             CreateOrderRequest request = new CreateOrderRequest();
             request.setShippingAddress("456 Order Street, Order City, OC 67890");
+            request.setShippingCost(BigDecimal.valueOf(5.99));
 
             mockMvc.perform(post(ORDERS_BASE_URL)
                             .header("Authorization", bearerToken(authToken))
@@ -212,6 +215,7 @@ class OrderControllerIntegrationTest extends BaseIntegrationTest {
 
             CreateOrderRequest request = new CreateOrderRequest();
             // Not setting shipping address
+            request.setShippingCost(BigDecimal.valueOf(5.99));
 
             mockMvc.perform(post(ORDERS_BASE_URL)
                             .header("Authorization", bearerToken(authToken))
@@ -225,6 +229,7 @@ class OrderControllerIntegrationTest extends BaseIntegrationTest {
         void createOrder_WithoutAuth_ReturnsUnauthorized() throws Exception {
             CreateOrderRequest request = new CreateOrderRequest();
             request.setShippingAddress("456 Order Street");
+            request.setShippingCost(BigDecimal.valueOf(5.99));
 
             mockMvc.perform(post(ORDERS_BASE_URL)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -239,6 +244,8 @@ class OrderControllerIntegrationTest extends BaseIntegrationTest {
 
             CreateOrderRequest request = new CreateOrderRequest();
             request.setShippingAddress("789 Clear Cart Street");
+            request.setShippingCost(BigDecimal.ZERO);
+            request.setShippingMethod("standard");
 
             // Create order
             mockMvc.perform(post(ORDERS_BASE_URL)
@@ -339,6 +346,8 @@ class OrderControllerIntegrationTest extends BaseIntegrationTest {
     private String createOrder(String shippingAddress) throws Exception {
         CreateOrderRequest request = new CreateOrderRequest();
         request.setShippingAddress(shippingAddress);
+        request.setShippingCost(BigDecimal.valueOf(5.99));
+        request.setShippingMethod("standard");
 
         return mockMvc.perform(post(ORDERS_BASE_URL)
                         .header("Authorization", bearerToken(authToken))
