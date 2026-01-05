@@ -84,14 +84,14 @@ export const UserDropdown = ({ isLoggedIn, user, onAuthModalOpen }: UserDropdown
                   <img 
                     src={user.imageUrl} 
                     alt="Profile" 
-                    className="w-10 h-10 rounded-full object-cover ring-2 ring-blue-400"
+                    className="w-10 h-10 rounded-full object-cover ring-2 ring-blue-400 shrink-0"
                   />
                 ) : (
-                  <User className="w-10 h-10 text-blue-400" />
+                  <User className="w-10 h-10 text-blue-400 shrink-0" />
                 )}
-                <div>
-                  <p className="text-white font-medium">{user?.name || user?.firstName || 'User'}</p>
-                  <p className="text-gray-400 text-sm">{user?.email}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-white font-medium truncate">{user?.name || user?.firstName || 'User'}</p>
+                  <p className="text-gray-400 text-sm truncate">{user?.email}</p>
                 </div>
               </div>
             </div>

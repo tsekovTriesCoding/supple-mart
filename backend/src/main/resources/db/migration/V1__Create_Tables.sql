@@ -168,6 +168,8 @@ CREATE TABLE orders_aud (
     status VARCHAR(50),
     stripe_payment_intent_id VARCHAR(255),
     shipping_address TEXT,
+    shipping_cost DECIMAL(10,2),
+    shipping_method VARCHAR(50),
     created_at DATETIME,
     updated_at DATETIME,
     last_modified_by VARCHAR(255),
