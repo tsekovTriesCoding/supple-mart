@@ -111,7 +111,44 @@ const Account = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({ firstName: '', lastName: '' });
+  const [formErrors, setFormErrors] = useState({ firstName: '', lastName: '' });
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+
+  const validateField = (name: 'firstName' | 'lastName', value: string): string => {
+    const trimmedValue = value.trim();
+    const fieldLabel = name === 'firstName' ? 'First name' : 'Last name';
+    
+    if (!trimmedValue) {
+      return `${fieldLabel} is required`;
+    }
+    if (trimmedValue.length < 2) {
+      return `${fieldLabel} must be at least 2 characters`;
+    }
+    if (trimmedValue.length > 50) {
+      return `${fieldLabel} must be less than 50 characters`;
+    }
+    return '';
+  };
+
+  const validateForm = (): boolean => {
+    const firstNameError = validateField('firstName', formData.firstName);
+    const lastNameError = validateField('lastName', formData.lastName);
+    
+    setFormErrors({
+      firstName: firstNameError,
+      lastName: lastNameError,
+    });
+    
+    return !firstNameError && !lastNameError;
+  };
+
+  const handleFieldChange = (field: 'firstName' | 'lastName', value: string) => {
+    setFormData({ ...formData, [field]: value });
+    // Clear error when user starts typing
+    if (formErrors[field]) {
+      setFormErrors({ ...formErrors, [field]: '' });
+    }
+  };
 
   const error = queryError instanceof AxiosError
     ? queryError.response?.data?.message || 'Failed to load profile'
@@ -132,12 +169,19 @@ const Account = () => {
 
   const handleCancel = () => {
     setIsEditing(false);
+    setFormErrors({ firstName: '', lastName: '' });
     updateProfileMutation.reset();
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateProfileMutation.mutate(formData);
+    if (!validateForm()) {
+      return;
+    }
+    updateProfileMutation.mutate({
+      firstName: formData.firstName.trim(),
+      lastName: formData.lastName.trim(),
+    });
   };
 
   const handlePictureUploadClick = () => {
@@ -338,7 +382,9 @@ const Account = () => {
                     label="First Name"
                     type="text"
                     value={formData.firstName}
-                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                    onChange={(e) => handleFieldChange('firstName', e.target.value)}
+                    onBlur={() => setFormErrors({ ...formErrors, firstName: validateField('firstName', formData.firstName) })}
+                    error={formErrors.firstName}
                     required
                   />
 
@@ -346,7 +392,9 @@ const Account = () => {
                     label="Last Name"
                     type="text"
                     value={formData.lastName}
-                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                    onChange={(e) => handleFieldChange('lastName', e.target.value)}
+                    onBlur={() => setFormErrors({ ...formErrors, lastName: validateField('lastName', formData.lastName) })}
+                    error={formErrors.lastName}
                     required
                   />
 

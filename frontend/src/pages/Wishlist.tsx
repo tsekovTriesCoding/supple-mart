@@ -11,7 +11,7 @@ import type { Product } from '../hooks/useProducts';
 const Wishlist = () => {
   const navigate = useNavigate();
   const { addItem } = useCart();
-  const { wishlistItems, wishlistCount, isLoadingWishlist, removeFromWishlist } = useWishlist();
+  const { wishlistItems, wishlistCount, isLoadingWishlist, removeFromWishlist, isTogglingProduct } = useWishlist();
   const [addingToCartId, setAddingToCartId] = useState<string | null>(null);
   const isAuthenticated = useIsAuthenticated();
 
@@ -110,6 +110,7 @@ const Wishlist = () => {
                 onToggleWishlist={handleToggleWishlist}
                 isAddingToCart={addingToCartId === product.id}
                 isInWishlist={true}
+                isTogglingWishlist={isTogglingProduct(product.id)}
                 animationDelay={index * 0.05}
               />
             );

@@ -11,6 +11,7 @@ interface ProductCardProps {
   isLoading?: boolean;
   isAddingToCart?: boolean;
   isInWishlist?: boolean;
+  isTogglingWishlist?: boolean;
   animationDelay?: number;
   variant?: 'card' | 'list';
 }
@@ -23,6 +24,7 @@ export const ProductCard = ({
   isLoading = false,
   isAddingToCart = false,
   isInWishlist = false,
+  isTogglingWishlist = false,
   animationDelay = 0,
   variant = 'card',
 }: ProductCardProps) => {
@@ -63,13 +65,20 @@ export const ProductCard = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onToggleWishlist(product);
+                if (!isTogglingWishlist) {
+                  onToggleWishlist(product);
+                }
               }}
+              disabled={isTogglingWishlist}
               className={`absolute top-2 right-2 p-2 rounded-full transition-colors cursor-pointer ${
                 isInWishlist ? 'bg-red-500/80 hover:bg-red-600/80' : 'bg-black/50 hover:bg-black/70'
-              }`}
+              } ${isTogglingWishlist ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              <Heart className={`w-4 h-4 text-white ${isInWishlist ? 'fill-current' : ''}`} />
+              {isTogglingWishlist ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Heart className={`w-4 h-4 text-white ${isInWishlist ? 'fill-current' : ''}`} />
+              )}
             </button>
           )}
         </div>
@@ -89,15 +98,22 @@ export const ProductCard = ({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  onToggleWishlist(product);
+                  if (!isTogglingWishlist) {
+                    onToggleWishlist(product);
+                  }
                 }}
+                disabled={isTogglingWishlist}
                 className={`p-2 rounded-full transition-colors cursor-pointer ${
                   isInWishlist ? 'bg-red-500/20 hover:bg-red-500/30' : 'hover:bg-gray-700'
-                }`}
+                } ${isTogglingWishlist ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                <Heart className={`w-5 h-5 ${
-                  isInWishlist ? 'text-red-400 fill-current' : 'text-gray-400'
-                }`} />
+                {isTogglingWishlist ? (
+                  <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Heart className={`w-5 h-5 ${
+                    isInWishlist ? 'text-red-400 fill-current' : 'text-gray-400'
+                  }`} />
+                )}
               </button>
             ) : (
               <div className="flex items-center space-x-1">

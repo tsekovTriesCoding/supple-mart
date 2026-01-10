@@ -333,7 +333,15 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
                       {...registerForm.register('firstName', { 
-                        required: 'First name is required'
+                        required: 'First name is required',
+                        minLength: {
+                          value: 2,
+                          message: 'First name must be at least 2 characters'
+                        },
+                        maxLength: {
+                          value: 50,
+                          message: 'First name must be less than 50 characters'
+                        }
                       })}
                       type="text"
                       className="input auth-input w-full"
@@ -355,7 +363,15 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                   </label>
                   <input
                     {...registerForm.register('lastName', { 
-                      required: 'Last name is required'
+                      required: 'Last name is required',
+                      minLength: {
+                        value: 2,
+                        message: 'Last name must be at least 2 characters'
+                      },
+                      maxLength: {
+                        value: 50,
+                        message: 'Last name must be less than 50 characters'
+                      }
                     })}
                     type="text"
                     className="input auth-input w-full"

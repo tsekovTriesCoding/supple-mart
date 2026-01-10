@@ -19,7 +19,7 @@ const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { addItem } = useCart();
-  const { checkIsInWishlist, toggleWishlist: toggleWishlistHook } = useWishlist();
+  const { checkIsInWishlist, toggleWishlist: toggleWishlistHook, isTogglingProduct } = useWishlist();
   
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -114,8 +114,8 @@ const Products = () => {
     }
   }, [addItem]);
 
-  const toggleWishlist = useCallback(async (product: Product) => {
-    await toggleWishlistHook(product.id, product.name);
+  const toggleWishlist = useCallback((product: Product) => {
+    toggleWishlistHook(product.id, product.name);
   }, [toggleWishlistHook]);
 
   const sortOptions = useMemo(() => [
@@ -270,6 +270,7 @@ const Products = () => {
                   isLoading={false}
                   isAddingToCart={addingToCartId === product.id}
                   isInWishlist={checkIsInWishlist(product.id)}
+                  isTogglingWishlist={isTogglingProduct(product.id)}
                   animationDelay={index * 0.05}
                 />
               ))}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
@@ -14,6 +14,8 @@ export const useWishlist = (options: UseWishlistOptions = {}) => {
   const { productId, enabled = true } = options;
   const queryClient = useQueryClient();
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [togglingProductId, setTogglingProductId] = useState<string | null>(null);
+  const pendingOperations = useRef<Set<string>>(new Set());
 
   const { data: isInWishlist } = useQuery({
     queryKey: ['wishlist-check', productId],
@@ -94,27 +96,41 @@ export const useWishlist = (options: UseWishlistOptions = {}) => {
     }
   }, [isInWishlist, productId]);
 
-  const checkIsInWishlist = (prodId: string): boolean => {
+  const checkIsInWishlist = useCallback((prodId: string): boolean => {
     if (!wishlistData?.content) return false;
     return wishlistData.content.some(item => item.productId === prodId);
-  };
+  }, [wishlistData]);
 
-  const toggleWishlist = async (prodId: string, productNameFromCaller?: string) => {
+  const toggleWishlist = useCallback(async (prodId: string, productNameFromCaller?: string) => {
     if (!localStorage.getItem('token')) {
       toast.error('Please log in to add items to your wishlist');
       return;
     }
+
+    // Prevent rapid clicks on the same product
+    if (pendingOperations.current.has(prodId)) {
+      return;
+    }
+
+    pendingOperations.current.add(prodId);
+    setTogglingProductId(prodId);
 
     const isCurrentlyWishlisted = checkIsInWishlist(prodId);
     const item = wishlistData?.content.find(w => w.productId === prodId);
     const productName = productNameFromCaller ?? item?.productName;
 
     if (isCurrentlyWishlisted) {
-      await removeFromWishlistMutation.mutateAsync({ prodId, productName });
+      await removeFromWishlistMutation.mutateAsync({ prodId, productName }).finally(() => {
+        pendingOperations.current.delete(prodId);
+        setTogglingProductId(null);
+      });
     } else {
-      await addToWishlistMutation.mutateAsync({ prodId, productName });
+      await addToWishlistMutation.mutateAsync({ prodId, productName }).finally(() => {
+        pendingOperations.current.delete(prodId);
+        setTogglingProductId(null);
+      });
     }
-  };
+  }, [checkIsInWishlist, wishlistData, addToWishlistMutation, removeFromWishlistMutation]);
 
   const addToWishlist = async (prodId: string, productName?: string) => {
     if (!localStorage.getItem('token')) {
@@ -125,17 +141,32 @@ export const useWishlist = (options: UseWishlistOptions = {}) => {
     await addToWishlistMutation.mutateAsync({ prodId, productName });
   };
 
-  const removeFromWishlist = async (prodId: string) => {
+  const removeFromWishlist = useCallback(async (prodId: string) => {
     if (!localStorage.getItem('token')) {
       toast.error('Please log in to manage your wishlist');
       return;
     }
 
+    // Prevent rapid clicks on the same product
+    if (pendingOperations.current.has(prodId)) {
+      return;
+    }
+
+    pendingOperations.current.add(prodId);
+    setTogglingProductId(prodId);
+
     const item = wishlistData?.content.find(w => w.productId === prodId);
     const productName = item?.productName;
 
-    await removeFromWishlistMutation.mutateAsync({ prodId, productName });
-  };
+    await removeFromWishlistMutation.mutateAsync({ prodId, productName }).finally(() => {
+      pendingOperations.current.delete(prodId);
+      setTogglingProductId(null);
+    });
+  }, [wishlistData, removeFromWishlistMutation]);
+
+  const isTogglingProduct = useCallback((prodId: string) => {
+    return togglingProductId === prodId;
+  }, [togglingProductId]);
 
   return {
     isWishlisted,
@@ -146,6 +177,8 @@ export const useWishlist = (options: UseWishlistOptions = {}) => {
     isAddingToWishlist: addToWishlistMutation.isPending,
     isRemovingFromWishlist: removeFromWishlistMutation.isPending,
     isTogglingWishlist: addToWishlistMutation.isPending || removeFromWishlistMutation.isPending,
+    togglingProductId,
+    isTogglingProduct,
     
     toggleWishlist,
     addToWishlist,
