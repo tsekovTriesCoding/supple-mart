@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Elements } from '@stripe/react-stripe-js';
 import { ArrowLeft, Package, MapPin, AlertCircle, CheckCircle, ShoppingBag, Truck, Zap, Clock } from 'lucide-react';
@@ -238,7 +238,7 @@ const Checkout = () => {
                 {getAmountForFreeShipping(totalPrice) > 0 && (
                   <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-3 mb-4">
                     <p className="text-blue-400 text-sm">
-                      💡 Add {formatCartPrice(getAmountForFreeShipping(totalPrice))} more to get free standard shipping!
+                      ?? Add {formatCartPrice(getAmountForFreeShipping(totalPrice))} more to get free standard shipping!
                     </p>
                   </div>
                 )}
@@ -285,7 +285,7 @@ const Checkout = () => {
                           </div>
                           {option.isFree && (
                             <span className="inline-block mt-1 text-xs text-green-400 bg-green-900/30 px-2 py-0.5 rounded">
-                              🎉 You qualify for free shipping!
+                              ?? You qualify for free shipping!
                             </span>
                           )}
                         </div>

@@ -6,6 +6,7 @@ import { SearchInput } from './SearchInput';
 import { UserDropdown } from './UserDropdown';
 import { MobileNav } from './MobileNav';
 import AuthModal from '../AuthModal';
+import { NotificationBell } from '../NotificationBell';
 import { useCart, formatCartPrice, useAuth } from '../../hooks';
 import { useProductCategories } from '../../hooks/useProducts';
 import { formatCategoryForDisplay, formatCategoryForUrl } from '../../utils/categoryUtils';
@@ -329,6 +330,7 @@ const Header = () => {
           </div>
           
           <div className="flex items-center space-x-4">
+            {isLoggedIn && <NotificationBell />}
             <CartButton />
 
             <UserDropdown

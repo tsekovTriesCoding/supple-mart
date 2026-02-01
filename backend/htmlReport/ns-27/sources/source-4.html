@@ -1,0 +1,145 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > OAuth2AuthenticationFailureHandler</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">app.security.oauth2</a>
+</div>
+
+<h1>Coverage Summary for Class: OAuth2AuthenticationFailureHandler (app.security.oauth2)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OAuth2AuthenticationFailureHandler</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    14.3%
+  </span>
+  <span class="absValue">
+    (1/7)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package app.security.oauth2;
+&nbsp;
+&nbsp;import jakarta.servlet.http.HttpServletRequest;
+&nbsp;import jakarta.servlet.http.HttpServletResponse;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.security.core.AuthenticationException;
+&nbsp;import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;import org.springframework.web.util.UriComponentsBuilder;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.net.URLEncoder;
+&nbsp;import java.nio.charset.StandardCharsets;
+&nbsp;
+&nbsp;/**
+&nbsp; * OAuth2 authentication failure handler.
+&nbsp; * Redirects to frontend with error message.
+&nbsp; */
+&nbsp;@Component
+&nbsp;@RequiredArgsConstructor
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
+&nbsp;
+&nbsp;    private final OAuth2RedirectUrlBuilder urlBuilder;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
+&nbsp;                                        AuthenticationException exception) throws IOException {
+&nbsp;
+<b class="nc">&nbsp;        log.error(&quot;OAuth2 authentication failed: {}&quot;, exception.getMessage());</b>
+&nbsp;
+<b class="nc">&nbsp;        String errorMessage = exception.getLocalizedMessage();</b>
+&nbsp;        
+<b class="nc">&nbsp;        String targetUrl = UriComponentsBuilder.fromUriString(urlBuilder.getCallbackUrl())</b>
+<b class="nc">&nbsp;                .queryParam(&quot;error&quot;, URLEncoder.encode(errorMessage, StandardCharsets.UTF_8))</b>
+<b class="nc">&nbsp;                .build().toUriString();</b>
+&nbsp;
+<b class="nc">&nbsp;        getRedirectStrategy().sendRedirect(request, response, targetUrl);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-01 17:16</div>
+</div>
+</body>
+</html>

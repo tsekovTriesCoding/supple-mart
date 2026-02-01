@@ -1,0 +1,200 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ProductController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">app.web</a>
+</div>
+
+<h1>Coverage Summary for Class: ProductController (app.web)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProductController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package app.web;
+&nbsp;
+&nbsp;import app.product.dto.ProductDetails;
+&nbsp;import app.product.dto.ProductPageResponse;
+&nbsp;import app.product.model.Category;
+&nbsp;import app.product.service.ProductService;
+&nbsp;import io.swagger.v3.oas.annotations.Operation;
+&nbsp;import io.swagger.v3.oas.annotations.Parameter;
+&nbsp;import io.swagger.v3.oas.annotations.media.Content;
+&nbsp;import io.swagger.v3.oas.annotations.media.Schema;
+&nbsp;import io.swagger.v3.oas.annotations.responses.ApiResponse;
+&nbsp;import io.swagger.v3.oas.annotations.responses.ApiResponses;
+&nbsp;import io.swagger.v3.oas.annotations.tags.Tag;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;import java.math.BigDecimal;
+&nbsp;import java.util.List;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;api/products&quot;)
+&nbsp;@RequiredArgsConstructor
+&nbsp;@Tag(name = &quot;Products&quot;, description = &quot;Product catalog and search endpoints&quot;)
+&nbsp;public class ProductController {
+&nbsp;
+&nbsp;    private final ProductService productService;
+&nbsp;
+&nbsp;    @Operation(
+&nbsp;            summary = &quot;Get all products&quot;,
+&nbsp;            description = &quot;Retrieve paginated list of products with optional filters for search, category, price range, and sorting&quot;
+&nbsp;    )
+&nbsp;    @ApiResponses(value = {
+&nbsp;            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Products retrieved successfully&quot;,
+&nbsp;                    content = @Content(schema = @Schema(implementation = ProductPageResponse.class)))
+&nbsp;    })
+&nbsp;    @GetMapping
+&nbsp;    public ResponseEntity&lt;ProductPageResponse&gt; getAllProducts(
+&nbsp;            @Parameter(description = &quot;Search term for product name or description&quot;)
+&nbsp;            @RequestParam(required = false) String search,
+&nbsp;            @Parameter(description = &quot;Filter by product category&quot;)
+&nbsp;            @RequestParam(required = false) Category category,
+&nbsp;            @Parameter(description = &quot;Minimum price filter&quot;)
+&nbsp;            @RequestParam(required = false) BigDecimal minPrice,
+&nbsp;            @Parameter(description = &quot;Maximum price filter&quot;)
+&nbsp;            @RequestParam(required = false) BigDecimal maxPrice,
+&nbsp;            @Parameter(description = &quot;Filter by active status (default: true)&quot;)
+&nbsp;            @RequestParam(required = false, defaultValue = &quot;true&quot;) Boolean active,
+&nbsp;            @Parameter(description = &quot;Page number (0-indexed)&quot;)
+&nbsp;            @RequestParam(required = false, defaultValue = &quot;0&quot;) Integer page,
+&nbsp;            @Parameter(description = &quot;Page size&quot;)
+&nbsp;            @RequestParam(required = false, defaultValue = &quot;20&quot;) Integer size,
+&nbsp;            @Parameter(description = &quot;Field to sort by (e.g., name, price, createdAt)&quot;)
+&nbsp;            @RequestParam(required = false, defaultValue = &quot;name&quot;) String sortBy,
+&nbsp;            @Parameter(description = &quot;Sort direction: asc or desc&quot;)
+&nbsp;            @RequestParam(required = false, defaultValue = &quot;asc&quot;) String sortDirection
+&nbsp;    ) {
+<b class="fc">&nbsp;        ProductPageResponse products = productService.getAllProducts(</b>
+&nbsp;                search, category, minPrice, maxPrice, active, page, size, sortBy, sortDirection
+&nbsp;        );
+&nbsp;
+<b class="fc">&nbsp;        return ResponseEntity.ok(products);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(
+&nbsp;            summary = &quot;Get all categories&quot;,
+&nbsp;            description = &quot;Retrieve list of all available product categories&quot;
+&nbsp;    )
+&nbsp;    @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Categories retrieved successfully&quot;)
+&nbsp;    @GetMapping(&quot;/categories&quot;)
+&nbsp;    public ResponseEntity&lt;List&lt;String&gt;&gt; getAllCategories() {
+<b class="fc">&nbsp;        List&lt;String&gt; categories = productService.getAllCategories()</b>
+<b class="fc">&nbsp;                .stream()</b>
+<b class="fc">&nbsp;                .map(category -&gt; category.name().toLowerCase())</b>
+<b class="fc">&nbsp;                .toList();</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(categories);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(
+&nbsp;            summary = &quot;Get product by ID&quot;,
+&nbsp;            description = &quot;Retrieve detailed information about a specific product including reviews&quot;
+&nbsp;    )
+&nbsp;    @ApiResponses(value = {
+&nbsp;            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Product found&quot;,
+&nbsp;                    content = @Content(schema = @Schema(implementation = ProductDetails.class))),
+&nbsp;            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Product not found&quot;)
+&nbsp;    })
+&nbsp;    @GetMapping(&quot;/{id}&quot;)
+&nbsp;    public ResponseEntity&lt;ProductDetails&gt; getProductById(
+&nbsp;            @Parameter(description = &quot;Product ID&quot;, required = true)
+&nbsp;            @PathVariable UUID id) {
+<b class="fc">&nbsp;        ProductDetails product = productService.getProductDetailsById(id);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(product);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-01 17:16</div>
+</div>
+</body>
+</html>

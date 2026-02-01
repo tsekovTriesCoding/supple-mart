@@ -1,0 +1,222 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > NotificationEventDispatcher</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">app.notification.handler</a>
+</div>
+
+<h1>Coverage Summary for Class: NotificationEventDispatcher (app.notification.handler)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">NotificationEventDispatcher</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (4/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83.3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88.2%
+  </span>
+  <span class="absValue">
+    (15/17)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">NotificationEventDispatcher$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (4/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83.3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88.2%
+  </span>
+  <span class="absValue">
+    (15/17)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package app.notification.handler;
+&nbsp;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.context.event.EventListener;
+&nbsp;import org.springframework.scheduling.annotation.Async;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;/**
+&nbsp; * Central dispatcher that routes notification events to the appropriate handler.
+&nbsp; * 
+&nbsp; * &lt;p&gt;This class uses Spring&#39;s dependency injection to automatically discover
+&nbsp; * all NotificationHandler implementations and register them by event type.&lt;/p&gt;
+&nbsp; * 
+&nbsp; * &lt;p&gt;Benefits of this approach:
+&nbsp; * &lt;ul&gt;
+&nbsp; *   &lt;li&gt;Open/Closed Principle: Add new handlers without modifying this class&lt;/li&gt;
+&nbsp; *   &lt;li&gt;Single Responsibility: Each handler focuses on one event type&lt;/li&gt;
+&nbsp; *   &lt;li&gt;Testability: Handlers can be unit tested in isolation&lt;/li&gt;
+&nbsp; *   &lt;li&gt;Spring integration: Leverages Spring&#39;s event system and async processing&lt;/li&gt;
+&nbsp; * &lt;/ul&gt;
+&nbsp; * &lt;/p&gt;
+&nbsp; */
+&nbsp;@Component
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;public class NotificationEventDispatcher {
+&nbsp;
+<b class="fc">&nbsp;    private final Map&lt;Class&lt;?&gt;, NotificationHandler&lt;?&gt;&gt; handlerMap = new HashMap&lt;&gt;();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor injection - Spring automatically provides all NotificationHandler beans.
+&nbsp;     * This is the recommended way to collect all implementations of an interface.
+&nbsp;     */
+<b class="fc">&nbsp;    public NotificationEventDispatcher(List&lt;NotificationHandler&lt;?&gt;&gt; handlers) {</b>
+<b class="fc">&nbsp;        for (NotificationHandler&lt;?&gt; handler : handlers) {</b>
+<b class="fc">&nbsp;            handlerMap.put(handler.getEventType(), handler);</b>
+<b class="fc">&nbsp;            log.info(&quot;Registered notification handler: {} for event type: {}&quot;, </b>
+<b class="fc">&nbsp;                    handler.getClass().getSimpleName(), </b>
+<b class="fc">&nbsp;                    handler.getEventType().getSimpleName());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        log.info(&quot;NotificationEventDispatcher initialized with {} handlers&quot;, handlerMap.size());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Main entry point for all notification events.
+&nbsp;     * Spring&#39;s @EventListener will route all published events here.
+&nbsp;     * The @Async annotation ensures non-blocking processing.
+&nbsp;     * 
+&nbsp;     * Note: Only processes events that have a registered handler,
+&nbsp;     * silently ignores Spring internal events.
+&nbsp;     */
+&nbsp;    @Async
+&nbsp;    @EventListener
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    public void handleEvent(Object event) {
+&nbsp;        // Only process events from our notification.event package
+<b class="fc">&nbsp;        if (!event.getClass().getPackageName().startsWith(&quot;app.notification.event&quot;)) {</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;        
+<b class="fc">&nbsp;        NotificationHandler&lt;Object&gt; handler = (NotificationHandler&lt;Object&gt;) handlerMap.get(event.getClass());</b>
+&nbsp;        
+<b class="pc">&nbsp;        if (handler != null) {</b>
+<b class="fc">&nbsp;            log.debug(&quot;Dispatching {} to {}&quot;, event.getClass().getSimpleName(), handler.getClass().getSimpleName());</b>
+<b class="fc">&nbsp;            handler.handle(event);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            log.warn(&quot;No handler registered for event type: {}&quot;, event.getClass().getSimpleName());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if a handler is registered for the given event type.
+&nbsp;     * Useful for testing and debugging.
+&nbsp;     */
+&nbsp;    public boolean hasHandlerFor(Class&lt;?&gt; eventType) {
+<b class="fc">&nbsp;        return handlerMap.containsKey(eventType);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the number of registered handlers.
+&nbsp;     */
+&nbsp;    public int getHandlerCount() {
+<b class="nc">&nbsp;        return handlerMap.size();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-01 17:16</div>
+</div>
+</body>
+</html>

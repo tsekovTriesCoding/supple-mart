@@ -4,6 +4,7 @@ import { Bell, ShoppingBag, Mail, AlertCircle, Package, DollarSign, Star, Shield
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
+
 import { notificationAPI } from '../lib/api/notification';
 import type { UpdateNotificationPreferencesRequest } from '../types/notification';
 import { LoadingSpinner } from '../components/LoadingSpinner';

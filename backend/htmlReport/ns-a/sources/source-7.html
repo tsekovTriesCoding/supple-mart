@@ -1,0 +1,204 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > SchedulingConfig</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">app.config</a>
+</div>
+
+<h1>Coverage Summary for Class: SchedulingConfig (app.config)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SchedulingConfig</td>
+<td class="coverageStat">
+  <span class="percent">
+    66.7%
+  </span>
+  <span class="absValue">
+    (4/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90.5%
+  </span>
+  <span class="absValue">
+    (19/21)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">SchedulingConfig$$SpringCGLIB$$0</td>
+  </tr>
+  <tr>
+    <td class="name">SchedulingConfig$$SpringCGLIB$$FastClass$$0</td>
+  </tr>
+  <tr>
+    <td class="name">SchedulingConfig$$SpringCGLIB$$FastClass$$1</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    66.7%
+  </span>
+  <span class="absValue">
+    (4/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90.5%
+  </span>
+  <span class="absValue">
+    (19/21)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package app.config;
+&nbsp;
+&nbsp;import app.exception.AsyncExceptionHandler;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+&nbsp;import org.springframework.beans.factory.annotation.Value;
+&nbsp;import org.springframework.context.annotation.Bean;
+&nbsp;import org.springframework.context.annotation.Configuration;
+&nbsp;import org.springframework.scheduling.annotation.AsyncConfigurer;
+&nbsp;import org.springframework.scheduling.annotation.SchedulingConfigurer;
+&nbsp;import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+&nbsp;import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+&nbsp;import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+&nbsp;
+&nbsp;import java.util.concurrent.Executor;
+&nbsp;
+&nbsp;/**
+&nbsp; * Configuration for scheduled tasks and async execution.
+&nbsp; * Configures thread pools for both scheduling and async task execution.
+&nbsp; */
+&nbsp;@Configuration
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class SchedulingConfig implements SchedulingConfigurer, AsyncConfigurer {
+&nbsp;
+&nbsp;    private final AsyncExceptionHandler asyncExceptionHandler;
+&nbsp;
+&nbsp;    @Value(&quot;${scheduling.pool.size:5}&quot;)
+&nbsp;    private int schedulingPoolSize;
+&nbsp;
+&nbsp;    @Value(&quot;${scheduling.async.core-pool-size:4}&quot;)
+&nbsp;    private int asyncCorePoolSize;
+&nbsp;
+&nbsp;    @Value(&quot;${scheduling.async.max-pool-size:10}&quot;)
+&nbsp;    private int asyncMaxPoolSize;
+&nbsp;
+&nbsp;    @Value(&quot;${scheduling.async.queue-capacity:100}&quot;)
+&nbsp;    private int asyncQueueCapacity;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Configure the task scheduler for @Scheduled methods.
+&nbsp;     * Uses a ThreadPoolTaskScheduler for better performance than single-threaded default.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+<b class="fc">&nbsp;        taskRegistrar.setTaskScheduler(taskScheduler());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    public ThreadPoolTaskScheduler taskScheduler() {
+<b class="fc">&nbsp;        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();</b>
+<b class="fc">&nbsp;        scheduler.setPoolSize(schedulingPoolSize);</b>
+<b class="fc">&nbsp;        scheduler.setThreadNamePrefix(&quot;scheduled-task-&quot;);</b>
+<b class="fc">&nbsp;        scheduler.setErrorHandler(throwable -&gt; </b>
+<b class="nc">&nbsp;            log.error(&quot;Error in scheduled task: {}&quot;, throwable.getMessage(), throwable));</b>
+<b class="fc">&nbsp;        scheduler.setWaitForTasksToCompleteOnShutdown(true);</b>
+<b class="fc">&nbsp;        scheduler.setAwaitTerminationSeconds(30);</b>
+<b class="fc">&nbsp;        scheduler.initialize();</b>
+<b class="fc">&nbsp;        return scheduler;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Configure the executor for @Async methods.
+&nbsp;     * Provides a configurable thread pool for async task execution.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public Executor getAsyncExecutor() {
+<b class="fc">&nbsp;        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();</b>
+<b class="fc">&nbsp;        executor.setCorePoolSize(asyncCorePoolSize);</b>
+<b class="fc">&nbsp;        executor.setMaxPoolSize(asyncMaxPoolSize);</b>
+<b class="fc">&nbsp;        executor.setQueueCapacity(asyncQueueCapacity);</b>
+<b class="fc">&nbsp;        executor.setThreadNamePrefix(&quot;async-task-&quot;);</b>
+<b class="fc">&nbsp;        executor.setWaitForTasksToCompleteOnShutdown(true);</b>
+<b class="fc">&nbsp;        executor.setAwaitTerminationSeconds(60);</b>
+<b class="fc">&nbsp;        executor.initialize();</b>
+<b class="fc">&nbsp;        return executor;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+<b class="nc">&nbsp;        return asyncExceptionHandler;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-01 17:16</div>
+</div>
+</body>
+</html>

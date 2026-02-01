@@ -3,6 +3,10 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  define: {
+    // Polyfill for sockjs-client which expects Node.js global
+    global: 'globalThis',
+  },
   build: {
     rollupOptions: {
       output: {

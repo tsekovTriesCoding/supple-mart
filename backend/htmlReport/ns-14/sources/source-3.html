@@ -1,0 +1,167 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > NotificationPreferencesService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">app.notification.service</a>
+</div>
+
+<h1>Coverage Summary for Class: NotificationPreferencesService (app.notification.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">NotificationPreferencesService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (16/16)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">NotificationPreferencesService$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (16/16)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package app.notification.service;
+&nbsp;
+&nbsp;import app.notification.dto.NotificationPreferencesResponse;
+&nbsp;import app.notification.dto.UpdateNotificationPreferencesRequest;
+&nbsp;import app.notification.mapper.NotificationPreferencesMapper;
+&nbsp;import app.notification.model.NotificationPreferences;
+&nbsp;import app.notification.repository.NotificationPreferencesRepository;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;@Service
+&nbsp;@RequiredArgsConstructor
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;public class NotificationPreferencesService {
+&nbsp;    
+&nbsp;    private final NotificationPreferencesRepository notificationPreferencesRepository;
+&nbsp;    private final NotificationPreferencesMapper notificationPreferencesMapper;
+&nbsp;
+&nbsp;    @Transactional(readOnly = true)
+&nbsp;    public NotificationPreferencesResponse getPreferences(UUID userId) {
+<b class="fc">&nbsp;        log.info(&quot;Getting notification preferences for user: {}&quot;, userId);</b>
+&nbsp;        
+<b class="fc">&nbsp;        NotificationPreferences preferences = notificationPreferencesRepository.findByUserId(userId)</b>
+<b class="fc">&nbsp;                .orElseGet(() -&gt; {</b>
+<b class="fc">&nbsp;                    NotificationPreferences defaultPrefs = notificationPreferencesMapper.createDefaultPreferences(userId);</b>
+<b class="fc">&nbsp;                    return notificationPreferencesRepository.save(defaultPrefs);</b>
+&nbsp;                });
+&nbsp;
+<b class="fc">&nbsp;        return notificationPreferencesMapper.toResponse(preferences);</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @Transactional
+&nbsp;    public NotificationPreferencesResponse updatePreferences(UUID userId, UpdateNotificationPreferencesRequest request) {
+<b class="fc">&nbsp;        log.info(&quot;Updating notification preferences for user: {}&quot;, userId);</b>
+&nbsp;        
+<b class="fc">&nbsp;        NotificationPreferences preferences = notificationPreferencesRepository.findByUserId(userId)</b>
+<b class="fc">&nbsp;                .orElseGet(() -&gt; {</b>
+<b class="fc">&nbsp;                    NotificationPreferences defaultPrefs = notificationPreferencesMapper.createDefaultPreferences(userId);</b>
+<b class="fc">&nbsp;                    return notificationPreferencesRepository.save(defaultPrefs);</b>
+&nbsp;                });
+&nbsp;
+<b class="fc">&nbsp;        notificationPreferencesMapper.updatePreferencesFromRequest(preferences, request);</b>
+&nbsp;
+<b class="fc">&nbsp;        NotificationPreferences savedPreferences = notificationPreferencesRepository.save(preferences);</b>
+<b class="fc">&nbsp;        log.info(&quot;Notification preferences updated successfully for user: {}&quot;, userId);</b>
+&nbsp;        
+<b class="fc">&nbsp;        return notificationPreferencesMapper.toResponse(savedPreferences);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-01 17:16</div>
+</div>
+</body>
+</html>

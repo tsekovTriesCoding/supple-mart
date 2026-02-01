@@ -1,0 +1,106 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > UserRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">app.user.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: UserRepository (app.user.repository)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">UserRepository$MockitoMock$gekrgNio</td>
+  </tr>
+  <tr>
+    <td class="name">UserRepository$MockitoMock$gekrgNio$auxiliary$GUohJd7Q</td>
+  </tr>
+  <tr>
+    <td class="name">UserRepository$MockitoMock$gekrgNio$auxiliary$tXGfD2Wl</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package app.user.repository;
+&nbsp;
+&nbsp;import app.user.model.Role;
+&nbsp;import app.user.model.User;
+&nbsp;import org.springframework.data.domain.Page;
+&nbsp;import org.springframework.data.domain.Pageable;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;import org.springframework.data.repository.query.Param;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;@Repository
+&nbsp;public interface UserRepository extends JpaRepository&lt;User, UUID&gt; {
+&nbsp;
+&nbsp;    Optional&lt;User&gt; findByEmail(String email);
+&nbsp;
+&nbsp;    @Query(&quot;SELECT u FROM User u WHERE &quot; +
+&nbsp;            &quot;(:search IS NULL OR :search = &#39;&#39; OR &quot; +
+&nbsp;            &quot;LOWER(u.email) LIKE LOWER(CONCAT(&#39;%&#39;, :search, &#39;%&#39;)) OR &quot; +
+&nbsp;            &quot;LOWER(u.firstName) LIKE LOWER(CONCAT(&#39;%&#39;, :search, &#39;%&#39;)) OR &quot; +
+&nbsp;            &quot;LOWER(u.lastName) LIKE LOWER(CONCAT(&#39;%&#39;, :search, &#39;%&#39;))) AND &quot; +
+&nbsp;            &quot;(:role IS NULL OR u.role = :role)&quot;)
+&nbsp;    Page&lt;User&gt; findUsersWithSearch(@Param(&quot;search&quot;) String search,
+&nbsp;                                     @Param(&quot;role&quot;) Role role,
+&nbsp;                                     Pageable pageable);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-01 17:16</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,232 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > OrderMapper</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">app.order.mapper</a>
+</div>
+
+<h1>Coverage Summary for Class: OrderMapper (app.order.mapper)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OrderMapper</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (40/40)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">OrderMapper$MockitoMock$H9OyHn4P</td>
+  </tr>
+  <tr>
+    <td class="name">OrderMapper$MockitoMock$H9OyHn4P$auxiliary$Op2Zoaqw</td>
+  </tr>
+  <tr>
+    <td class="name">OrderMapper$MockitoMock$H9OyHn4P$auxiliary$rr2PHsYB</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (40/40)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package app.order.mapper;
+&nbsp;
+&nbsp;import app.cartitem.model.CartItem;
+&nbsp;import app.order.dto.OrderResponse;
+&nbsp;import app.order.dto.OrderItemResponse;
+&nbsp;import app.order.dto.OrderStats;
+&nbsp;import app.order.dto.OrdersResponse;
+&nbsp;import app.order.model.Order;
+&nbsp;import app.order.model.OrderItem;
+&nbsp;import org.mapstruct.Mapper;
+&nbsp;import org.mapstruct.Mapping;
+&nbsp;import org.springframework.data.domain.Page;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;@Mapper(componentModel = &quot;spring&quot;)
+&nbsp;public interface OrderMapper {
+&nbsp;
+&nbsp;    @Mapping(target = &quot;status&quot;, expression = &quot;java(order.getStatus().name().toLowerCase())&quot;)
+&nbsp;    OrderResponse toOrderResponse(Order order);
+&nbsp;
+&nbsp;    @Mapping(target = &quot;product&quot;, source = &quot;product&quot;)
+&nbsp;    OrderItemResponse toOrderItemResponse(OrderItem orderItem);
+&nbsp;
+&nbsp;    @Mapping(target = &quot;id&quot;, source = &quot;product.id&quot;)
+&nbsp;    @Mapping(target = &quot;name&quot;, source = &quot;product.name&quot;)
+&nbsp;    @Mapping(target = &quot;imageUrl&quot;, source = &quot;product.imageUrl&quot;)
+&nbsp;    OrderItemResponse.ProductInfo toProductInfo(app.product.model.Product product);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Converts a Page of Orders to OrdersResponse DTO
+&nbsp;     */
+&nbsp;    default OrdersResponse toOrdersResponse(Page&lt;Order&gt; orderPage) {
+<b class="fc">&nbsp;        List&lt;OrderResponse&gt; orders = orderPage.getContent().stream()</b>
+<b class="fc">&nbsp;                .map(this::toOrderResponse)</b>
+<b class="fc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;
+<b class="fc">&nbsp;        return OrdersResponse.builder()</b>
+<b class="fc">&nbsp;                .orders(orders)</b>
+<b class="fc">&nbsp;                .currentPage(orderPage.getNumber())</b>
+<b class="fc">&nbsp;                .totalPages(orderPage.getTotalPages())</b>
+<b class="fc">&nbsp;                .totalElements(orderPage.getTotalElements())</b>
+<b class="fc">&nbsp;                .size(orderPage.getSize())</b>
+<b class="fc">&nbsp;                .first(orderPage.isFirst())</b>
+<b class="fc">&nbsp;                .last(orderPage.isLast())</b>
+<b class="fc">&nbsp;                .hasNext(orderPage.hasNext())</b>
+<b class="fc">&nbsp;                .hasPrevious(orderPage.hasPrevious())</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Converts CartItem to OrderItem (without order reference)
+&nbsp;     */
+&nbsp;    @Mapping(target = &quot;id&quot;, ignore = true)
+&nbsp;    @Mapping(target = &quot;order&quot;, ignore = true)
+&nbsp;    @Mapping(target = &quot;product&quot;, source = &quot;product&quot;)
+&nbsp;    @Mapping(target = &quot;quantity&quot;, source = &quot;quantity&quot;)
+&nbsp;    @Mapping(target = &quot;price&quot;, source = &quot;price&quot;)
+&nbsp;    OrderItem cartItemToOrderItem(CartItem cartItem);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Converts list of CartItems to OrderItems
+&nbsp;     */
+&nbsp;    default List&lt;OrderItem&gt; cartItemsToOrderItems(List&lt;CartItem&gt; cartItems) {
+<b class="fc">&nbsp;        return cartItems.stream()</b>
+<b class="fc">&nbsp;                .map(this::cartItemToOrderItem)</b>
+<b class="fc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Builds OrderStats from individual statistics
+&nbsp;     */
+&nbsp;    default OrderStats toOrderStats(Long totalOrders, Long pendingCount, Long paidCount,
+&nbsp;                                          Long processingCount, Long shippedCount, Long deliveredCount,
+&nbsp;                                          Long cancelledCount, java.math.BigDecimal totalSpent) {
+<b class="fc">&nbsp;        return OrderStats.builder()</b>
+<b class="fc">&nbsp;                .totalOrders(totalOrders)</b>
+<b class="fc">&nbsp;                .pendingCount(pendingCount)</b>
+<b class="fc">&nbsp;                .paidCount(paidCount)</b>
+<b class="fc">&nbsp;                .processingCount(processingCount)</b>
+<b class="fc">&nbsp;                .shippedCount(shippedCount)</b>
+<b class="fc">&nbsp;                .deliveredCount(deliveredCount)</b>
+<b class="fc">&nbsp;                .cancelledCount(cancelledCount)</b>
+<b class="fc">&nbsp;                .totalSpent(totalSpent)</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates Order entity from user, order number, total amount, shipping details, and cart items
+&nbsp;     */
+&nbsp;    default Order toOrder(app.user.model.User user, String orderNumber, java.math.BigDecimal totalAmount,
+&nbsp;                          String shippingAddress, java.math.BigDecimal shippingCost, String shippingMethod,
+&nbsp;                          List&lt;CartItem&gt; cartItems) {
+<b class="fc">&nbsp;        Order order = Order.builder()</b>
+<b class="fc">&nbsp;                .user(user)</b>
+<b class="fc">&nbsp;                .orderNumber(orderNumber)</b>
+<b class="fc">&nbsp;                .totalAmount(totalAmount)</b>
+<b class="fc">&nbsp;                .status(app.order.model.OrderStatus.PENDING)</b>
+<b class="fc">&nbsp;                .shippingAddress(shippingAddress)</b>
+<b class="fc">&nbsp;                .shippingCost(shippingCost)</b>
+<b class="fc">&nbsp;                .shippingMethod(shippingMethod)</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;
+<b class="fc">&nbsp;        List&lt;OrderItem&gt; orderItems = cartItemsToOrderItems(cartItems);</b>
+<b class="fc">&nbsp;        orderItems.forEach(orderItem -&gt; orderItem.setOrder(order));</b>
+<b class="fc">&nbsp;        order.setItems(orderItems);</b>
+&nbsp;
+<b class="fc">&nbsp;        return order;</b>
+&nbsp;    }
+&nbsp;}
+&nbsp;
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-01 17:16</div>
+</div>
+</body>
+</html>

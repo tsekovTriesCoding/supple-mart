@@ -1,0 +1,179 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > WebSocketNotificationService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">app.notification.service</a>
+</div>
+
+<h1>Coverage Summary for Class: WebSocketNotificationService (app.notification.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">WebSocketNotificationService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94.7%
+  </span>
+  <span class="absValue">
+    (18/19)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package app.notification.service;
+&nbsp;
+&nbsp;import app.notification.dto.NotificationDto;
+&nbsp;import app.notification.dto.UnreadCountResponse;
+&nbsp;import app.user.model.User;
+&nbsp;import app.user.repository.UserRepository;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.messaging.simp.SimpMessagingTemplate;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;/**
+&nbsp; * Service for sending real-time notifications via WebSocket.
+&nbsp; * WebSocket user identity is based on email (from JWT), so userId must be resolved to email.
+&nbsp; */
+&nbsp;@Service
+&nbsp;@RequiredArgsConstructor
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;public class WebSocketNotificationService {
+&nbsp;
+&nbsp;    private final SimpMessagingTemplate messagingTemplate;
+&nbsp;    private final UserRepository userRepository;
+&nbsp;
+&nbsp;    private static final String USER_NOTIFICATION_DESTINATION = &quot;/queue/notifications&quot;;
+&nbsp;    private static final String USER_UNREAD_COUNT_DESTINATION = &quot;/queue/notifications/unread-count&quot;;
+&nbsp;
+&nbsp;    public void sendNotificationToUser(UUID userId, NotificationDto notification) {
+<b class="fc">&nbsp;        userRepository.findById(userId)</b>
+<b class="fc">&nbsp;                .map(User::getEmail)</b>
+<b class="fc">&nbsp;                .ifPresentOrElse(</b>
+<b class="fc">&nbsp;                        userEmail -&gt; sendToUser(userId, userEmail, notification),</b>
+<b class="fc">&nbsp;                        () -&gt; log.warn(&quot;Cannot send WebSocket notification - user not found: {}&quot;, userId)</b>
+&nbsp;                );
+&nbsp;    }
+&nbsp;
+&nbsp;    private void sendToUser(UUID userId, String userEmail, NotificationDto notification) {
+<b class="fc">&nbsp;        log.debug(&quot;Sending notification to user {} ({}) at destination {}&quot;, userId, userEmail, USER_NOTIFICATION_DESTINATION);</b>
+&nbsp;
+&nbsp;        try {
+<b class="fc">&nbsp;            messagingTemplate.convertAndSendToUser(</b>
+&nbsp;                    userEmail,
+&nbsp;                    USER_NOTIFICATION_DESTINATION,
+&nbsp;                    notification
+&nbsp;            );
+<b class="fc">&nbsp;            log.info(&quot;Notification sent to user: {} ({}) - Type: {}&quot;, userId, userEmail, notification.getType());</b>
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;Failed to send notification to user: {} ({})&quot;, userId, userEmail, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    public void sendUnreadCountToUser(UUID userId, long unreadCount) {
+<b class="fc">&nbsp;        userRepository.findById(userId)</b>
+<b class="fc">&nbsp;                .map(User::getEmail)</b>
+<b class="fc">&nbsp;                .ifPresentOrElse(</b>
+<b class="fc">&nbsp;                        userEmail -&gt; sendUnreadCountToUser(userId, userEmail, unreadCount),</b>
+<b class="fc">&nbsp;                        () -&gt; log.warn(&quot;Cannot send WebSocket unread count - user not found: {}&quot;, userId)</b>
+&nbsp;                );
+&nbsp;    }
+&nbsp;
+&nbsp;    private void sendUnreadCountToUser(UUID userId, String userEmail, long unreadCount) {
+<b class="fc">&nbsp;        log.debug(&quot;Sending unread count {} to user {} ({}) at destination {}&quot;, unreadCount, userId, userEmail, USER_UNREAD_COUNT_DESTINATION);</b>
+&nbsp;
+&nbsp;        try {
+<b class="fc">&nbsp;            messagingTemplate.convertAndSendToUser(</b>
+&nbsp;                    userEmail,
+&nbsp;                    USER_UNREAD_COUNT_DESTINATION,
+<b class="fc">&nbsp;                    UnreadCountResponse.of(unreadCount)</b>
+&nbsp;            );
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            log.error(&quot;Failed to send unread count to user: {} ({})&quot;, userId, userEmail, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-01 17:16</div>
+</div>
+</body>
+</html>

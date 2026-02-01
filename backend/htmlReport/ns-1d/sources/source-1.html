@@ -1,0 +1,236 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ProductMapper</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">app.product.mapper</a>
+</div>
+
+<h1>Coverage Summary for Class: ProductMapper (app.product.mapper)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProductMapper</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    59.1%
+  </span>
+  <span class="absValue">
+    (13/22)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    81.8%
+  </span>
+  <span class="absValue">
+    (27/33)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ProductMapper$MockitoMock$w2EyNQXk</td>
+  </tr>
+  <tr>
+    <td class="name">ProductMapper$MockitoMock$w2EyNQXk$auxiliary$4hDZmRjL</td>
+  </tr>
+  <tr>
+    <td class="name">ProductMapper$MockitoMock$w2EyNQXk$auxiliary$gHr4FAZf</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    59.1%
+  </span>
+  <span class="absValue">
+    (13/22)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    81.8%
+  </span>
+  <span class="absValue">
+    (27/33)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package app.product.mapper;
+&nbsp;
+&nbsp;import app.product.dto.ProductSummary;
+&nbsp;import app.product.dto.ProductDetails;
+&nbsp;import app.product.dto.ProductPageResponse;
+&nbsp;import app.product.model.Product;
+&nbsp;import app.review.dto.Review;
+&nbsp;import app.review.mapper.ReviewMapper;
+&nbsp;import org.mapstruct.Mapper;
+&nbsp;import org.mapstruct.Mapping;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.data.domain.Page;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Mapper(componentModel = &quot;spring&quot;, uses = {ReviewMapper.class})
+&nbsp;public abstract class ProductMapper {
+&nbsp;
+&nbsp;    protected ReviewMapper reviewMapper;
+&nbsp;
+<b class="fc">&nbsp;    public ProductMapper() {</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    public void setReviewMapper(ReviewMapper reviewMapper) {
+<b class="fc">&nbsp;        this.reviewMapper = reviewMapper;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Mapping(target = &quot;inStock&quot;, expression = &quot;java(isInStock(product))&quot;)
+&nbsp;    @Mapping(target = &quot;averageRating&quot;, expression = &quot;java(calculateAverageRating(product))&quot;)
+&nbsp;    @Mapping(target = &quot;totalReviews&quot;, expression = &quot;java(calculateTotalReviews(product))&quot;)
+&nbsp;    public abstract ProductSummary toProductSummary(Product product);
+&nbsp;
+&nbsp;    public abstract List&lt;ProductSummary&gt; toProductSummaryList(List&lt;Product&gt; products);
+&nbsp;
+&nbsp;    @Mapping(target = &quot;inStock&quot;, expression = &quot;java(isInStock(product))&quot;)
+&nbsp;    @Mapping(target = &quot;isActive&quot;, source = &quot;active&quot;)
+&nbsp;    @Mapping(target = &quot;reviews&quot;, expression = &quot;java(mapReviews(product))&quot;)
+&nbsp;    @Mapping(target = &quot;averageRating&quot;, expression = &quot;java(calculateAverageRatingFromReviews(mapReviews(product)))&quot;)
+&nbsp;    @Mapping(target = &quot;totalReviews&quot;, expression = &quot;java(mapReviews(product).size())&quot;)
+&nbsp;    public abstract ProductDetails toProductDetails(Product product);
+&nbsp;
+&nbsp;    protected boolean isInStock(Product product) {
+<b class="pc">&nbsp;        return product != null &amp;&amp; product.getStockQuantity() &gt; 0;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    protected double calculateAverageRating(Product product) {
+<b class="pc">&nbsp;        if (product == null || product.getReviews() == null || product.getReviews().isEmpty()) {</b>
+<b class="fc">&nbsp;            return 0.0;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return product.getReviews().stream()</b>
+<b class="fc">&nbsp;                .mapToInt(app.review.model.Review::getRating)</b>
+<b class="fc">&nbsp;                .average()</b>
+<b class="fc">&nbsp;                .orElse(0.0);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    protected int calculateTotalReviews(Product product) {
+<b class="pc">&nbsp;        if (product == null || product.getReviews() == null) {</b>
+<b class="nc">&nbsp;            return 0;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return product.getReviews().size();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    protected List&lt;Review&gt; mapReviews(Product product) {
+<b class="pc">&nbsp;        if (product == null || product.getReviews() == null) {</b>
+<b class="nc">&nbsp;            return List.of();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return reviewMapper.toReviewList(product.getReviews());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    protected Double calculateAverageRatingFromReviews(List&lt;Review&gt; reviews) {
+<b class="pc">&nbsp;        if (reviews == null || reviews.isEmpty()) {</b>
+<b class="fc">&nbsp;            return 0.0;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return reviews.stream()</b>
+<b class="nc">&nbsp;                .mapToInt(Review::getRating)</b>
+<b class="nc">&nbsp;                .average()</b>
+<b class="nc">&nbsp;                .orElse(0.0);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public ProductPageResponse toPageResponse(Page&lt;Product&gt; productPage) {
+<b class="fc">&nbsp;        List&lt;ProductSummary&gt; products = toProductSummaryList(productPage.getContent());</b>
+&nbsp;
+<b class="fc">&nbsp;        return ProductPageResponse.builder()</b>
+<b class="fc">&nbsp;                .products(products)</b>
+<b class="fc">&nbsp;                .currentPage(productPage.getNumber())</b>
+<b class="fc">&nbsp;                .totalPages(productPage.getTotalPages())</b>
+<b class="fc">&nbsp;                .totalElements(productPage.getTotalElements())</b>
+<b class="fc">&nbsp;                .size(productPage.getSize())</b>
+<b class="fc">&nbsp;                .first(productPage.isFirst())</b>
+<b class="fc">&nbsp;                .last(productPage.isLast())</b>
+<b class="fc">&nbsp;                .hasNext(productPage.hasNext())</b>
+<b class="fc">&nbsp;                .hasPrevious(productPage.hasPrevious())</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-01 17:16</div>
+</div>
+</body>
+</html>

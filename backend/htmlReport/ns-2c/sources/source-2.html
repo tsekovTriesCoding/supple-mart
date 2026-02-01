@@ -1,0 +1,200 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > CartController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">app.web</a>
+</div>
+
+<h1>Coverage Summary for Class: CartController (app.web)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CartController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/12)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package app.web;
+&nbsp;
+&nbsp;import app.cart.dto.AddCartItemRequest;
+&nbsp;import app.cart.dto.CartResponse;
+&nbsp;import app.cart.service.CartService;
+&nbsp;import app.cartitem.dto.UpdateCartItemRequest;
+&nbsp;import app.cartitem.service.CartItemService;
+&nbsp;import app.security.CustomUserDetails;
+&nbsp;import io.swagger.v3.oas.annotations.Operation;
+&nbsp;import io.swagger.v3.oas.annotations.Parameter;
+&nbsp;import io.swagger.v3.oas.annotations.media.Content;
+&nbsp;import io.swagger.v3.oas.annotations.media.Schema;
+&nbsp;import io.swagger.v3.oas.annotations.responses.ApiResponse;
+&nbsp;import io.swagger.v3.oas.annotations.responses.ApiResponses;
+&nbsp;import io.swagger.v3.oas.annotations.tags.Tag;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.security.core.annotation.AuthenticationPrincipal;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;api/cart&quot;)
+&nbsp;@RequiredArgsConstructor
+&nbsp;@Tag(name = &quot;Cart&quot;, description = &quot;Shopping cart management endpoints&quot;)
+&nbsp;public class CartController {
+&nbsp;
+&nbsp;    private final CartService cartService;
+&nbsp;    private final CartItemService cartItemService;
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Get user&#39;s cart&quot;, description = &quot;Retrieve the current user&#39;s shopping cart with all items&quot;)
+&nbsp;    @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Cart retrieved successfully&quot;,
+&nbsp;            content = @Content(schema = @Schema(implementation = CartResponse.class)))
+&nbsp;    @GetMapping
+&nbsp;    public ResponseEntity&lt;CartResponse&gt; getCart(@AuthenticationPrincipal CustomUserDetails userDetails) {
+<b class="fc">&nbsp;        CartResponse cart = cartService.getCart(userDetails.getId());</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(cart);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Add item to cart&quot;, description = &quot;Add a product to the shopping cart or increase quantity if already exists&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Item added successfully&quot;),
+&nbsp;            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid request or insufficient stock&quot;),
+&nbsp;            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Product not found&quot;)
+&nbsp;    })
+&nbsp;    @PostMapping(&quot;/items&quot;)
+&nbsp;    public ResponseEntity&lt;CartResponse&gt; addItemToCart(
+&nbsp;            @AuthenticationPrincipal CustomUserDetails userDetails,
+&nbsp;            @RequestBody AddCartItemRequest request) {
+<b class="fc">&nbsp;        CartResponse cart = cartService.addItemToCart(userDetails.getId(), request);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(cart);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Update cart item quantity&quot;, description = &quot;Update the quantity of an item in the cart&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Item updated successfully&quot;),
+&nbsp;            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid quantity or insufficient stock&quot;),
+&nbsp;            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Cart item not found&quot;)
+&nbsp;    })
+&nbsp;    @PutMapping(&quot;/items/{id}&quot;)
+&nbsp;    public ResponseEntity&lt;CartResponse&gt; updateCartItem(
+&nbsp;            @Parameter(description = &quot;Cart item ID&quot;) @PathVariable UUID id,
+&nbsp;            @AuthenticationPrincipal CustomUserDetails userDetails,
+&nbsp;            @RequestBody UpdateCartItemRequest request) {
+&nbsp;
+<b class="fc">&nbsp;        cartItemService.updateCartItemQuantity(id, userDetails.getId(), request);</b>
+&nbsp;
+<b class="fc">&nbsp;        CartResponse cart = cartService.getCart(userDetails.getId());</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(cart);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Remove item from cart&quot;, description = &quot;Remove an item from the shopping cart&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Item removed successfully&quot;),
+&nbsp;            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Cart item not found&quot;)
+&nbsp;    })
+&nbsp;    @DeleteMapping(&quot;/items/{id}&quot;)
+&nbsp;    public ResponseEntity&lt;CartResponse&gt; deleteCartItem(
+&nbsp;            @Parameter(description = &quot;Cart item ID&quot;) @PathVariable UUID id,
+&nbsp;            @AuthenticationPrincipal CustomUserDetails userDetails) {
+&nbsp;
+<b class="fc">&nbsp;        cartItemService.deleteCartItem(id, userDetails.getId());</b>
+&nbsp;
+<b class="fc">&nbsp;        CartResponse cart = cartService.getCart(userDetails.getId());</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(cart);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Empty cart&quot;, description = &quot;Remove all items from the shopping cart&quot;)
+&nbsp;    @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Cart emptied successfully&quot;)
+&nbsp;    @DeleteMapping
+&nbsp;    public ResponseEntity&lt;CartResponse&gt; emptyCart(@AuthenticationPrincipal CustomUserDetails userDetails) {
+<b class="fc">&nbsp;        CartResponse cart = cartService.emptyCart(userDetails.getId());</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(cart);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-01 17:16</div>
+</div>
+</body>
+</html>

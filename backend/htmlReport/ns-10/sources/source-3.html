@@ -1,0 +1,107 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > NotificationHandler</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">app.notification.handler</a>
+</div>
+
+<h1>Coverage Summary for Class: NotificationHandler (app.notification.handler)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">NotificationHandler$MockitoMock$ImeqqH7T</td>
+  </tr>
+  <tr>
+    <td class="name">NotificationHandler$MockitoMock$ImeqqH7T$auxiliary$75CkgFpy</td>
+  </tr>
+  <tr>
+    <td class="name">NotificationHandler$MockitoMock$ImeqqH7T$auxiliary$bC5PvF9g</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package app.notification.handler;
+&nbsp;
+&nbsp;/**
+&nbsp; * Strategy interface for handling notification events.
+&nbsp; * Each implementation handles a specific event type.
+&nbsp; * 
+&nbsp; * &lt;p&gt;Spring will auto-discover all implementations and register them
+&nbsp; * in the NotificationEventDispatcher.&lt;/p&gt;
+&nbsp; * 
+&nbsp; * @param &lt;E&gt; The event type this handler processes
+&nbsp; */
+&nbsp;public interface NotificationHandler&lt;E&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the event class this handler supports.
+&nbsp;     * Used by the dispatcher to route events to the correct handler.
+&nbsp;     */
+&nbsp;    Class&lt;E&gt; getEventType();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Process the notification event.
+&nbsp;     * Implementations should:
+&nbsp;     * 1. Check user preferences
+&nbsp;     * 2. Create in-app notification (if applicable)
+&nbsp;     * 3. Send email notification (if applicable)
+&nbsp;     * 
+&nbsp;     * @param event The event to process
+&nbsp;     */
+&nbsp;    void handle(E event);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-01 17:16</div>
+</div>
+</body>
+</html>

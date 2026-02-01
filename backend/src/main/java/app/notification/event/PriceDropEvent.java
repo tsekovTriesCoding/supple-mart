@@ -8,14 +8,16 @@ import java.util.UUID;
 
 @Getter
 public class PriceDropEvent extends ApplicationEvent {
+    private final UUID productId;
     private final String productName;
     private final Double oldPrice;
     private final Double newPrice;
     private final List<UserNotificationData> interestedUsers;
 
-    public PriceDropEvent(Object source, String productName, Double oldPrice, Double newPrice,
+    public PriceDropEvent(Object source, UUID productId, String productName, Double oldPrice, Double newPrice,
                          List<UserNotificationData> interestedUsers) {
         super(source);
+        this.productId = productId;
         this.productName = productName;
         this.oldPrice = oldPrice;
         this.newPrice = newPrice;

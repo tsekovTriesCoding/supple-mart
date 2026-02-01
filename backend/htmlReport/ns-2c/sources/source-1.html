@@ -1,0 +1,225 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AuthController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">app.web</a>
+</div>
+
+<h1>Coverage Summary for Class: AuthController (app.web)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AuthController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (25/25)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package app.web;
+&nbsp;
+&nbsp;import app.security.CustomUserDetails;
+&nbsp;import app.security.jwt.JwtService;
+&nbsp;import app.user.dto.AuthResponse;
+&nbsp;import app.user.dto.LoginRequest;
+&nbsp;import app.user.dto.RegisterRequest;
+&nbsp;import app.user.mapper.UserMapper;
+&nbsp;import app.user.model.User;
+&nbsp;import app.user.service.UserService;
+&nbsp;import io.swagger.v3.oas.annotations.Operation;
+&nbsp;import io.swagger.v3.oas.annotations.media.Content;
+&nbsp;import io.swagger.v3.oas.annotations.media.Schema;
+&nbsp;import io.swagger.v3.oas.annotations.responses.ApiResponse;
+&nbsp;import io.swagger.v3.oas.annotations.responses.ApiResponses;
+&nbsp;import io.swagger.v3.oas.annotations.tags.Tag;
+&nbsp;import jakarta.validation.Valid;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;api/auth&quot;)
+&nbsp;@RequiredArgsConstructor
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@Tag(name = &quot;Authentication&quot;, description = &quot;User authentication and registration endpoints&quot;)
+&nbsp;public class AuthController {
+&nbsp;
+&nbsp;    private final UserService userService;
+&nbsp;    private final JwtService jwtService;
+&nbsp;    private final UserMapper userMapper;
+&nbsp;
+&nbsp;    @Operation(
+&nbsp;            summary = &quot;Authenticate user&quot;,
+&nbsp;            description = &quot;Login with email and password to receive JWT access and refresh tokens&quot;
+&nbsp;    )
+&nbsp;    @ApiResponses(value = {
+&nbsp;            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully authenticated&quot;,
+&nbsp;                    content = @Content(schema = @Schema(implementation = AuthResponse.class))),
+&nbsp;            @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Invalid credentials&quot;),
+&nbsp;            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid request body&quot;)
+&nbsp;    })
+&nbsp;    @PostMapping(&quot;/login&quot;)
+&nbsp;    public ResponseEntity&lt;AuthResponse&gt; authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+<b class="fc">&nbsp;        log.info(&quot;Authentication attempt for email: {}&quot;, loginRequest.getEmail());</b>
+&nbsp;
+<b class="fc">&nbsp;        User user = userService.authenticateUser(loginRequest.getEmail(), loginRequest.getPassword());</b>
+&nbsp;
+<b class="fc">&nbsp;        CustomUserDetails userDetails = userMapper.toCustomUserDetails(user);</b>
+&nbsp;
+<b class="fc">&nbsp;        String accessToken = jwtService.generateToken(userDetails);</b>
+<b class="fc">&nbsp;        String refreshToken = jwtService.generateRefreshToken(userDetails);</b>
+&nbsp;
+<b class="fc">&nbsp;        AuthResponse response = userMapper.toAuthResponse(user, accessToken, refreshToken);</b>
+&nbsp;
+<b class="fc">&nbsp;        log.info(&quot;User authenticated successfully: {}&quot;, user.getEmail());</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(response);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(
+&nbsp;            summary = &quot;Register new user&quot;,
+&nbsp;            description = &quot;Create a new user account and receive JWT tokens&quot;
+&nbsp;    )
+&nbsp;    @ApiResponses(value = {
+&nbsp;            @ApiResponse(responseCode = &quot;201&quot;, description = &quot;User registered successfully&quot;,
+&nbsp;                    content = @Content(schema = @Schema(implementation = AuthResponse.class))),
+&nbsp;            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid request or email already exists&quot;)
+&nbsp;    })
+&nbsp;    @PostMapping(&quot;/register&quot;)
+&nbsp;    public ResponseEntity&lt;AuthResponse&gt; registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
+<b class="fc">&nbsp;        log.info(&quot;Registration attempt for email: {}&quot;, registerRequest.getEmail());</b>
+&nbsp;
+<b class="fc">&nbsp;        User user = userService.registerUser(registerRequest);</b>
+&nbsp;
+<b class="fc">&nbsp;        CustomUserDetails userDetails = userMapper.toCustomUserDetails(user);</b>
+&nbsp;
+<b class="fc">&nbsp;        String accessToken = jwtService.generateToken(userDetails);</b>
+<b class="fc">&nbsp;        String refreshToken = jwtService.generateRefreshToken(userDetails);</b>
+&nbsp;
+<b class="fc">&nbsp;        AuthResponse response = userMapper.toAuthResponse(user, accessToken, refreshToken);</b>
+&nbsp;
+<b class="fc">&nbsp;        log.info(&quot;User registered successfully: {}&quot;, user.getEmail());</b>
+<b class="fc">&nbsp;        return ResponseEntity</b>
+<b class="fc">&nbsp;                .status(HttpStatus.CREATED)</b>
+<b class="fc">&nbsp;                .body(response);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(
+&nbsp;            summary = &quot;Logout user&quot;,
+&nbsp;            description = &quot;Revoke the current JWT token. The token will be added to a blacklist.&quot;
+&nbsp;    )
+&nbsp;    @ApiResponses(value = {
+&nbsp;            @ApiResponse(responseCode = &quot;204&quot;, description = &quot;Successfully logged out&quot;)
+&nbsp;    })
+&nbsp;    @PostMapping(&quot;/logout&quot;)
+&nbsp;    public ResponseEntity&lt;Void&gt; logout(@RequestHeader(value = &quot;Authorization&quot;, required = false) String authorizationHeader) {
+<b class="fc">&nbsp;        if (authorizationHeader != null &amp;&amp; authorizationHeader.startsWith(&quot;Bearer &quot;)) {</b>
+<b class="fc">&nbsp;            String token = authorizationHeader.substring(7);</b>
+<b class="fc">&nbsp;            jwtService.revokeToken(token);</b>
+<b class="fc">&nbsp;            log.info(&quot;User logged out successfully - token revoked&quot;);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            log.info(&quot;Logout request without valid Authorization header - treating as idempotent success&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        return ResponseEntity.noContent().build();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-01 17:16</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,215 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > UserMapperImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">app.user.mapper</a>
+</div>
+
+<h1>Coverage Summary for Class: UserMapperImpl (app.user.mapper)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">UserMapperImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    44.4%
+  </span>
+  <span class="absValue">
+    (8/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91.3%
+  </span>
+  <span class="absValue">
+    (42/46)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package app.user.mapper;
+&nbsp;
+&nbsp;import app.security.CustomUserDetails;
+&nbsp;import app.user.dto.AuthResponse;
+&nbsp;import app.user.dto.RegisterRequest;
+&nbsp;import app.user.dto.UserProfileResponse;
+&nbsp;import app.user.model.AuthProvider;
+&nbsp;import app.user.model.User;
+&nbsp;import javax.annotation.processing.Generated;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;
+&nbsp;@Generated(
+&nbsp;    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+&nbsp;    date = &quot;2026-01-31T18:24:32+0200&quot;,
+&nbsp;    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.14.3.jar, environment: Java 21.0.7 (Oracle Corporation)&quot;
+&nbsp;)
+&nbsp;@Component
+<b class="fc">&nbsp;public class UserMapperImpl implements UserMapper {</b>
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public CustomUserDetails toCustomUserDetails(User user) {
+<b class="pc">&nbsp;        if ( user == null ) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        CustomUserDetails.CustomUserDetailsBuilder customUserDetails = CustomUserDetails.builder();</b>
+&nbsp;
+<b class="fc">&nbsp;        customUserDetails.username( user.getEmail() );</b>
+<b class="fc">&nbsp;        customUserDetails.id( user.getId() );</b>
+<b class="fc">&nbsp;        customUserDetails.password( user.getPassword() );</b>
+<b class="fc">&nbsp;        customUserDetails.role( user.getRole() );</b>
+&nbsp;
+<b class="fc">&nbsp;        customUserDetails.isEnabled( true );</b>
+&nbsp;
+<b class="fc">&nbsp;        return customUserDetails.build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public AuthResponse.UserInfo toUserInfo(User user) {
+<b class="pc">&nbsp;        if ( user == null ) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        AuthResponse.UserInfo.UserInfoBuilder userInfo = AuthResponse.UserInfo.builder();</b>
+&nbsp;
+<b class="fc">&nbsp;        userInfo.id( user.getId() );</b>
+<b class="fc">&nbsp;        userInfo.email( user.getEmail() );</b>
+<b class="fc">&nbsp;        userInfo.firstName( user.getFirstName() );</b>
+<b class="fc">&nbsp;        userInfo.lastName( user.getLastName() );</b>
+<b class="fc">&nbsp;        userInfo.role( user.getRole() );</b>
+<b class="fc">&nbsp;        userInfo.imageUrl( user.getImageUrl() );</b>
+&nbsp;
+<b class="fc">&nbsp;        return userInfo.build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public User toUser(RegisterRequest registerRequest, String encodedPassword) {
+<b class="pc">&nbsp;        if ( registerRequest == null &amp;&amp; encodedPassword == null ) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        User.UserBuilder user = User.builder();</b>
+&nbsp;
+<b class="pc">&nbsp;        if ( registerRequest != null ) {</b>
+<b class="fc">&nbsp;            user.email( registerRequest.getEmail() );</b>
+<b class="fc">&nbsp;            user.firstName( registerRequest.getFirstName() );</b>
+<b class="fc">&nbsp;            user.lastName( registerRequest.getLastName() );</b>
+&nbsp;        }
+<b class="fc">&nbsp;        user.password( encodedPassword );</b>
+<b class="pc">&nbsp;        user.role( registerRequest.getRole() != null ? registerRequest.getRole() : app.user.model.Role.CUSTOMER );</b>
+<b class="fc">&nbsp;        user.createdAt( java.time.LocalDateTime.now() );</b>
+<b class="fc">&nbsp;        user.updatedAt( java.time.LocalDateTime.now() );</b>
+<b class="fc">&nbsp;        user.authProvider( AuthProvider.LOCAL );</b>
+&nbsp;
+<b class="fc">&nbsp;        return user.build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public UserProfileResponse toUserProfileResponse(User user) {
+<b class="pc">&nbsp;        if ( user == null ) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        UserProfileResponse.UserProfileResponseBuilder userProfileResponse = UserProfileResponse.builder();</b>
+&nbsp;
+<b class="fc">&nbsp;        userProfileResponse.imageUrl( user.getImageUrl() );</b>
+<b class="fc">&nbsp;        userProfileResponse.firstName( user.getFirstName() );</b>
+<b class="fc">&nbsp;        userProfileResponse.lastName( user.getLastName() );</b>
+<b class="fc">&nbsp;        userProfileResponse.email( user.getEmail() );</b>
+<b class="fc">&nbsp;        userProfileResponse.role( user.getRole() );</b>
+&nbsp;
+<b class="fc">&nbsp;        userProfileResponse.id( user.getId().toString() );</b>
+<b class="fc">&nbsp;        userProfileResponse.name( user.getFirstName() + &quot; &quot; + user.getLastName() );</b>
+<b class="pc">&nbsp;        userProfileResponse.createdAt( user.getCreatedAt() != null ? user.getCreatedAt().toString() : null );</b>
+<b class="pc">&nbsp;        userProfileResponse.updatedAt( user.getUpdatedAt() != null ? user.getUpdatedAt().toString() : null );</b>
+&nbsp;
+<b class="fc">&nbsp;        return userProfileResponse.build();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-01 17:16</div>
+</div>
+</body>
+</html>

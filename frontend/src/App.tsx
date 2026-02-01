@@ -6,6 +6,7 @@ import Header from './components/Header';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { CartProvider } from './hooks';
+import { NotificationProvider } from './components/NotificationProvider';
 
 const Home = lazy(() => import('./pages/Home'));
 const Products = lazy(() => import('./pages/Products'));
@@ -21,6 +22,7 @@ const Orders = lazy(() => import('./pages/Orders'));
 const Reviews = lazy(() => import('./pages/Reviews'));
 const NotificationPreferences = lazy(() => import('./pages/NotificationPreferences'));
 const PrivacySettings = lazy(() => import('./pages/PrivacySettings'));
+const Notifications = lazy(() => import('./pages/Notifications'));
 
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
@@ -38,7 +40,8 @@ const PageLoader = () => (
 function App() {
   return (
     <CartProvider>
-      <Toaster 
+      <NotificationProvider>
+        <Toaster 
         position="top-center"
         toastOptions={{
           duration: 3000,
@@ -99,6 +102,7 @@ function App() {
                       <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
                       <Route path="/account/notifications" element={<ProtectedRoute><NotificationPreferences /></ProtectedRoute>} />
                       <Route path="/account/privacy" element={<ProtectedRoute><PrivacySettings /></ProtectedRoute>} />
+                      <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
                       <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
                       <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
                       <Route path="/wishlist" element={<Wishlist />} />
@@ -110,6 +114,7 @@ function App() {
           />
         </Routes>
       </Suspense>
+      </NotificationProvider>
     </CartProvider>
   );
 }
