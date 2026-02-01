@@ -8,11 +8,13 @@ import java.util.UUID;
 
 @Getter
 public class ProductRestockedEvent extends ApplicationEvent {
+    private final UUID productId;
     private final String productName;
     private final List<UserNotificationData> interestedUsers;
 
-    public ProductRestockedEvent(Object source, String productName, List<UserNotificationData> interestedUsers) {
+    public ProductRestockedEvent(Object source, UUID productId, String productName, List<UserNotificationData> interestedUsers) {
         super(source);
+        this.productId = productId;
         this.productName = productName;
         this.interestedUsers = interestedUsers;
     }

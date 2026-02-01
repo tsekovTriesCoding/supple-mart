@@ -1,0 +1,112 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > UpdateNotificationPreferencesRequest</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">app.notification.dto</a>
+</div>
+
+<h1>Coverage Summary for Class: UpdateNotificationPreferencesRequest (app.notification.dto)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">UpdateNotificationPreferencesRequest</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package app.notification.dto;
+&nbsp;
+&nbsp;import jakarta.validation.constraints.NotNull;
+&nbsp;import lombok.AllArgsConstructor;
+&nbsp;import lombok.Builder;
+&nbsp;import lombok.Data;
+&nbsp;import lombok.NoArgsConstructor;
+&nbsp;
+&nbsp;@Data
+&nbsp;@Builder
+&nbsp;@NoArgsConstructor
+&nbsp;@AllArgsConstructor
+&nbsp;public class UpdateNotificationPreferencesRequest {
+&nbsp;
+&nbsp;    @NotNull(message = &quot;Order updates preference is required&quot;)
+&nbsp;    private Boolean orderUpdates;
+&nbsp;    
+&nbsp;    @NotNull(message = &quot;Shipping notifications preference is required&quot;)
+&nbsp;    private Boolean shippingNotifications;
+&nbsp;
+&nbsp;    @NotNull(message = &quot;Promotional emails preference is required&quot;)
+&nbsp;    private Boolean promotionalEmails;
+&nbsp;    
+&nbsp;    @NotNull(message = &quot;Newsletter preference is required&quot;)
+&nbsp;    private Boolean newsletter;
+&nbsp;
+&nbsp;    @NotNull(message = &quot;Product recommendations preference is required&quot;)
+&nbsp;    private Boolean productRecommendations;
+&nbsp;    
+&nbsp;    @NotNull(message = &quot;Price drop alerts preference is required&quot;)
+&nbsp;    private Boolean priceDropAlerts;
+&nbsp;    
+&nbsp;    @NotNull(message = &quot;Back in stock alerts preference is required&quot;)
+&nbsp;    private Boolean backInStockAlerts;
+&nbsp;
+&nbsp;    @NotNull(message = &quot;Account security alerts preference is required&quot;)
+&nbsp;    private Boolean accountSecurityAlerts;
+&nbsp;    
+&nbsp;    @NotNull(message = &quot;Password reset emails preference is required&quot;)
+&nbsp;    private Boolean passwordResetEmails;
+&nbsp;
+&nbsp;    @NotNull(message = &quot;Review reminders preference is required&quot;)
+&nbsp;    private Boolean reviewReminders;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-01 17:16</div>
+</div>
+</body>
+</html>

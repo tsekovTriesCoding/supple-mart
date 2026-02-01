@@ -1,0 +1,221 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > NotificationPreferencesMapperImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">app.notification.mapper</a>
+</div>
+
+<h1>Coverage Summary for Class: NotificationPreferencesMapperImpl (app.notification.mapper)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">NotificationPreferencesMapperImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88.5%
+  </span>
+  <span class="absValue">
+    (23/26)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96.4%
+  </span>
+  <span class="absValue">
+    (53/55)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package app.notification.mapper;
+&nbsp;
+&nbsp;import app.notification.dto.NotificationPreferencesResponse;
+&nbsp;import app.notification.dto.UpdateNotificationPreferencesRequest;
+&nbsp;import app.notification.model.NotificationPreferences;
+&nbsp;import java.util.UUID;
+&nbsp;import javax.annotation.processing.Generated;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;
+&nbsp;@Generated(
+&nbsp;    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+&nbsp;    date = &quot;2026-01-31T18:24:32+0200&quot;,
+&nbsp;    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.14.3.jar, environment: Java 21.0.7 (Oracle Corporation)&quot;
+&nbsp;)
+&nbsp;@Component
+<b class="fc">&nbsp;public class NotificationPreferencesMapperImpl extends NotificationPreferencesMapper {</b>
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public NotificationPreferences createDefaultPreferences(UUID userId) {
+<b class="pc">&nbsp;        if ( userId == null ) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        NotificationPreferences.NotificationPreferencesBuilder notificationPreferences = NotificationPreferences.builder();</b>
+&nbsp;
+<b class="fc">&nbsp;        notificationPreferences.userId( userId );</b>
+&nbsp;
+<b class="fc">&nbsp;        notificationPreferences.orderUpdates( true );</b>
+<b class="fc">&nbsp;        notificationPreferences.shippingNotifications( true );</b>
+<b class="fc">&nbsp;        notificationPreferences.promotionalEmails( true );</b>
+<b class="fc">&nbsp;        notificationPreferences.newsletter( true );</b>
+<b class="fc">&nbsp;        notificationPreferences.productRecommendations( true );</b>
+<b class="fc">&nbsp;        notificationPreferences.priceDropAlerts( true );</b>
+<b class="fc">&nbsp;        notificationPreferences.backInStockAlerts( true );</b>
+<b class="fc">&nbsp;        notificationPreferences.accountSecurityAlerts( true );</b>
+<b class="fc">&nbsp;        notificationPreferences.passwordResetEmails( true );</b>
+<b class="fc">&nbsp;        notificationPreferences.reviewReminders( true );</b>
+&nbsp;
+<b class="fc">&nbsp;        return notificationPreferences.build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void updatePreferencesFromRequest(NotificationPreferences preferences, UpdateNotificationPreferencesRequest request) {
+<b class="pc">&nbsp;        if ( request == null ) {</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if ( request.getOrderUpdates() != null ) {</b>
+<b class="fc">&nbsp;            preferences.setOrderUpdates( request.getOrderUpdates() );</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if ( request.getShippingNotifications() != null ) {</b>
+<b class="fc">&nbsp;            preferences.setShippingNotifications( request.getShippingNotifications() );</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if ( request.getPromotionalEmails() != null ) {</b>
+<b class="fc">&nbsp;            preferences.setPromotionalEmails( request.getPromotionalEmails() );</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if ( request.getNewsletter() != null ) {</b>
+<b class="fc">&nbsp;            preferences.setNewsletter( request.getNewsletter() );</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if ( request.getProductRecommendations() != null ) {</b>
+<b class="fc">&nbsp;            preferences.setProductRecommendations( request.getProductRecommendations() );</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if ( request.getPriceDropAlerts() != null ) {</b>
+<b class="fc">&nbsp;            preferences.setPriceDropAlerts( request.getPriceDropAlerts() );</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if ( request.getBackInStockAlerts() != null ) {</b>
+<b class="fc">&nbsp;            preferences.setBackInStockAlerts( request.getBackInStockAlerts() );</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if ( request.getAccountSecurityAlerts() != null ) {</b>
+<b class="fc">&nbsp;            preferences.setAccountSecurityAlerts( request.getAccountSecurityAlerts() );</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if ( request.getPasswordResetEmails() != null ) {</b>
+<b class="fc">&nbsp;            preferences.setPasswordResetEmails( request.getPasswordResetEmails() );</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if ( request.getReviewReminders() != null ) {</b>
+<b class="fc">&nbsp;            preferences.setReviewReminders( request.getReviewReminders() );</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public NotificationPreferencesResponse toResponse(NotificationPreferences preferences) {
+<b class="pc">&nbsp;        if ( preferences == null ) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        NotificationPreferencesResponse.NotificationPreferencesResponseBuilder notificationPreferencesResponse = NotificationPreferencesResponse.builder();</b>
+&nbsp;
+<b class="fc">&nbsp;        notificationPreferencesResponse.id( preferences.getId() );</b>
+<b class="fc">&nbsp;        notificationPreferencesResponse.userId( preferences.getUserId() );</b>
+<b class="fc">&nbsp;        notificationPreferencesResponse.orderUpdates( preferences.getOrderUpdates() );</b>
+<b class="fc">&nbsp;        notificationPreferencesResponse.shippingNotifications( preferences.getShippingNotifications() );</b>
+<b class="fc">&nbsp;        notificationPreferencesResponse.promotionalEmails( preferences.getPromotionalEmails() );</b>
+<b class="fc">&nbsp;        notificationPreferencesResponse.newsletter( preferences.getNewsletter() );</b>
+<b class="fc">&nbsp;        notificationPreferencesResponse.productRecommendations( preferences.getProductRecommendations() );</b>
+<b class="fc">&nbsp;        notificationPreferencesResponse.priceDropAlerts( preferences.getPriceDropAlerts() );</b>
+<b class="fc">&nbsp;        notificationPreferencesResponse.backInStockAlerts( preferences.getBackInStockAlerts() );</b>
+<b class="fc">&nbsp;        notificationPreferencesResponse.accountSecurityAlerts( preferences.getAccountSecurityAlerts() );</b>
+<b class="fc">&nbsp;        notificationPreferencesResponse.passwordResetEmails( preferences.getPasswordResetEmails() );</b>
+<b class="fc">&nbsp;        notificationPreferencesResponse.reviewReminders( preferences.getReviewReminders() );</b>
+<b class="fc">&nbsp;        notificationPreferencesResponse.createdAt( preferences.getCreatedAt() );</b>
+<b class="fc">&nbsp;        notificationPreferencesResponse.updatedAt( preferences.getUpdatedAt() );</b>
+&nbsp;
+<b class="fc">&nbsp;        return notificationPreferencesResponse.build();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-01 17:16</div>
+</div>
+</body>
+</html>

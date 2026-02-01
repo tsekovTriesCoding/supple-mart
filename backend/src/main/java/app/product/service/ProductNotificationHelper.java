@@ -49,7 +49,7 @@ public class ProductNotificationHelper {
                 .map(user -> new PriceDropEvent.UserNotificationData(user.getId(), user.getEmail(), user.getFirstName()))
                 .toList();
 
-        eventPublisher.publishEvent(new PriceDropEvent(this, product.getName(), oldPrice, newPrice, userNotificationData));
+        eventPublisher.publishEvent(new PriceDropEvent(this, productId, product.getName(), oldPrice, newPrice, userNotificationData));
 
         log.info("PriceDropEvent published for product: {}", product.getName());
     }
@@ -80,7 +80,7 @@ public class ProductNotificationHelper {
                 .map(user -> new ProductRestockedEvent.UserNotificationData(user.getId(), user.getEmail(), user.getFirstName()))
                 .toList();
 
-        eventPublisher.publishEvent(new ProductRestockedEvent(this, product.getName(), userNotificationData));
+        eventPublisher.publishEvent(new ProductRestockedEvent(this, productId, product.getName(), userNotificationData));
 
         log.info("ProductRestockedEvent published for product: {}", product.getName());
     }

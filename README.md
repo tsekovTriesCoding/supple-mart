@@ -135,6 +135,8 @@ The application follows a client-server architecture with clear separation betwe
 ### Technical Features
 - **JWT Authentication**: Secure token-based authentication with refresh tokens
 - **Role-Based Access Control**: Admin and customer role separation
+- **Real-Time Notifications**: WebSocket/STOMP-based instant notifications
+- **Strategy Pattern**: Pluggable notification handlers for different event types
 - **Input Validation**: Comprehensive request validation
 - **Error Handling**: Global exception handling with meaningful error responses
 - **Database Migrations**: Version-controlled schema management with Flyway
@@ -160,8 +162,8 @@ supple-mart/
 |   |   |   |   |-- config/     # Application configuration
 |   |   |   |   |-- contact/    # Contact form handling
 |   |   |   |   |-- exception/  # Global exception handling
-|   |   |   |   |-- monitoring/ # Health indicators
-|   |   |   |   |-- notification/ # Email notifications
+|   |   |   |   |-- monitoring/ # Health indicators & business metrics
+|   |   |   |   |-- notification/ # Real-time & email notifications
 |   |   |   |   |-- order/      # Order management
 |   |   |   |   |-- payment/    # Stripe integration
 |   |   |   |   |-- privacy/    # Privacy settings

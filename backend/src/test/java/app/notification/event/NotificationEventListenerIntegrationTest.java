@@ -235,6 +235,7 @@ class NotificationEventListenerIntegrationTest extends BaseIntegrationTest {
 
             PriceDropEvent event = new PriceDropEvent(
                     this,
+                    UUID.randomUUID(),
                     "Premium Protein Powder",
                     59.99,
                     39.99,
@@ -266,6 +267,7 @@ class NotificationEventListenerIntegrationTest extends BaseIntegrationTest {
 
             PriceDropEvent event = new PriceDropEvent(
                     this,
+                    UUID.randomUUID(),
                     "Discounted Product",
                     79.99,
                     49.99,
@@ -308,6 +310,7 @@ class NotificationEventListenerIntegrationTest extends BaseIntegrationTest {
 
             PriceDropEvent event = new PriceDropEvent(
                     this,
+                    UUID.randomUUID(),
                     "Multi-User Product",
                     100.00,
                     75.00,
@@ -339,6 +342,7 @@ class NotificationEventListenerIntegrationTest extends BaseIntegrationTest {
 
             ProductRestockedEvent event = new ProductRestockedEvent(
                     this,
+                    UUID.randomUUID(),
                     "Popular Creatine",
                     interestedUsers
             );
@@ -368,6 +372,7 @@ class NotificationEventListenerIntegrationTest extends BaseIntegrationTest {
 
             ProductRestockedEvent event = new ProductRestockedEvent(
                     this,
+                    UUID.randomUUID(),
                     "Restocked Item",
                     interestedUsers
             );

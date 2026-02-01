@@ -13,6 +13,7 @@ The SuppleMart frontend is a modern React application built with TypeScript and 
 - [API Integration](#api-integration)
 - [Routing](#routing)
 - [State Management](#state-management)
+- [Real-Time Notifications](#real-time-notifications)
 - [Styling](#styling)
 - [Testing](#testing)
 - [Building](#building)
@@ -56,6 +57,8 @@ src/
 |   |-- AuthModal.tsx           # Authentication modal
 |   |-- CartProvider.tsx        # Cart context provider
 |   |-- LoadingSpinner.tsx      # Loading indicator
+|   |-- NotificationBell.tsx    # Real-time notification bell
+|   |-- NotificationProvider.tsx # WebSocket notification context
 |   |-- Pagination.tsx          # Pagination controls
 |   |-- PasswordChangeModal.tsx # Password change form
 |   |-- PaymentForm.tsx         # Stripe payment form
@@ -224,6 +227,7 @@ tests/
 |------|---------|
 | `useAuth` | Authentication state and actions (login, logout, register) |
 | `useCart` | Cart operations (add, remove, update, clear) |
+| `useNotifications` | Real-time notifications via WebSocket |
 | `useProducts` | Product fetching with pagination and filters |
 | `useWishlist` | Wishlist operations (add, remove, check) |
 
@@ -270,6 +274,7 @@ Each domain has a dedicated API module in `lib/api/`:
 | `reviews.ts` | CRUD operations for reviews |
 | `wishlist.ts` | Add/remove wishlist items |
 | `user.ts` | Profile operations, password change |
+| `notifications.ts` | Get notifications, mark read, delete |
 | `admin.ts` | Admin dashboard, product/order/user management |
 
 ## Routing
@@ -343,6 +348,28 @@ Authentication state is stored in localStorage:
 - `refreshToken` - JWT refresh token
 - `user` - User profile data
 
+## Real-Time Notifications
+
+The application supports real-time notifications via WebSocket using STOMP protocol.
+
+### Components
+
+| Component | Description |
+|-----------|-------------|
+| `NotificationProvider` | Context provider managing WebSocket connection and notification state |
+| `NotificationBell` | Header bell icon with unread count badge and dropdown |
+
+### How It Works
+
+WebSocket connection flow:
+```
+1. User logs in and receives JWT token
+2. NotificationProvider establishes WebSocket connection to /ws
+3. Client subscribes to /user/queue/notifications
+4. Server pushes real-time notifications on events
+5. NotificationBell displays unread count and notification list
+6. Connection auto-reconnects on disconnect
+```
 ## Styling
 
 ### Tailwind CSS

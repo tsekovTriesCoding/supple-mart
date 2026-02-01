@@ -1,0 +1,211 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > PrivacySettingsMapperImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">app.privacy.mapper</a>
+</div>
+
+<h1>Coverage Summary for Class: PrivacySettingsMapperImpl (app.privacy.mapper)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PrivacySettingsMapperImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (11/22)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95.7%
+  </span>
+  <span class="absValue">
+    (45/47)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package app.privacy.mapper;
+&nbsp;
+&nbsp;import app.privacy.dto.PrivacySettingsResponse;
+&nbsp;import app.privacy.dto.UpdatePrivacySettingsRequest;
+&nbsp;import app.privacy.model.PrivacySettings;
+&nbsp;import java.util.UUID;
+&nbsp;import javax.annotation.processing.Generated;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;
+&nbsp;@Generated(
+&nbsp;    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+&nbsp;    date = &quot;2026-01-31T18:24:32+0200&quot;,
+&nbsp;    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.14.3.jar, environment: Java 21.0.7 (Oracle Corporation)&quot;
+&nbsp;)
+&nbsp;@Component
+<b class="fc">&nbsp;public class PrivacySettingsMapperImpl extends PrivacySettingsMapper {</b>
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public PrivacySettings createDefaultSettings(UUID userId) {
+<b class="pc">&nbsp;        if ( userId == null ) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        PrivacySettings.PrivacySettingsBuilder privacySettings = PrivacySettings.builder();</b>
+&nbsp;
+<b class="fc">&nbsp;        privacySettings.userId( userId );</b>
+&nbsp;
+<b class="fc">&nbsp;        privacySettings.showProfile( true );</b>
+<b class="fc">&nbsp;        privacySettings.showActivity( false );</b>
+<b class="fc">&nbsp;        privacySettings.showOnlineStatus( false );</b>
+<b class="fc">&nbsp;        privacySettings.shareAnalytics( false );</b>
+<b class="fc">&nbsp;        privacySettings.shareMarketing( false );</b>
+<b class="fc">&nbsp;        privacySettings.shareThirdParty( false );</b>
+<b class="fc">&nbsp;        privacySettings.searchable( true );</b>
+<b class="fc">&nbsp;        privacySettings.allowMessages( true );</b>
+&nbsp;
+<b class="fc">&nbsp;        return privacySettings.build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void updateSettingsFromRequest(PrivacySettings settings, UpdatePrivacySettingsRequest request) {
+<b class="pc">&nbsp;        if ( request == null ) {</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="pc">&nbsp;        if ( request.getShowProfile() != null ) {</b>
+<b class="fc">&nbsp;            settings.setShowProfile( request.getShowProfile() );</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if ( request.getShowActivity() != null ) {</b>
+<b class="fc">&nbsp;            settings.setShowActivity( request.getShowActivity() );</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if ( request.getShowOnlineStatus() != null ) {</b>
+<b class="fc">&nbsp;            settings.setShowOnlineStatus( request.getShowOnlineStatus() );</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if ( request.getShareAnalytics() != null ) {</b>
+<b class="fc">&nbsp;            settings.setShareAnalytics( request.getShareAnalytics() );</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if ( request.getShareMarketing() != null ) {</b>
+<b class="fc">&nbsp;            settings.setShareMarketing( request.getShareMarketing() );</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if ( request.getShareThirdParty() != null ) {</b>
+<b class="fc">&nbsp;            settings.setShareThirdParty( request.getShareThirdParty() );</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if ( request.getSearchable() != null ) {</b>
+<b class="fc">&nbsp;            settings.setSearchable( request.getSearchable() );</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if ( request.getAllowMessages() != null ) {</b>
+<b class="fc">&nbsp;            settings.setAllowMessages( request.getAllowMessages() );</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public PrivacySettingsResponse toResponse(PrivacySettings settings) {
+<b class="pc">&nbsp;        if ( settings == null ) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        PrivacySettingsResponse.PrivacySettingsResponseBuilder privacySettingsResponse = PrivacySettingsResponse.builder();</b>
+&nbsp;
+<b class="fc">&nbsp;        privacySettingsResponse.id( settings.getId() );</b>
+<b class="fc">&nbsp;        privacySettingsResponse.userId( settings.getUserId() );</b>
+<b class="fc">&nbsp;        privacySettingsResponse.showProfile( settings.getShowProfile() );</b>
+<b class="fc">&nbsp;        privacySettingsResponse.showActivity( settings.getShowActivity() );</b>
+<b class="fc">&nbsp;        privacySettingsResponse.showOnlineStatus( settings.getShowOnlineStatus() );</b>
+<b class="fc">&nbsp;        privacySettingsResponse.shareAnalytics( settings.getShareAnalytics() );</b>
+<b class="fc">&nbsp;        privacySettingsResponse.shareMarketing( settings.getShareMarketing() );</b>
+<b class="fc">&nbsp;        privacySettingsResponse.shareThirdParty( settings.getShareThirdParty() );</b>
+<b class="fc">&nbsp;        privacySettingsResponse.searchable( settings.getSearchable() );</b>
+<b class="fc">&nbsp;        privacySettingsResponse.allowMessages( settings.getAllowMessages() );</b>
+<b class="fc">&nbsp;        privacySettingsResponse.createdAt( settings.getCreatedAt() );</b>
+<b class="fc">&nbsp;        privacySettingsResponse.updatedAt( settings.getUpdatedAt() );</b>
+&nbsp;
+<b class="fc">&nbsp;        return privacySettingsResponse.build();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-01 17:16</div>
+</div>
+</body>
+</html>

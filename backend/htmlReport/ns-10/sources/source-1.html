@@ -1,0 +1,203 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AbstractNotificationHandler</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">app.notification.handler</a>
+</div>
+
+<h1>Coverage Summary for Class: AbstractNotificationHandler (app.notification.handler)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AbstractNotificationHandler</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (13/13)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package app.notification.handler;
+&nbsp;
+&nbsp;import app.notification.dto.NotificationPreferencesResponse;
+&nbsp;import app.notification.model.NotificationType;
+&nbsp;import app.notification.service.EmailService;
+&nbsp;import app.notification.service.NotificationPreferencesService;
+&nbsp;import app.notification.service.NotificationService;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;/**
+&nbsp; * Abstract base class for notification handlers.
+&nbsp; * Provides common functionality and template method pattern for processing notifications.
+&nbsp; * 
+&nbsp; * &lt;p&gt;Subclasses only need to implement the specific logic for their event type,
+&nbsp; * while common concerns (logging, error handling, preference checking) are handled here.&lt;/p&gt;
+&nbsp; * 
+&nbsp; * @param &lt;E&gt; The event type this handler processes
+&nbsp; */
+&nbsp;@RequiredArgsConstructor
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;public abstract class AbstractNotificationHandler&lt;E&gt; implements NotificationHandler&lt;E&gt; {
+&nbsp;
+&nbsp;    protected final NotificationService notificationService;
+&nbsp;    protected final NotificationPreferencesService preferencesService;
+&nbsp;    protected final EmailService emailService;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void handle(E event) {
+<b class="fc">&nbsp;        String eventName = getEventType().getSimpleName();</b>
+<b class="fc">&nbsp;        log.info(&quot;Handling {} - {}&quot;, eventName, getEventDescription(event));</b>
+&nbsp;
+&nbsp;        try {
+<b class="fc">&nbsp;            processEvent(event);</b>
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            log.error(&quot;Failed to handle {}: {}&quot;, eventName, getEventDescription(event), e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Template method for processing the event.
+&nbsp;     * Subclasses implement this to define specific handling logic.
+&nbsp;     */
+&nbsp;    protected abstract void processEvent(E event);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a description of the event for logging purposes.
+&nbsp;     */
+&nbsp;    protected abstract String getEventDescription(E event);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Helper method to get user preferences.
+&nbsp;     */
+&nbsp;    protected NotificationPreferencesResponse getPreferences(UUID userId) {
+<b class="fc">&nbsp;        return preferencesService.getPreferences(userId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Helper method to create and send an in-app notification via WebSocket.
+&nbsp;     */
+&nbsp;    protected void createInAppNotification(UUID userId, NotificationType type, 
+&nbsp;                                           String title, String message, 
+&nbsp;                                           String actionUrl, String referenceId) {
+<b class="fc">&nbsp;        notificationService.createAndSend(userId, type, title, message, actionUrl, referenceId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Helper method to send an email.
+&nbsp;     */
+&nbsp;    protected void sendEmail(String to, String subject, String htmlContent) {
+<b class="fc">&nbsp;        emailService.sendEmail(to, subject, htmlContent);</b>
+<b class="fc">&nbsp;        log.info(&quot;Email sent to: {} - Subject: {}&quot;, to, subject);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Helper method to check if a preference is enabled and log if disabled.
+&nbsp;     */
+&nbsp;    protected boolean isPreferenceEnabled(boolean preferenceValue, String preferenceName, String userEmail) {
+<b class="fc">&nbsp;        if (!preferenceValue) {</b>
+<b class="fc">&nbsp;            log.info(&quot;User {} has disabled {}&quot;, userEmail, preferenceName);</b>
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-01 17:16</div>
+</div>
+</body>
+</html>

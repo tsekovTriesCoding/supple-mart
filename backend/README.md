@@ -66,8 +66,9 @@ The application follows a layered architecture pattern:
 - **Repository Pattern**: Data access abstraction with Spring Data JPA
 - **DTO Pattern**: Separate transfer objects for API communication
 - **Service Layer Pattern**: Business logic encapsulation
-- **Strategy Pattern**: Payment processing strategies
+- **Strategy + Registry Pattern**: Notification handling with auto-discovered pluggable handlers
 - **Factory Pattern**: Email notification creation
+- **Observer Pattern**: Spring Events for decoupled notification triggers
 
 ## Project Structure
 
@@ -99,7 +100,8 @@ src/main/java/app/
 |   |-- CacheConfig.java
 |   |-- OpenApiConfig.java
 |   |-- SchedulingConfig.java
-|   +-- WebMvcConfig.java
+|   |-- WebMvcConfig.java
+|   +-- WebSocketConfig.java    # WebSocket/STOMP configuration
 |
 |-- contact/                    # Contact form feature
 |   |-- dto/                    # Contact DTOs
@@ -114,9 +116,12 @@ src/main/java/app/
 |
 |-- notification/               # Notification feature
 |   |-- dto/                    # Notification DTOs
-|   |-- model/                  # NotificationPreference entity
+|   |-- event/                  # Spring application events
+|   |-- handler/                # Strategy pattern handlers
+|   |-- listener/               # Event listeners
+|   |-- model/                  # Notification, NotificationPreference entities
 |   |-- repository/             # Data access
-|   +-- service/                # Email services
+|   +-- service/                # Notification services (WebSocket, Email)
 |
 |-- order/                      # Order feature
 |   |-- dto/                    # Order DTOs
@@ -440,6 +445,15 @@ OAuth2 flow:
 | POST | `/api/contact` | Submit contact form |
 | GET | `/api/contact/subjects` | Get contact subjects |
 
+### Notifications
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/notifications` | Get user's notifications (paginated) |
+| GET | `/api/notifications/unread-count` | Get unread notification count |
+| PUT | `/api/notifications/{id}/read` | Mark notification as read |
+| PUT | `/api/notifications/read-all` | Mark all as read |
+| DELETE | `/api/notifications/{id}` | Delete a notification |
+
 ## Caching
 
 The application uses Caffeine for in-memory caching:
@@ -458,6 +472,67 @@ The application uses Caffeine for in-memory caching:
 Caches are automatically evicted when:
 - Products are created, updated, or deleted
 - Admin clears cache manually via API
+
+## Real-Time Notifications
+
+The application implements a real-time notification system using WebSocket with STOMP protocol, allowing instant delivery of notifications to connected users.
+
+### Design Patterns
+
+The notification system combines three design patterns for clean, decoupled architecture:
+
+1. **Observer Pattern (Spring Events)**: Business events trigger notifications without tight coupling
+2. **Strategy Pattern (Handlers)**: Each notification type has a dedicated handler for specialized processing
+3. **Registry Pattern (Spring DI)**: Spring auto-discovers all handlers and the dispatcher selects the right one at runtime
+
+Event-driven notification flow:
+```
+1. Business action occurs (e.g., order placed, password changed)
+2. Service publishes a Spring ApplicationEvent
+3. NotificationEventListener receives the event
+4. NotificationDispatcher iterates registered handlers via supports() method
+5. Matching handler creates notification and sends via WebSocket
+6. Notification is persisted to database for offline users
+```
+
+### Strategy + Registry Pattern
+
+Available notification handlers (auto-discovered by Spring):
+- **OrderPlacedHandler**: Order confirmation notifications
+- **OrderShippedHandler**: Shipping update notifications
+- **OrderDeliveredHandler**: Delivery confirmation notifications
+- **AccountSecurityHandler**: Password changes and login alerts
+- **LowStockAlertHandler**: Admin inventory alerts
+
+Adding a new notification type:
+```
+1. Create new NotificationType enum value
+2. Implement NotificationHandler interface with supports() method
+3. Register handler as Spring @Component
+4. Handler auto-discovered and added to dispatcher's registry
+4. Handler auto-discovered by NotificationDispatcher
+```
+
+### WebSocket Configuration
+
+| Setting | Value | Description |
+|---------|-------|-------------|
+| Endpoint | `/ws` | WebSocket connection endpoint |
+| User Queue | `/user/queue/notifications` | Per-user notification delivery |
+| Allowed Origins | Frontend URL | CORS configuration |
+| SockJS Fallback | Enabled | Browser compatibility |
+
+### Notification Types
+
+| Type | Trigger | Recipients |
+|------|---------|------------|
+| `ORDER_PLACED` | Order creation | Customer |
+| `ORDER_SHIPPED` | Order shipped by admin | Customer |
+| `ORDER_DELIVERED` | Order delivered | Customer |
+| `PASSWORD_CHANGED` | Password update | User |
+| `LOW_STOCK_ALERT` | Product stock < threshold | Admins |
+| `ABANDONED_CART` | Cart inactive for 24h | Customer |
+| `REVIEW_REMINDER` | 3+ days after delivery | Customer |
 
 ## Scheduled Tasks
 

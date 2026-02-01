@@ -1,0 +1,290 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AdminMapperImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">app.admin.mapper</a>
+</div>
+
+<h1>Coverage Summary for Class: AdminMapperImpl (app.admin.mapper)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AdminMapperImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (15/30)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90.5%
+  </span>
+  <span class="absValue">
+    (76/84)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package app.admin.mapper;
+&nbsp;
+&nbsp;import app.admin.dto.AdminOrderItem;
+&nbsp;import app.admin.dto.AdminOrderResponse;
+&nbsp;import app.admin.dto.AdminProductResponse;
+&nbsp;import app.admin.dto.AdminUserResponse;
+&nbsp;import app.admin.dto.CreateProductRequest;
+&nbsp;import app.admin.dto.UpdateProductRequest;
+&nbsp;import app.order.model.Order;
+&nbsp;import app.order.model.OrderItem;
+&nbsp;import app.product.model.Product;
+&nbsp;import app.user.model.User;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import javax.annotation.processing.Generated;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;
+&nbsp;@Generated(
+&nbsp;    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+&nbsp;    date = &quot;2026-01-31T18:24:32+0200&quot;,
+&nbsp;    comments = &quot;version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.14.3.jar, environment: Java 21.0.7 (Oracle Corporation)&quot;
+&nbsp;)
+&nbsp;@Component
+<b class="fc">&nbsp;public class AdminMapperImpl implements AdminMapper {</b>
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Product toProductEntity(CreateProductRequest request) {
+<b class="pc">&nbsp;        if ( request == null ) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        Product.ProductBuilder product = Product.builder();</b>
+&nbsp;
+<b class="fc">&nbsp;        product.name( request.getName() );</b>
+<b class="fc">&nbsp;        product.description( request.getDescription() );</b>
+<b class="fc">&nbsp;        product.price( request.getPrice() );</b>
+<b class="fc">&nbsp;        product.imageUrl( request.getImageUrl() );</b>
+<b class="fc">&nbsp;        product.category( request.getCategory() );</b>
+<b class="fc">&nbsp;        product.stockQuantity( request.getStockQuantity() );</b>
+<b class="pc">&nbsp;        if ( request.getIsActive() != null ) {</b>
+<b class="fc">&nbsp;            product.isActive( request.getIsActive() );</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        return product.build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void updateProductEntity(Product product, UpdateProductRequest request) {
+<b class="pc">&nbsp;        if ( request == null ) {</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="pc">&nbsp;        if ( request.getIsActive() != null ) {</b>
+<b class="fc">&nbsp;            product.setActive( request.getIsActive() );</b>
+&nbsp;        }
+<b class="fc">&nbsp;        product.setName( request.getName() );</b>
+<b class="fc">&nbsp;        product.setDescription( request.getDescription() );</b>
+<b class="fc">&nbsp;        product.setPrice( request.getPrice() );</b>
+<b class="fc">&nbsp;        product.setImageUrl( request.getImageUrl() );</b>
+<b class="fc">&nbsp;        product.setCategory( request.getCategory() );</b>
+<b class="fc">&nbsp;        product.setStockQuantity( request.getStockQuantity() );</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public AdminProductResponse toAdminProductResponse(Product product, Integer totalSales) {
+<b class="pc">&nbsp;        if ( product == null &amp;&amp; totalSales == null ) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        AdminProductResponse.AdminProductResponseBuilder adminProductResponse = AdminProductResponse.builder();</b>
+&nbsp;
+<b class="pc">&nbsp;        if ( product != null ) {</b>
+<b class="fc">&nbsp;            adminProductResponse.active( product.isActive() );</b>
+<b class="fc">&nbsp;            adminProductResponse.id( product.getId() );</b>
+<b class="fc">&nbsp;            adminProductResponse.name( product.getName() );</b>
+<b class="fc">&nbsp;            adminProductResponse.description( product.getDescription() );</b>
+<b class="fc">&nbsp;            adminProductResponse.price( product.getPrice() );</b>
+<b class="fc">&nbsp;            adminProductResponse.category( product.getCategory() );</b>
+<b class="fc">&nbsp;            adminProductResponse.stockQuantity( product.getStockQuantity() );</b>
+<b class="fc">&nbsp;            adminProductResponse.imageUrl( product.getImageUrl() );</b>
+<b class="fc">&nbsp;            adminProductResponse.createdAt( product.getCreatedAt() );</b>
+<b class="fc">&nbsp;            adminProductResponse.updatedAt( product.getUpdatedAt() );</b>
+&nbsp;        }
+<b class="fc">&nbsp;        adminProductResponse.totalSales( totalSales );</b>
+<b class="pc">&nbsp;        adminProductResponse.inStock( product.getStockQuantity() &gt; 0 );</b>
+&nbsp;
+<b class="fc">&nbsp;        return adminProductResponse.build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public AdminOrderResponse toAdminOrderResponse(Order order) {
+<b class="pc">&nbsp;        if ( order == null ) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        AdminOrderResponse.AdminOrderResponseBuilder adminOrderResponse = AdminOrderResponse.builder();</b>
+&nbsp;
+<b class="fc">&nbsp;        adminOrderResponse.customerEmail( orderUserEmail( order ) );</b>
+<b class="fc">&nbsp;        adminOrderResponse.items( orderItemListToAdminOrderItemList( order.getItems() ) );</b>
+<b class="fc">&nbsp;        adminOrderResponse.id( order.getId() );</b>
+<b class="fc">&nbsp;        adminOrderResponse.orderNumber( order.getOrderNumber() );</b>
+<b class="fc">&nbsp;        adminOrderResponse.totalAmount( order.getTotalAmount() );</b>
+<b class="fc">&nbsp;        adminOrderResponse.createdAt( order.getCreatedAt() );</b>
+&nbsp;
+<b class="fc">&nbsp;        adminOrderResponse.customerName( order.getUser().getFirstName() + &quot; &quot; + order.getUser().getLastName() );</b>
+<b class="fc">&nbsp;        adminOrderResponse.status( order.getStatus().name() );</b>
+&nbsp;
+<b class="fc">&nbsp;        return adminOrderResponse.build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public AdminOrderItem toAdminOrderItem(OrderItem orderItem) {
+<b class="pc">&nbsp;        if ( orderItem == null ) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        AdminOrderItem.AdminOrderItemBuilder adminOrderItem = AdminOrderItem.builder();</b>
+&nbsp;
+<b class="fc">&nbsp;        adminOrderItem.productName( orderItemProductName( orderItem ) );</b>
+<b class="fc">&nbsp;        adminOrderItem.id( orderItem.getId() );</b>
+<b class="fc">&nbsp;        adminOrderItem.quantity( orderItem.getQuantity() );</b>
+<b class="fc">&nbsp;        adminOrderItem.price( orderItem.getPrice() );</b>
+&nbsp;
+<b class="fc">&nbsp;        return adminOrderItem.build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public AdminUserResponse toAdminUserResponse(User user) {
+<b class="pc">&nbsp;        if ( user == null ) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        AdminUserResponse.AdminUserResponseBuilder adminUserResponse = AdminUserResponse.builder();</b>
+&nbsp;
+<b class="fc">&nbsp;        adminUserResponse.id( user.getId() );</b>
+<b class="fc">&nbsp;        adminUserResponse.email( user.getEmail() );</b>
+<b class="fc">&nbsp;        adminUserResponse.firstName( user.getFirstName() );</b>
+<b class="fc">&nbsp;        adminUserResponse.lastName( user.getLastName() );</b>
+<b class="fc">&nbsp;        adminUserResponse.role( user.getRole() );</b>
+<b class="fc">&nbsp;        adminUserResponse.createdAt( user.getCreatedAt() );</b>
+<b class="fc">&nbsp;        adminUserResponse.updatedAt( user.getUpdatedAt() );</b>
+&nbsp;
+<b class="fc">&nbsp;        return adminUserResponse.build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String orderUserEmail(Order order) {
+<b class="fc">&nbsp;        User user = order.getUser();</b>
+<b class="pc">&nbsp;        if ( user == null ) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return user.getEmail();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    protected List&lt;AdminOrderItem&gt; orderItemListToAdminOrderItemList(List&lt;OrderItem&gt; list) {
+<b class="pc">&nbsp;        if ( list == null ) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        List&lt;AdminOrderItem&gt; list1 = new ArrayList&lt;AdminOrderItem&gt;( list.size() );</b>
+<b class="fc">&nbsp;        for ( OrderItem orderItem : list ) {</b>
+<b class="fc">&nbsp;            list1.add( toAdminOrderItem( orderItem ) );</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        return list1;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String orderItemProductName(OrderItem orderItem) {
+<b class="fc">&nbsp;        Product product = orderItem.getProduct();</b>
+<b class="pc">&nbsp;        if ( product == null ) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return product.getName();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-01 17:16</div>
+</div>
+</body>
+</html>

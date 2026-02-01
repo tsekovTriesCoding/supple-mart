@@ -1,0 +1,200 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > WebSocketEventListener</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">app.config</a>
+</div>
+
+<h1>Coverage Summary for Class: WebSocketEventListener (app.config)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">WebSocketEventListener</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    25%
+  </span>
+  <span class="absValue">
+    (2/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    10%
+  </span>
+  <span class="absValue">
+    (3/30)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package app.config;
+&nbsp;
+&nbsp;import app.security.CustomUserDetails;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.context.event.EventListener;
+&nbsp;import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+&nbsp;import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;import org.springframework.web.socket.messaging.SessionConnectedEvent;
+&nbsp;import org.springframework.web.socket.messaging.SessionDisconnectEvent;
+&nbsp;import org.springframework.web.socket.messaging.SessionSubscribeEvent;
+&nbsp;
+&nbsp;import java.security.Principal;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.concurrent.ConcurrentHashMap;
+&nbsp;
+&nbsp;/**
+&nbsp; * Listener for WebSocket session lifecycle events.
+&nbsp; * Tracks connected users for monitoring and debugging purposes.
+&nbsp; */
+&nbsp;@Component
+<b class="fc">&nbsp;@Slf4j</b>
+<b class="fc">&nbsp;public class WebSocketEventListener {</b>
+&nbsp;
+&nbsp;    // Track connected sessions (sessionId -&gt; userId)
+<b class="fc">&nbsp;    private final Map&lt;String, String&gt; connectedSessions = new ConcurrentHashMap&lt;&gt;();</b>
+&nbsp;
+&nbsp;    @EventListener
+&nbsp;    public void handleWebSocketConnectListener(SessionConnectedEvent event) {
+<b class="nc">&nbsp;        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());</b>
+<b class="nc">&nbsp;        String sessionId = headerAccessor.getSessionId();</b>
+<b class="nc">&nbsp;        Principal user = headerAccessor.getUser();</b>
+&nbsp;
+<b class="nc">&nbsp;        if (user != null) {</b>
+<b class="nc">&nbsp;            String userId = extractUserId(user);</b>
+<b class="nc">&nbsp;            connectedSessions.put(sessionId, userId);</b>
+<b class="nc">&nbsp;            log.info(&quot;WebSocket connected - Session: {}, User: {}&quot;, sessionId, userId);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            log.warn(&quot;WebSocket connected without authentication - Session: {}&quot;, sessionId);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @EventListener
+&nbsp;    public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
+<b class="nc">&nbsp;        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());</b>
+<b class="nc">&nbsp;        String sessionId = headerAccessor.getSessionId();</b>
+<b class="nc">&nbsp;        String userId = connectedSessions.remove(sessionId);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (userId != null) {</b>
+<b class="nc">&nbsp;            log.info(&quot;WebSocket disconnected - Session: {}, User: {}&quot;, sessionId, userId);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            log.info(&quot;WebSocket disconnected - Session: {}&quot;, sessionId);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @EventListener
+&nbsp;    public void handleWebSocketSubscribeListener(SessionSubscribeEvent event) {
+<b class="nc">&nbsp;        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());</b>
+<b class="nc">&nbsp;        String sessionId = headerAccessor.getSessionId();</b>
+<b class="nc">&nbsp;        String destination = headerAccessor.getDestination();</b>
+<b class="nc">&nbsp;        Principal user = headerAccessor.getUser();</b>
+&nbsp;
+<b class="nc">&nbsp;        String userId = user != null ? extractUserId(user) : &quot;anonymous&quot;;</b>
+<b class="nc">&nbsp;        log.debug(&quot;WebSocket subscription - Session: {}, User: {}, Destination: {}&quot;, sessionId, userId, destination);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public int getConnectedUserCount() {
+<b class="nc">&nbsp;        return connectedSessions.size();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean isUserConnected(String userId) {
+<b class="nc">&nbsp;        return connectedSessions.containsValue(userId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String extractUserId(Principal principal) {
+<b class="nc">&nbsp;        if (principal instanceof UsernamePasswordAuthenticationToken authToken) {</b>
+<b class="nc">&nbsp;            Object principalObj = authToken.getPrincipal();</b>
+<b class="nc">&nbsp;            if (principalObj instanceof CustomUserDetails userDetails) {</b>
+<b class="nc">&nbsp;                return userDetails.getId().toString();</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return principal.getName();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-01 17:16</div>
+</div>
+</body>
+</html>

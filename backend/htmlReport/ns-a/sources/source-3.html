@@ -1,0 +1,190 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > CacheConfig</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">app.config</a>
+</div>
+
+<h1>Coverage Summary for Class: CacheConfig (app.config)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CacheConfig</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (22/22)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">CacheConfig$$SpringCGLIB$$0</td>
+  </tr>
+  <tr>
+    <td class="name">CacheConfig$$SpringCGLIB$$FastClass$$0</td>
+  </tr>
+  <tr>
+    <td class="name">CacheConfig$$SpringCGLIB$$FastClass$$1</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (22/22)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package app.config;
+&nbsp;
+&nbsp;import com.github.benmanes.caffeine.cache.Caffeine;
+&nbsp;import org.springframework.cache.CacheManager;
+&nbsp;import org.springframework.cache.annotation.EnableCaching;
+&nbsp;import org.springframework.cache.caffeine.CaffeineCacheManager;
+&nbsp;import org.springframework.context.annotation.Bean;
+&nbsp;import org.springframework.context.annotation.Configuration;
+&nbsp;
+&nbsp;import java.util.concurrent.TimeUnit;
+&nbsp;
+&nbsp;@Configuration
+&nbsp;@EnableCaching
+<b class="fc">&nbsp;public class CacheConfig {</b>
+&nbsp;
+&nbsp;    public static final String PRODUCTS_CACHE = &quot;products&quot;;
+&nbsp;    public static final String PRODUCT_LISTS_CACHE = &quot;productLists&quot;;
+&nbsp;    public static final String CATEGORIES_CACHE = &quot;categories&quot;;
+&nbsp;    public static final String DASHBOARD_STATS_CACHE = &quot;dashboardStats&quot;;
+&nbsp;    public static final String USERS_CACHE = &quot;users&quot;;
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    public CacheManager cacheManager() {
+<b class="fc">&nbsp;        CaffeineCacheManager cacheManager = new CaffeineCacheManager();</b>
+&nbsp;
+<b class="fc">&nbsp;        cacheManager.setCacheNames(java.util.List.of(</b>
+&nbsp;                PRODUCTS_CACHE,
+&nbsp;                PRODUCT_LISTS_CACHE,
+&nbsp;                CATEGORIES_CACHE,
+&nbsp;                DASHBOARD_STATS_CACHE,
+&nbsp;                USERS_CACHE
+&nbsp;        ));
+&nbsp;
+<b class="fc">&nbsp;        cacheManager.setCaffeine(defaultCacheBuilder());</b>
+&nbsp;        
+<b class="fc">&nbsp;        return cacheManager;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Caffeine&lt;Object, Object&gt; defaultCacheBuilder() {
+<b class="fc">&nbsp;        return Caffeine.newBuilder()</b>
+<b class="fc">&nbsp;                .maximumSize(500)</b>
+<b class="fc">&nbsp;                .expireAfterAccess(10, TimeUnit.MINUTES)</b>
+<b class="fc">&nbsp;                .expireAfterWrite(30, TimeUnit.MINUTES)</b>
+<b class="fc">&nbsp;                .recordStats();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    public Caffeine&lt;Object, Object&gt; productsCacheBuilder() {
+<b class="fc">&nbsp;        return Caffeine.newBuilder()</b>
+<b class="fc">&nbsp;                .maximumSize(200)</b>
+<b class="fc">&nbsp;                .expireAfterWrite(15, TimeUnit.MINUTES)</b>
+<b class="fc">&nbsp;                .recordStats();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    public Caffeine&lt;Object, Object&gt; categoriesCacheBuilder() {
+<b class="fc">&nbsp;        return Caffeine.newBuilder()</b>
+<b class="fc">&nbsp;                .maximumSize(50)</b>
+<b class="fc">&nbsp;                .expireAfterWrite(24, TimeUnit.HOURS)</b>
+<b class="fc">&nbsp;                .recordStats();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    public Caffeine&lt;Object, Object&gt; dashboardStatsCacheBuilder() {
+<b class="fc">&nbsp;        return Caffeine.newBuilder()</b>
+<b class="fc">&nbsp;                .maximumSize(10)</b>
+<b class="fc">&nbsp;                .expireAfterWrite(5, TimeUnit.MINUTES)</b>
+<b class="fc">&nbsp;                .recordStats();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-01 17:16</div>
+</div>
+</body>
+</html>

@@ -70,6 +70,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
+    @ExceptionHandler(NotificationAccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleNotificationAccessDeniedException(NotificationAccessDeniedException ex) {
+        log.warn("Notification access denied: {}", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.FORBIDDEN.value(),
+                ex.getMessage()
+        );
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
+
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException ex) {
         ErrorResponse errorResponse = new ErrorResponse(
@@ -168,16 +180,6 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
-    
-    private String extractFieldFromNullConstraint(String message) {
-        // Pattern: "Column 'fieldName' cannot be null"
-        int start = message.indexOf("'");
-        int end = message.indexOf("'", start + 1);
-        if (start != -1 && end != -1) {
-            return message.substring(start + 1, end);
-        }
-        return null;
-    }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
@@ -271,5 +273,15 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    }
+
+    private String extractFieldFromNullConstraint(String message) {
+        // Pattern: "Column 'fieldName' cannot be null"
+        int start = message.indexOf("'");
+        int end = message.indexOf("'", start + 1);
+        if (start != -1 && end != -1) {
+            return message.substring(start + 1, end);
+        }
+        return null;
     }
 }

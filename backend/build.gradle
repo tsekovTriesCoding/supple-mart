@@ -61,6 +61,9 @@ dependencies {
 
     implementation 'me.paulschwarz:springboot4-dotenv:5.0.1'
 
+    // WebSocket for real-time notifications
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.projectlombok:lombok'

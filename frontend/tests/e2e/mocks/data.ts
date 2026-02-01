@@ -305,3 +305,50 @@ export const mockPrivacySettings = {
   showOrderHistory: false,
   allowDataCollection: true,
 };
+
+export const mockNotifications = [
+  {
+    id: 'notif-1',
+    type: 'ORDER_PLACED',
+    title: 'Order Confirmed!',
+    message: 'Your order #ORD-123 has been placed successfully',
+    actionUrl: '/orders',
+    referenceId: 'ORD-123',
+    isRead: false,
+    createdAt: '2026-01-31T10:00:00Z',
+  },
+  {
+    id: 'notif-2',
+    type: 'ORDER_SHIPPED',
+    title: 'Order Shipped!',
+    message: 'Your order #ORD-456 is on its way',
+    actionUrl: '/orders',
+    referenceId: 'ORD-456',
+    isRead: true,
+    readAt: '2026-01-30T15:00:00Z',
+    createdAt: '2026-01-30T10:00:00Z',
+  },
+  {
+    id: 'notif-3',
+    type: 'PRICE_DROP',
+    title: 'Price Drop Alert!',
+    message: 'Premium Whey Protein is now 20% off',
+    actionUrl: '/products/1',
+    referenceId: '1',
+    isRead: false,
+    createdAt: '2026-01-29T10:00:00Z',
+  },
+];
+
+export const mockNotificationPageResponse = {
+  notifications: mockNotifications,
+  totalElements: 3,
+  totalPages: 1,
+  currentPage: 0,
+  pageSize: 20,
+  unreadCount: 2,
+  unreadByType: {
+    ORDER_PLACED: 1,
+    PRICE_DROP: 1,
+  },
+};

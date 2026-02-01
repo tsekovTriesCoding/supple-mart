@@ -12,6 +12,8 @@ import {
   mockNotificationPreferences,
   mockPrivacySettings,
   mockUser,
+  mockNotifications,
+  mockNotificationPageResponse,
 } from './data';
 
 /**
@@ -264,6 +266,82 @@ export async function setupAPIMocks(page: Page) {
       contentType: 'application/json',
       body: JSON.stringify(mockReviews),
     });
+  });
+
+  // Mock real-time notifications
+  await page.route('**/api/notifications?*', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(mockNotificationPageResponse),
+    });
+  });
+
+  await page.route(/\/api\/notifications$/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(mockNotificationPageResponse),
+    });
+  });
+
+  await page.route('**/api/notifications/unread', async (route) => {
+    const unread = mockNotifications.filter(n => !n.isRead);
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(unread),
+    });
+  });
+
+  await page.route('**/api/notifications/unread/count', async (route) => {
+    const unreadCount = mockNotifications.filter(n => !n.isRead).length;
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ count: unreadCount }),
+    });
+  });
+
+  await page.route('**/api/notifications/*/read', async (route) => {
+    const url = route.request().url();
+    const match = url.match(/\/notifications\/([^/]+)\/read/);
+    const id = match ? match[1] : '';
+    const notification = mockNotifications.find(n => n.id === id);
+    
+    if (notification) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ ...notification, isRead: true, readAt: new Date().toISOString() }),
+      });
+    } else {
+      await route.fulfill({
+        status: 404,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Notification not found' }),
+      });
+    }
+  });
+
+  await page.route('**/api/notifications/mark-all-read', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ success: true }),
+    });
+  });
+
+  // Delete notification
+  await page.route(/\/api\/notifications\/[^/]+$/, async (route) => {
+    if (route.request().method() === 'DELETE') {
+      await route.fulfill({
+        status: 204,
+        contentType: 'application/json',
+      });
+    } else {
+      await route.continue();
+    }
   });
 
   // Mock contact form
