@@ -145,8 +145,8 @@ class CloudinaryServiceTest {
                     .thenThrow(new IOException("Upload failed"));
 
             assertThatThrownBy(() -> cloudinaryService.uploadImage(file, "products"))
-                    .isInstanceOf(BadRequestException.class)
-                    .hasMessageContaining("Failed to upload");
+                    .isInstanceOf(IOException.class)
+                    .hasMessageContaining("Upload failed");
         }
 
         @Test

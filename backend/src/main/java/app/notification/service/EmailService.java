@@ -5,8 +5,12 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -23,6 +27,11 @@ public class EmailService {
     @Value("${app.email.from}")
     private String fromEmail;
 
+    @Retryable(
+            retryFor = {MessagingException.class, MailException.class},
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 15000)
+    )
     public void sendEmail(String to, String subject, String htmlContent) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -36,8 +45,16 @@ public class EmailService {
             mailSender.send(message);
             log.info("Email sent successfully to: {}", to);
         } catch (MessagingException e) {
-            log.error("Failed to send email to: {}", to, e);
+            log.error("Failed to send email to: {} (will retry if attempts remaining)", to, e);
+            throw new RuntimeException("Failed to send email: " + e.getMessage(), e);
         }
+    }
+
+    @Recover
+    public void recoverSendEmail(Exception e, String to, String subject, String htmlContent) {
+        log.error("All retry attempts exhausted for sending email to: {}. Subject: '{}'. Error: {}",
+                to, subject, e.getMessage());
+        // Could implement: save to dead letter queue, send notification to admin, etc.
     }
 
     public String buildOrderConfirmationEmail(String customerName, String orderId, BigDecimal totalAmount) {

@@ -4,6 +4,7 @@ import app.payment.dto.PaymentIntentRequest;
 import app.payment.dto.PaymentIntentResponse;
 import app.payment.service.PaymentService;
 import app.security.CustomUserDetails;
+import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -39,13 +40,12 @@ public class PaymentController {
     @PostMapping("/create-intent")
     public ResponseEntity<PaymentIntentResponse> createPaymentIntent(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @RequestBody PaymentIntentRequest request) {
+            @Valid @RequestBody PaymentIntentRequest request) throws StripeException {
 
         UUID userId = userDetails.getId();
         log.info("Creating payment intent for user: {}", userId);
 
         PaymentIntentResponse response = paymentService.createPaymentIntent(userId, request);
-
         return ResponseEntity.ok(response);
     }
 

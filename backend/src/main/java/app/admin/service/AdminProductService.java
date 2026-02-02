@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -123,13 +124,17 @@ public class AdminProductService {
     public ImageUploadResponse uploadProductImage(MultipartFile file) {
         log.info("Uploading product image to Cloudinary: {}", file.getOriginalFilename());
 
-        //.join() waits for result -> Response
-        String imageUrl = cloudinaryService.uploadImage(file, CLOUDINARY_FOLDER).join();
+        try {
+            //.join() waits for result -> Response
+            String imageUrl = cloudinaryService.uploadImage(file, CLOUDINARY_FOLDER).join();
 
-        return ImageUploadResponse.builder()
-                .imageUrl(imageUrl)
-                .message("Image uploaded successfully")
-                .build();
+            return ImageUploadResponse.builder()
+                    .imageUrl(imageUrl)
+                    .message("Image uploaded successfully")
+                    .build();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload product image", e);
+        }
     }
 
     private void deleteImageFromCloudinary(UUID id, String oldImageUrl) {
