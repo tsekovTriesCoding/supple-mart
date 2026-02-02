@@ -5,6 +5,9 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,31 +26,41 @@ public class CloudinaryService {
     private static final String[] ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"};
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
 
+    /**
+     * Uploads an image to Cloudinary with automatic retry on transient network failures.
+     * Validation errors throw BadRequestException immediately without retry.
+     */
     @Async
-    public CompletableFuture<String> uploadImage(MultipartFile file, String folder) {
+    @Retryable(
+            retryFor = {IOException.class},
+            notRecoverable = {BadRequestException.class},
+            maxAttempts = 4,
+            backoff = @Backoff(delay = 500, multiplier = 2, maxDelay = 8000)
+    )
+    public CompletableFuture<String> uploadImage(MultipartFile file, String folder) throws IOException {
         validateFile(file);
 
-        try {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> uploadParams = ObjectUtils.asMap(
-                    "folder", folder,
-                    "resource_type", "image",
-                    "format", "jpg",
-                    "quality", "auto",
-                    "fetch_format", "auto"
-            );
+        @SuppressWarnings("unchecked")
+        Map<String, Object> uploadParams = ObjectUtils.asMap(
+                "folder", folder,
+                "resource_type", "image",
+                "format", "jpg",
+                "quality", "auto",
+                "fetch_format", "auto"
+        );
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(), uploadParams);
-            String imageUrl = (String) uploadResult.get("secure_url");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(), uploadParams);
+        String imageUrl = (String) uploadResult.get("secure_url");
 
-            log.info("Image uploaded successfully to Cloudinary: {}", imageUrl);
-            return CompletableFuture.completedFuture(imageUrl);
+        log.info("Image uploaded successfully to Cloudinary: {}", imageUrl);
+        return CompletableFuture.completedFuture(imageUrl);
+    }
 
-        } catch (IOException e) {
-            log.error("Failed to upload image to Cloudinary", e);
-            throw new BadRequestException("Failed to upload image: " + e.getMessage());
-        }
+    @Recover
+    public CompletableFuture<String> recoverUpload(IOException e, MultipartFile file, String folder) {
+        log.error("All retry attempts exhausted for image upload to folder: {}. Error: {}", folder, e.getMessage());
+        throw new BadRequestException("Failed to upload image after multiple attempts. Please try again later.");
     }
 
     @Async
@@ -58,7 +71,6 @@ public class CloudinaryService {
             log.info("Image deleted from Cloudinary: {}", publicId);
         } catch (IOException e) {
             log.error("Failed to delete image from Cloudinary: {}", publicId, e);
-            // Don't throw exception in async fire-and-forget operation, just log it
         }
     }
 
@@ -90,16 +102,13 @@ public class CloudinaryService {
         if (file == null || file.isEmpty()) {
             throw new BadRequestException("Please select a file to upload");
         }
-
         if (file.getSize() > MAX_FILE_SIZE) {
             throw new BadRequestException("File size exceeds maximum allowed size of 5MB");
         }
-
         String originalFilename = file.getOriginalFilename();
         if (originalFilename == null || !hasValidExtension(originalFilename)) {
             throw new BadRequestException("Invalid file type. Allowed types: jpg, jpeg, png, gif, webp");
         }
-
         String contentType = file.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
             throw new BadRequestException("File must be an image");

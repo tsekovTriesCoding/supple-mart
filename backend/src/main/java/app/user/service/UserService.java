@@ -23,6 +23,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -241,6 +243,8 @@ public class UserService {
             return userRepository.save(user);
         } catch (InterruptedException | ExecutionException e) {
             Thread.currentThread().interrupt();
+            throw new RuntimeException("Failed to upload profile picture", e);
+        } catch (IOException e) {
             throw new RuntimeException("Failed to upload profile picture", e);
         }
     }

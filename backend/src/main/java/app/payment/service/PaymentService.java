@@ -10,6 +10,8 @@ import app.payment.dto.PaymentIntentRequest;
 import app.payment.dto.PaymentIntentResponse;
 import app.user.model.User;
 import app.user.service.UserService;
+import com.stripe.exception.ApiConnectionException;
+import com.stripe.exception.RateLimitException;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
@@ -20,6 +22,8 @@ import com.stripe.net.Webhook;
 import com.stripe.param.PaymentIntentCreateParams;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,57 +41,60 @@ public class PaymentService {
     private final OrderService orderService;
     private final StripeConfig stripeConfig;
 
+    /**
+     * Creates a payment intent with Stripe.
+     * Retries only on transient network/rate limit errors, NOT on business errors.
+     */
     @Transactional
-    public PaymentIntentResponse createPaymentIntent(UUID userId, PaymentIntentRequest request) {
-        try {
-            User user = userService.getUserById(userId);
+    @Retryable(
+            retryFor = {ApiConnectionException.class, RateLimitException.class},
+            maxAttempts = 2,
+            backoff = @Backoff(delay = 2000, multiplier = 2, maxDelay = 5000)
+    )
+    public PaymentIntentResponse createPaymentIntent(UUID userId, PaymentIntentRequest request) throws StripeException {
+        User user = userService.getUserById(userId);
 
-            OrderResponse order = orderService.getOrderById(request.getOrderId(), userId);
+        OrderResponse order = orderService.getOrderById(request.getOrderId(), userId);
 
-            if (!"pending".equals(order.getStatus())) {
-                throw new BadRequestException("Payment intent can only be created for pending orders");
-            }
-
-            // Stripe expects amount in cents (smallest currency unit)
-            long amountInCents = order.getTotalAmount().multiply(BigDecimal.valueOf(100)).longValue();
-
-            Map<String, String> metadata = new HashMap<>();
-            metadata.put("userId", userId.toString());
-            metadata.put("userEmail", user.getEmail());
-            metadata.put("orderId", order.getId().toString());
-            metadata.put("shippingAddress", order.getShippingAddress());
-
-            PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
-                    .setAmount(amountInCents)
-                    .setCurrency(request.getCurrency())
-                    .putAllMetadata(metadata)
-                    .setAutomaticPaymentMethods(
-                            PaymentIntentCreateParams.AutomaticPaymentMethods.builder()
-                                    .setEnabled(true)
-                                    .build()
-                    )
-                    .build();
-
-            PaymentIntent paymentIntent = PaymentIntent.create(params);
-
-            // Link payment intent to order
-            orderService.updateOrderPaymentIntentId(order.getId(), paymentIntent.getId());
-
-            log.info("Payment intent created successfully: {} for user: {} and order: {}",
-                    paymentIntent.getId(), userId, order.getId());
-
-            return PaymentIntentResponse.builder()
-                    .clientSecret(paymentIntent.getClientSecret())
-                    .paymentIntentId(paymentIntent.getId())
-                    .amount(paymentIntent.getAmount())
-                    .currency(paymentIntent.getCurrency())
-                    .status(paymentIntent.getStatus())
-                    .build();
-
-        } catch (StripeException e) {
-            log.error("Stripe error while creating payment intent: {}", e.getMessage(), e);
-            throw new BadRequestException("Failed to create payment intent: " + e.getMessage());
+        if (!"pending".equals(order.getStatus())) {
+            throw new BadRequestException("Payment intent can only be created for pending orders");
         }
+
+        // Stripe expects amount in cents (smallest currency unit)
+        long amountInCents = order.getTotalAmount().multiply(BigDecimal.valueOf(100)).longValue();
+
+        Map<String, String> metadata = new HashMap<>();
+        metadata.put("userId", userId.toString());
+        metadata.put("userEmail", user.getEmail());
+        metadata.put("orderId", order.getId().toString());
+        metadata.put("shippingAddress", order.getShippingAddress());
+
+        PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
+                .setAmount(amountInCents)
+                .setCurrency(request.getCurrency())
+                .putAllMetadata(metadata)
+                .setAutomaticPaymentMethods(
+                        PaymentIntentCreateParams.AutomaticPaymentMethods.builder()
+                                .setEnabled(true)
+                                .build()
+                )
+                .build();
+
+        PaymentIntent paymentIntent = PaymentIntent.create(params);
+
+        // Link payment intent to order
+        orderService.updateOrderPaymentIntentId(order.getId(), paymentIntent.getId());
+
+        log.info("Payment intent created successfully: {} for user: {} and order: {}",
+                paymentIntent.getId(), userId, order.getId());
+
+        return PaymentIntentResponse.builder()
+                .clientSecret(paymentIntent.getClientSecret())
+                .paymentIntentId(paymentIntent.getId())
+                .amount(paymentIntent.getAmount())
+                .currency(paymentIntent.getCurrency())
+                .status(paymentIntent.getStatus())
+                .build();
     }
 
     public Event constructWebhookEvent(String payload, String signatureHeader) {
